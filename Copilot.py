@@ -58,7 +58,7 @@ def document_search(message, db):
         raise Exception("The message should be a string")
 
     try:
-        documents = db.similarity_search_with_score(query=message, k=5, score_threshold=0.8)
+        documents = db.similarity_search_with_score(query=message, k=5, score_threshold=0.4)
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
@@ -84,26 +84,27 @@ def append_context_to_history(documents, history_openai_format, system_prompt, m
     if documents:
         for doc in documents:
             doc_content = doc[0].page_content
-            doc_reference = doc[0].metadata["ibapuid"]
+            doc_reference = doc[0].metadata["ibafullpuid"]
             doc_url = doc[0].metadata["url"]
 
             system_prompt += (
-                f"{doc_content} {doc_reference} <a href='{doc_url}'>LINK</a>\n\n"
+                f"{doc_content} {doc_reference} <a href='{doc_url}'>LINK</a>\n"
             )
 
         history_openai_format.append(
             {
                 "role": "user",
-                "content": "Primarily, use the following pieces of information to answer the user’s question. If the "
-                           "context does not provide information, you can use your knowledge:\nContext :"
-                           + system_prompt
-                           + "Question :"
-                           + message,
+                "content": f"""Primarily, use the following pieces of information to answer the user’s question. 
+                If the context does not provide information, you can use your knowledge:
+                ### Context :
+                {system_prompt}
+                ### Question :
+                {message}"""
             }
         )
     else:
         history_openai_format.append(
-            {"role": "user", "content": "Question :" + message}
+            {"role": "user", "content": f"Question : {message}"}
         )
     return history_openai_format
 
@@ -130,7 +131,7 @@ def predict(
     response = client.chat.completions.create(
         model="mistralai/Mistral-7B-Instruct-v0.2",
         messages=append_context_to_history(documents, history_openai_format, system_prompt, message),
-        temperature=1,
+        temperature=0.5,
         stream=True,
     )
 

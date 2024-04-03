@@ -240,12 +240,14 @@ def str_cleaner(text: str) -> str:
     text = html.unescape(text)
     # if a </ul> is at the end of the string, remove it
     text = re.sub(r'</?ul>$', '', text)
-    # if a </ul> is at the end of the string, remove it
+    # if a </li> is at the end of the string, remove it
     text = re.sub(r'<li>$', '', text)
     # replace <li> or </li> with a ',' character
     text = re.sub(r'</li>', ',', text)
     # replace <li> or </li> with a newline character
     text = re.sub(r'</?li>', ' ', text)
+    # Replace <br> tags with a newline character
+    text = re.sub(r'(?<!:)<br/>', ". ", text)
     # Remove tab characters
     text = text.replace("\t", "")
     # Remove newline characters
@@ -258,6 +260,8 @@ def str_cleaner(text: str) -> str:
     text = re.sub('<.*?>', '', text)
     # Replace sequences of more than one space with a single space
     text = re.sub(' +', ' ', text)
+    # Make sure a white space is after a dot if it's not a dot of end of sentence
+    text = re.sub(r'\.(?=\S)', '. ', text)
     # Remove any whitespace after a dot if it's not followed by something that is not a whitespace
     text = re.sub(r'(?<=\.)\s*(?!.)', '', text)
     # Make sure there is a space after a dot if it's followed by any capital character
@@ -273,9 +277,11 @@ def str_cleaner(text: str) -> str:
     # Add a space after a comma if it's not followed by a whitespace
     text = re.sub(r',(?!\s)', ', ', text)
     # Remove a comma if it's at the end of the string
-    text = re.sub(r',\s+', '', text)
+    text = re.sub(r'\.,\s*$', '.', text)
     # Add a space after a closing parenthesis if it's followed by any capital character
-    text = re.sub(r'\)(?=[a-z,A-Z])', ') ', text)
+    text = re.sub(r'\)(?=[a-zA-Z])', ') ', text)
+    # Add whitespace after a double dot if it's not followed by a whitespace
+    text = re.sub(r':(?=\S)', ': ', text)
     return text
 
 
@@ -283,13 +289,6 @@ def create_vector_db(
         data: list[tuple[Any, tuple[Any, str | Any]]],
         db_path: Path | str
 ):
-    """
-    Create a vector database from a list of strings
-    :param data: The list of strings
-    :type data: List[str]
-    :param db_path: The path to the database
-    :type db_path: str
-    """
     if not isinstance(data, list):
         raise TypeError("The data must be a list")
     if not isinstance(db_path, str):
@@ -311,10 +310,17 @@ def create_vector_db(
                 sys.exit(0)
 
     absolute_db_path = Path(db_path).absolute()
-    embeddings = HuggingFaceHubEmbeddings(model=api_url)
+    embeddings = HuggingFaceHubEmbeddings(model=api_url, model_kwargs={"truncate": True})
 
-    descriptions = [description for description, _ in data if description != ""]
-    metadatas = [{"ibapuid": reference[0], "url": reference[1]} for description, reference in data if description != ""]
+    descriptions = []
+    metadatas = []
+    for description, reference in data:
+        if description != "":
+            # Split the description into chunks of 1000 characters
+            chunks = [description[i:i + 1000] for i in range(0, len(description), 1000)]
+            descriptions.extend(chunks)
+            # Repeat the reference for each chunk
+            metadatas.extend([{"ibafullpuid": reference[0], "url": reference[1]}] * len(chunks))
 
     batch_size = 32
     texts = [descriptions[i:i + batch_size] for i in range(0, len(descriptions), batch_size)]
