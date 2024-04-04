@@ -135,21 +135,51 @@ def str_cleaner(text: str) -> str:
     return text
 
 
+# if __name__ == '__main__':
+#     polarion = get_polarion_instance()
+#     name = 'Therapy_Center_Spec'
+#     # # name = 'L2_System_Spec'
+#     project_group = ProjectGroup(polarion, name)
+#     #
+#     workitem = project_group.get_workitem_with_fields(query='id:PMS-1307')
+#     print('\n' + workitem[0].description.content)
+#     print('\n')
+#     print(str_cleaner(workitem[0].description.content))
+#     # project = get_project(polarion, 'PT_L1_Operating_Instructions')
+#     # workitem = get_one_workitem(polarion, project, 'OP-1201')
+#     # print(workitem.__dict__)
+#     # check_descriptions_in_pickle_file('.cache/cache_Therapy_Center_Spec__P235-R12.4.0.pkl')
+#     # verif = ProjectGroup(get_polarion_instance(), name)
+#     # if verif.name == name:
+#     #     print(verif)
+#     #     print("Project group exists")
+import gradio as gr
+
+
+def predict(message, history, choice=""):
+    return "Hello " + choice
+
 if __name__ == '__main__':
-    polarion = get_polarion_instance()
-    name = 'Therapy_Center_Spec'
-    # # name = 'L2_System_Spec'
-    project_group = ProjectGroup(polarion, name)
-    #
-    workitem = project_group.get_workitem_with_fields(query='id:PMS-1307')
-    print('\n' + workitem[0].description.content)
-    print('\n')
-    print(str_cleaner(workitem[0].description.content))
-    # project = get_project(polarion, 'PT_L1_Operating_Instructions')
-    # workitem = get_one_workitem(polarion, project, 'OP-1201')
-    # print(workitem.__dict__)
-    # check_descriptions_in_pickle_file('.cache/cache_Therapy_Center_Spec__P235-R12.4.0.pkl')
-    # verif = ProjectGroup(get_polarion_instance(), name)
-    # if verif.name == name:
-    #     print(verif)
-    #     print("Project group exists")
+    # doesn't work
+    examples = [
+        "Hi",
+        "Good morning",
+    ]
+    # works
+    # examples = [
+    #     ["Hi"],
+    #     ["Good morning"],
+    # ]
+    chatbot = gr.Chatbot()
+    textbox = gr.Textbox()
+
+    with gr.Blocks() as demo:
+
+        gr.ChatInterface(
+            fn=predict,
+            chatbot=chatbot,
+            textbox=textbox,
+            examples=examples,
+        )
+
+    demo.launch()

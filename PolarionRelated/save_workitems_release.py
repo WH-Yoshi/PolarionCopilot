@@ -8,7 +8,7 @@ import re
 import shutil
 import sys
 import pickle
-from typing import List, Any
+from typing import List, Any, Tuple
 
 import certifi
 
@@ -63,7 +63,6 @@ def get_project(client: Polarion, project_id: str) -> Project:
         raise TypeError("The project_id parameter must be a string")
 
     try:
-        print("Getting project...")
         project_from_id = client.getProject(project_id)
         return project_from_id
     except Exception as e:
@@ -110,10 +109,10 @@ def get_workitems_from_group(
 
     if release:
         match = check_release(client, release)
-        query = f'type:(requirement safetydecision) AND ibaApplicableConfiguration.KEY:("{match[0].id}")'
+        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND ibaApplicableConfiguration.KEY:("{match[0].id}")"""
         file_name += f'{project_group.name}__{release}'
     else:
-        query = 'type:(requirement safetydecision)'
+        query = """type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)")"""
         file_name += project_group.name
 
     try:
@@ -146,10 +145,10 @@ def get_workitems_from_project(
 
     if release:
         match = check_release(client, release)
-        query = f'type:(requirement safetydecision) AND ibaApplicableConfiguration.KEY:("{match[0].id}")'
+        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND ibaApplicableConfiguration.KEY:("{match[0].id}")"""
         file_name += f'{project.id}_{release}'
     else:
-        query = 'type:(requirement safetydecision)'
+        query = """type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)")"""
         file_name += f'{project.id}'
 
     try:
@@ -165,7 +164,7 @@ def get_workitems_from_project(
 def workitem_to_embed(
         full_workitems_list: list[Workitem],
         release: str | None = None
-) -> list[tuple[Any, tuple[Any, str | Any]]]:
+) -> list[Workitem]:
     """
     Get linked workitems from every workitems in the list and add them to the parent description.
     Create a list of workitems and their metadatas ready to embed
@@ -184,25 +183,19 @@ def workitem_to_embed(
 
     print("Getting children... might take a while accordingly")
     for i, workitem in enumerate(full_workitems_list):
-        sent = (' \u21AA  Loading workitems: ' + str(i + 1) + ' of ' + str(len(full_workitems_list)))
+        sent = (' \u21AA  Loading workitems children: ' + str(i + 1) + ' of ' + str(len(full_workitems_list)))
         sys.stdout.write('\r' + sent)
         try:
-            # linked_workitems_description = []
-            if workitem.description is not None and workitem.description != "":
-                # for w in workitem.getLinkedItemWithFields(['id', 'description', 'customFields.ibaFullPuid', 'type']):
-                #     if w.type['id'] == "requirement" or w.type['id'] == "safetydecision":
-                #         for field in w.customFields['Custom']:
-                #             if field['value'] == "(cont'd)":
-                #                 linked_workitems_description.append(w.description.content)
-                linked_workitems_description = [
-                    w.description.content
-                    for w in workitem.getLinkedItemWithFields(['id', 'description', 'customFields.ibaFullPuid', 'type'])
-                    if w.type['id'] in ["requirement", "safetydecision"] and any(field['value'] == "(cont'd)"
-                                                                                 for field in w.customFields['Custom'])
-                    ]
+            linked_workitems_description = []
+            if workitem.description is not None and workitem.description != "" and workitem.customFields['Custom'][0]['value'] != "(cont'd)":
+                for w in workitem.getLinkedItemWithFields(['id', 'description', 'customFields.ibaFullPuid', 'type']):
+                    if w.type['id'] in ["safetydecision", "requirement"]:
+                        for field in w.customFields['Custom']:
+                            if field['value'] == "(cont'd)":
+                                linked_workitems_description.append(w.description.content)
                 for description in linked_workitems_description:
                     if description and workitem.description is not None:
-                        workitem.description.content += f' {description},'
+                        workitem.description.content += f', {description}'
                 merged_workitems.append(workitem)
         except AttributeError as e:
             raise AttributeError(e)
@@ -211,7 +204,10 @@ def workitem_to_embed(
                 print(f"\nWorkitem {workitem.id} not retrieved from Polarion")
             else:
                 raise Exception(e)
+    return merged_workitems
 
+
+def format_workitem(merged_workitems: list[Workitem]) -> list[tuple[str, tuple[Any, str | Any]]]:
     try:
         workitems_to_embed = [
             (
@@ -316,10 +312,8 @@ def create_vector_db(
     metadatas = []
     for description, reference in data:
         if description != "":
-            # Split the description into chunks of 1000 characters
             chunks = [description[i:i + 1000] for i in range(0, len(description), 1000)]
             descriptions.extend(chunks)
-            # Repeat the reference for each chunk
             metadatas.extend([{"ibafullpuid": reference[0], "url": reference[1]}] * len(chunks))
 
     batch_size = 32
@@ -352,19 +346,18 @@ def main(
 
         if choice == "group":
             project_group = client.getProjectGroup(group_name=project_id)
-            printarrow("Done !")
             workitems = get_workitems_from_group(client=client, project_group=project_group, release=release)
             printarrow("Done !", start="\n")
         elif choice == "project":
             project = get_project(client=client, project_id=project_id)
-            printarrow("Done !")
             workitems = get_workitems_from_project(client=client, project=project, release=release)
             printarrow("Done !", start="\n")
         else:
             raise ValueError("The choice parameter must be either 'project' or 'group'")
 
-        formatted_list_workitems = workitem_to_embed(workitems, release)
-        printarrow("Done !")
+        merged_workitems = workitem_to_embed(workitems, release)
+        formatted_list_workitems = format_workitem(merged_workitems)
+        printarrow("Done !", start="\n")
         with open(f'.cache/cache_{project_id}__{release}.pkl', 'wb') as f:
             pickle.dump(formatted_list_workitems, f)
             printarrow("Cache saved")
