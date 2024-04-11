@@ -8,10 +8,12 @@ import re
 import shutil
 import sys
 import pickle
-from typing import List, Any, Tuple
+from typing import Any
 
-import certifi
+from enhancer import printarrow
+import file_helper as fh
 
+from datetime import datetime
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -24,15 +26,12 @@ from polarion.project_groups import ProjectGroup
 from polarion.workitem import Workitem
 
 load_dotenv()
-print("Certs path: " + certifi.where())
 
 api_url = "http://localhost:22027"
 base_url = 'https://polarion.goiba.net/polarion'
-file_name = '../faiss/'
-
-
-def printarrow(content: str, start: str | None = '', end: str | None = ''):
-    print(f"{start} \u21AA  {content}{end}")
+db_folder_name = '../faiss/'
+file_path = "../data/.update_file.pkl"
+now = ""
 
 
 def get_polarion_instance() -> Polarion:
@@ -48,34 +47,13 @@ def get_polarion_instance() -> Polarion:
     return client
 
 
-def get_project(client: Polarion, project_id: str) -> Project:
-    """
-    Get a project from the Polarion instance
-    :param client: The Polarion instance
-    :type client: Polarion
-    :param project_id: A string representing the project's id
-    :type project_id: str
-    :return: A project object
-    """
-    if not isinstance(client, Polarion):
-        raise TypeError("The client parameter must be a Polarion instance")
-    if not isinstance(project_id, str):
-        raise TypeError("The project_id parameter must be a string")
-
-    try:
-        project_from_id = client.getProject(project_id)
-        return project_from_id
-    except Exception as e:
-        raise Exception(f"Error while getting the project: {e}")
-
-
 def check_release(client: Polarion, release: str) -> list[Project] | None:
     if not isinstance(release, str):
         raise TypeError("The release parameter must be a string")
 
     print("Checking if release exists...")
     try:
-        pts_config = get_project(client, "PTS_Config")
+        pts_config = client.getProject("PTS_Config")
         query = f'title:"{release}"'
         match = pts_config.searchWorkitemFullItem(query)
         if not match:
@@ -89,31 +67,63 @@ def check_release(client: Polarion, release: str) -> list[Project] | None:
         raise Exception(f"Error while searching for the release: {e}")
 
 
+def define_query(
+        release: str | None = None,
+        additional_query: str | None = ""
+) -> str:
+    """
+    Define the query to get workitems from a project or a project group
+    :param release: [Optional] A string representing the release
+    :param additional_query: [Optional] A string representing an additional query
+    :return: A string representing the query
+    """
+    if not isinstance(release, str) and release is not None:
+        raise TypeError("The release parameter must be a string")
+    if not isinstance(additional_query, str) and additional_query is not None:
+        raise TypeError("The additional_query parameter must be a string")
+
+    if release:
+        match = check_release(release)
+        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND 
+        ibaApplicableConfiguration.KEY:("{match[0].id}")"""
+    else:
+        query = """type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)")"""
+    query += f" AND {additional_query}" if additional_query else ""
+    return query
+
+
 def get_workitems_from_group(
         client: Polarion,
         project_group: ProjectGroup,
-        release: str | None = None
+        release: str | None = None,
+        additional_query: str | None = ""
 ) -> list[Project]:
     """
-    Get a list of workitems (requirements and safety decisions) from the given Group
+    Get a list of workitems (requirement and safety decision) from the given Group
+    :param additional_query: [Optional] A string representing an additional query
     :param project_group: A Polarion project group
     :param client: The Polarion instance
-    :param release: A string representing the release
+    :param release:  [Optional] A string representing the release
     :return: A list of project objects
     """
     if not isinstance(client, Polarion):
         raise TypeError("The client parameter must be a Polarion instance")
     if not isinstance(project_group, ProjectGroup):
         raise TypeError("The group_name parameter must be a Project Group object")
-    global file_name
+
+    global db_folder_name
+    global now
+    now = datetime.now().strftime("%A %d %B %Y - %H:%M:%S")
 
     if release:
         match = check_release(client, release)
-        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND ibaApplicableConfiguration.KEY:("{match[0].id}")"""
-        file_name += f'{project_group.name}__{release}'
+        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND 
+        ibaApplicableConfiguration.KEY:("{match[0].id}")"""
+        db_folder_name += f'{project_group.name}__{release}%group'
     else:
         query = """type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)")"""
-        file_name += project_group.name
+        db_folder_name += f'{project_group.name}%group'
+    query += f" AND {additional_query}" if additional_query else ""
 
     try:
         print("Getting workitems from groups... might take a long time")
@@ -128,28 +138,35 @@ def get_workitems_from_group(
 def get_workitems_from_project(
         client: Polarion,
         project: Project,
-        release: str | None = None
+        release: str | None = None,
+        additional_query: str | None = ""
 ) -> list[Workitem]:
     """
     Get workitems with a query from a project
+    :param additional_query: [Optional] A string representing an additional query
     :param client: The Polarion instance
     :param project: A Polarion project
-    :param release: A string representing the release
+    :param release: [Optional] A string representing the release
     :return: A list of workitems
     """
     if not isinstance(client, Polarion):
         raise TypeError("The client parameter must be a Polarion instance")
     if not isinstance(project, Project):
         raise TypeError("The project parameter must be a Polarion project object")
-    global file_name
+
+    global db_folder_name
+    global now
+    now = datetime.now().strftime("%A %d %B %Y - %H:%M:%S")
 
     if release:
         match = check_release(client, release)
-        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND ibaApplicableConfiguration.KEY:("{match[0].id}")"""
-        file_name += f'{project.id}_{release}'
+        query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND 
+        ibaApplicableConfiguration.KEY:("{match[0].id}")"""
+        db_folder_name += f'{project.id}__{release}%project'
     else:
         query = """type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)")"""
-        file_name += f'{project.id}'
+        db_folder_name += f'{project.id}%project'
+    query += f" AND {additional_query}" if additional_query else ""
 
     try:
         print("Getting workitems... might take a while for big queries.")
@@ -207,7 +224,9 @@ def workitem_to_embed(
     return merged_workitems
 
 
-def format_workitem(merged_workitems: list[Workitem]) -> list[tuple[str, tuple[Any, str | Any]]]:
+def format_workitem(
+        merged_workitems: list[Workitem]
+) -> list[tuple[str, tuple[Any, str | Any]]]:
     try:
         workitems_to_embed = [
             (
@@ -325,31 +344,32 @@ def create_vector_db(
         faiss.add_texts(texts=text, metadatas=metadatas[i])
 
     faiss.save_local(str(absolute_db_path))
+    fh.db_to_update_file(db_path, now)
 
 
 def main(
         project_id: str,
-        choice: str,
+        type_chosen: str,
         release: str | None = None,
 ) -> None:
-    global file_name
+    global db_folder_name
     print("Checking for .cache...")
-    if os.path.exists(f'.cache/cache_{project_id}__{release}.pkl'):
-        with open(f'.cache/cache_{project_id}__{release}.pkl', 'rb') as f:
+    if os.path.exists(f'.cache/cache_{project_id}__{release}%{type_chosen}.pkl'):
+        with open(f'.cache/cache_{project_id}__{release}%{type_chosen}.pkl', 'rb') as f:
             formatted_list_workitems = pickle.load(f)
-            file_name += f'{project_id}__{release}'
+            db_folder_name += f'{project_id}__{release}%{type_chosen}'
             printarrow("Cache loaded")
     else:
         printarrow("No cache")
         client = get_polarion_instance()
         printarrow("Done !")
 
-        if choice == "group":
+        if type_chosen == "group":
             project_group = client.getProjectGroup(group_name=project_id)
             workitems = get_workitems_from_group(client=client, project_group=project_group, release=release)
             printarrow("Done !", start="\n")
-        elif choice == "project":
-            project = get_project(client=client, project_id=project_id)
+        elif type_chosen == "project":
+            project = client.getProject(project_id)
             workitems = get_workitems_from_project(client=client, project=project, release=release)
             printarrow("Done !", start="\n")
         else:
@@ -358,24 +378,33 @@ def main(
         merged_workitems = workitem_to_embed(workitems, release)
         formatted_list_workitems = format_workitem(merged_workitems)
         printarrow("Done !", start="\n")
-        with open(f'.cache/cache_{project_id}__{release}.pkl', 'wb') as f:
+        with open(f'.cache/cache_{project_id}__{release}%{type_chosen}.pkl', 'wb') as f:
             pickle.dump(formatted_list_workitems, f)
             printarrow("Cache saved")
-            file_name += f'{project_id}__{release}'
+            db_folder_name += f'{project_id}__{release}%{type_chosen}'
 
     if release:
-        create_vector_db(formatted_list_workitems, file_name)
+        create_vector_db(formatted_list_workitems, db_folder_name)
     else:
-        create_vector_db(formatted_list_workitems, file_name)
+        create_vector_db(formatted_list_workitems, db_folder_name)
 
-    # delete .cache file
-    if os.path.exists(f'.cache/cache_{project_id}__{release}.pkl'):
-        os.remove(f'.cache/cache_{project_id}__{release}.pkl')
+    if os.path.exists(f'.cache/cache_{project_id}__{release}%{type_chosen}.pkl'):
+        os.remove(f'.cache/cache_{project_id}__{release}%{type_chosen}.pkl')
     print("Finished !")
 
 
 if __name__ == '__main__':
-    choice = ""
+    fh.check_backup()
+    fh.check_db_folder()
+    fh.check_update_file()
+
+    action_choice = ""
+    while action_choice not in [str(i) for i in range(1, 3)]:
+        action_choice = input(
+            "Invalid input. Please enter either '1' or '2': "
+            if action_choice else "Do you want to save workitems from a project or a project group ? (1 / 2): ")
+
+    type_choice = ""
     while choice not in ["project", "group"]:
         choice = input(
             "Invalid input. Please enter either 'project' or 'group': "
@@ -388,6 +417,6 @@ if __name__ == '__main__':
 
     # Release examples: "P235-R12.3.0", "P235-R12.4.0", "AI-V2.4.0.0", etc...
     release_input = input("Release (e.g. AI-V2.4.0.0, P235-R12.4.0, ...): ") or None
-    main(choice=choice, project_id=project_or_group_id_input, release=release_input)
+    main(type_chosen=choice, project_id=project_or_group_id_input, release=release_input)
 
 

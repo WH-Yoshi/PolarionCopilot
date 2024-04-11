@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
     examples = [
         ["What action should the TSS take in the event of wiring failures detected on the output signal ‘ACU service "
-        "mode allowed’?", "Therapy_Center_Spec__P235-R12.4.0"],
+        "mode allowed’?", "Therapy_Center_Spec__P235-R12.4.0%group"],
         ["What is the height of the Mount Everest?", "General"],
     ]
     chatbot = gr.Chatbot(

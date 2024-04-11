@@ -1,12 +1,19 @@
+"""
+This code will save workitems incrementally in a database. To do so it saves a pkl file containing the last update date.
+"""
 import html
 import os
 import pickle
 import re
 import shutil
 import sys
-from typing import List, Any
-
 import certifi
+
+import file_helper as fh
+from save_workitems_release import get_polarion_instance, workitem_to_embed, printarrow, str_cleaner, \
+    create_vector_db, get_workitems_from_project, get_workitems_from_group
+
+from typing import List, Any, Dict
 
 from dotenv import load_dotenv
 from pprint import pprint
@@ -21,261 +28,228 @@ from polarion.project import Project
 from polarion.polarion import Polarion
 from polarion.workitem import Workitem
 
-load_dotenv()
-print(certifi.where())
-
-api_url = "http://localhost:22027"
-base_url = 'https://polarion.goiba.net/polarion'
-file_name = 'last_update_date.pkl'
+backup_path = "../data/.backup.pkl"
+file_path = "../data/.update_file.pkl"
+dbs_folder_path = "../faiss/"
 
 
-def get_polarion_instance() -> Polarion:
+def display_file():
     """
-    Get a Polarion instance with the user's credentials or a token
-    :return: A Polarion instance
+    Display the content of the update file
     """
-    return Polarion(base_url, 'aixyf', password=None, token=os.environ.get("polarion_token"))
-
-
-def get_project(cl: Polarion, project_id: str = "PT_L2_TSS_Subsystem") -> Project:
-    """
-    Get a project from the Polarion instance
-    :param cl: The Polarion instance
-    :type cl: Polarion
-    :param project_id: A string representing the project's id
-    :type project_id: str
-    :return: A project object
-    """
-    project_from_id = cl.getProject(project_id)
-    return project_from_id
-
-
-def get_last_update_date(file: str) -> datetime | None:
-    """
-    Get the last update date from a pkl file.
-    Should be a datetime.date() object
-    :param file: The file containing the last update date
-    :type file: str
-    :return: A datetime object
-    """
+    path = fh.get_abs_update_path()
+    update_dict = fh.open_pkl_file_rb(path)
+    print("Content of the update file:")
     try:
-        with open(file, 'rb') as f:
-            last_update_date = pickle.load(f)
-            return last_update_date
-    except FileNotFoundError:
-        print(f"No file named '{file}' found in '{Path().absolute()}' folder.")
-    except EOFError:
-        print(f"File '{file}' is empty")
-        return None
-    except pickle.UnpicklingError:
-        print(f"File '{file}' is corrupted")
+        for i, (db, date) in enumerate(update_dict.items()):
+            print(f"[{i + 1}] {db.split('%')[0].split('__')[0]} and {db.split('%')[0].split('__')[1]} : "
+                  f"{date if date is not None else 'No date'}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        raise Exception(f"An error occurred while displaying the file: {e}")
 
 
-def save_last_update_date(file: str) -> bool:  # MUST BE CALLED *AFTER* THE WORKITEMS HAVE BEEN SAVED IN DATABASE
+def initial_checkup():
     """
-    Save the new update date in a pkl file
-    :param file: The file containing the last update date
-    :type file: str
+    Save an update file if no folder exists in the faiss folder, update the file otherwise
+    """
+    abs_update_path = fh.get_abs_update_path()
+    dbs_path = fh.get_abs_db_path()
+    infos = fh.open_pkl_file_rb(abs_update_path)
+    list_subfolders_with_paths = [f.name for f in os.scandir(dbs_path) if f.is_dir()]
+
+    if not list_subfolders_with_paths and (not infos or infos == {}):
+        print("No database saved for now. Start creating databases with the save_workitem_release.py script !")
+        return
+    elif list_subfolders_with_paths and (not infos or infos == {}):  # update happens with existing databases
+        backup_abs_path = fh.get_abs_backup_path()
+        backup_content = fh.open_pkl_file_rb(backup_abs_path)
+        if backup_content:
+            shutil.copyfile(backup_abs_path, abs_update_path)
+            copied_content = fh.open_pkl_file_rb(abs_update_path)
+            for db in list_subfolders_with_paths:
+                if db not in copied_content.keys():
+                    copied_content[db] = None
+                    print(f"Database '{db}' added, but has no date.")
+            print("Update file updated with existing databases.")
+            return
+        else:
+            for db in list_subfolders_with_paths:
+                infos[db] = None
+            with open(abs_update_path, 'wb') as f:
+                pickle.dump(infos, f)
+            with open(backup_abs_path, 'wb') as f:
+                pickle.dump(infos, f)
+            print(f"The update file has db names but no date. Might wanna re-run the save_workitems_release.py script "
+                  f"for the following content:")
+            for db in list_subfolders_with_paths:
+                print(f" - {db.split('%')[0].split('__')[0]} and {db.split('%')[0].split('__')[1]}")
+            return
+    elif list_subfolders_with_paths and infos:  # update happens with existing databases if infos is not right
+        keys_to_delete = [key for key in infos.keys() if key not in list_subfolders_with_paths]
+        for key in keys_to_delete:
+            del infos[key]
+        if not all(elem in infos.keys() for elem in list_subfolders_with_paths):
+            for db in list_subfolders_with_paths:
+                if db not in infos.keys():
+                    infos[db] = None
+            with open(abs_update_path, 'wb') as f:
+                pickle.dump(infos, f)
+            printarrow("Update file updated with existing databases.")
+            return
+        else:
+            with open(abs_update_path, 'wb') as f:
+                pickle.dump(infos, f)
+            return
+    else:
+        raise Exception("Unknown combination.")
+
+
+def get_update_date(db_name: list[str]) -> dict[str, datetime]:
+    """
+    Get the last update date of a database from the db pkl file.
+    :return: A datetime class object
+    """
+    if not isinstance(db_name, list):
+        raise ValueError(f"The database parameter must be a list.")
+    if len(db_name) == 0:
+        raise ValueError(f"The database list must not be empty.")
+    return_dict = {}
+    try:
+        with open(fh.get_abs_update_path(), 'rb') as f:
+            update_dict = pickle.load(f)
+        for db in db_name:
+            return_dict[db] = update_dict[db]
+        return return_dict
+    except FileNotFoundError:
+        with open(fh.get_abs_update_path(), 'wb') as f:
+            pickle.dump({}, f)
+        return {}
+    except EOFError:
+        with open(fh.get_abs_update_path(), 'wb') as f:
+            pickle.dump({}, f)
+        return {}
+    except pickle.UnpicklingError:
+        raise pickle.UnpicklingError(f"File '{fh.get_abs_update_path().name}' is corrupted")
+    except KeyError:
+        raise KeyError(f"Database '{db_name}' not found in '{fh.get_abs_update_path().name}' file")
+    except Exception as e:
+        raise Exception(f"Unknown error : {e}")
+
+
+def save_last_update_date(db_choice) -> bool:  # MUST BE CALLED *AFTER* THE WORKITEMS HAVE BEEN SAVED IN DATABASE
+    """
+    Save the new update date of a database in the db pkl file
     :return: True if the file has been successfully updated, False otherwise
     :rtype: bool
     """
-    if not Path(file).exists():
-        print(f"Intializing update date file:\n"
-              f" \u21AA  Creating 'last_update_date.pkl' file with following content: '{datetime.now().date()}'")
-    else:
-        last_update = get_last_update_date(file)
-        print(f"Changing update date:\n"
-              f" \u21AA  Deleting '{file}' file following content: '{last_update}' for '{datetime.now().date()}'")
+    now = datetime.now().strftime("%A %d %B %Y - %H:%M:%S")
+    # if not abs_file_path.exists():
+    #     printarrow(f"Adding date: [{now}] for {db_choice}")
+    # else:
+    #     last_update = get_update_date(db_choice)
+    #     printarrow(f"Changing date: [{last_update}] to [{now}] for {db_choice}")
 
-    valid_input = False
-    while not valid_input:
-        input_content = input("Do you want to continue? (y/n): ")
-        if input_content in ['n', 'N', 'no', 'No', 'NO']:
-            print("\tOperation cancelled: Workitems not saved in database.")
-            return False
-        elif input_content in ['y', 'Y', 'ye', 'Ye', 'YE', 'yes', 'Yes', 'YES']:
-            try:
-                with open(file, 'wb') as f:
-                    pickle.dump(datetime.now().date(), f)
-                print(f"\tFile '{file}' content successfully modified with: {get_last_update_date(file)}")
-                return True
-            except FileNotFoundError:
-                print(f"\tNo file named '{file}' found in '{Path().absolute()}' folder.")
-                return False
-            except pickle.PicklingError:
-                print(f"\tAn error occurred while pickling the data into '{file}' file.")
-                return False
-            except Exception as e:
-                print(f"\tAn error occurred: {e}")
-                return False
-        else:
-            print("\tInvalid input.")
+    input_content = "python"
+    while input_content not in ['n', 'N', 'no', 'No', 'NO', 'y', 'Y', 'ye', 'Ye', 'YE', 'yes', 'Yes', 'YES', ""]:
+        input_content = input(
+            "Invalid input, try again: "
+            if input_content != "python" else "Do you want to continue? (y/n): ")
 
-
-def get_updated_workitems(project: Project, updated_since: datetime = None) -> list[Workitem] | None:
-    """
-    Get all workitems updated since the last update
-    :param project: A Polarion project
-    :param updated_since: A datetime.date() object representing the last update date
-    :return: A list of workitems
-    """
-    if updated_since is None:
-        query = 'type:(requirement safetydecision) AND NOT created:20240312'
-        print("Getting all workitems since update date is not available.")
-    else:
-        if not isinstance(project, Project):
-            raise TypeError("The project parameter must be a Polarion object")
-        if not isinstance(updated_since, datetime):
-            raise TypeError("The updated_since parameter must be a datetime object")
-
-        query = f'type:(requirement safetydecision) updated:[{updated_since.strftime("%Y%m%d")} TO 30000000]'
-        print("Getting workitems updated since:", updated_since.strftime("%Y%m%d"))
-
-    workitem_list = project.searchWorkitemFullItem(query)
-    return workitem_list if save_last_update_date(file_name) else None
-
-
-def workitem_to_embed(workitems: list[Workitem]) -> list[list[list[str | Any] | Any]]:
-    """
-    Create a list of workitems with their metadatas, to embed in the database
-    :param workitems: A list of Polarion workitems
-    :return: A list of workitems with their metadatas
-    """
-    new_workitems = []
-
-    for workitem in workitems:
+    if input_content in ["n", "N", "no", "No", "NO"]:
+        printarrow("Operation cancelled: Workitems not saved in database.")
+        return False
+    elif input_content in ["y", "Y", "ye", "Ye", "YE", "yes", "Yes", "YES", ""]:
         try:
-            workitem.children = doc.getChildren(workitem)
-            if workitem.children is not None or workitem.children != []:
-                for child in workitem.children:
-                    workitem.description.content += "\n" + child.description.content
+            with open(abs_file_path, 'rb') as f:
+                update_dict = pickle.load(f)
+            with open(abs_file_path, 'wb') as f:
+                update_dict[db_choice] = now
+                pickle.dump(update_dict, f)
+            printarrow(f"Content successfully modified to [{now}].")
+            return True
+        except FileNotFoundError:
+            raise FileNotFoundError(f"No file named '{abs_file_path}' found in '{abs_file_path.parent}' folder.")
+        except pickle.PicklingError:
+            raise pickle.PicklingError(f"An error occurred while pickling the data into '{abs_file_path}' file.")
         except Exception as e:
-            print(e)
-            pass
-
-    for workitem in workitems:
-        try:
-            parent = doc.getParent(workitem)
-            print(workitem.id)
-        except IndexError as e:
-            new_workitems.append(workitem)
-            pass
-        except AttributeError as e:
-            pass
-
-    livedoc_url = f'/#/project/{project.id}/workitem?id='
-    workitems_to_embed = [[workitem.description.content, [item['value'], base_url + livedoc_url + workitem.id]]
-                          for workitem in new_workitems for item in
-                          workitem.customFields.Custom if item['key'] == 'ibaFullPuid']
-
-    return workitems_to_embed
+            raise Exception(f"Unknown error: {e}")
 
 
-def get_workitem(p: Project, name: str) -> Workitem:
-    return p.getWorkitem(name)
-
-
-def lprint(data):
-    pprint(data)
-
-
-def get_document(project) -> Document:
-    return project.getDocuments()[1]
-
-
-def str_cleaner(text: str) -> str:
+def show_saved_db():
     """
-    Clean a string from HTML tags and other characters
-    :param text: The string to clean
-    :type text: str
-    :return: The cleaned string
-    :rtype: str
+    Show the saved databases
     """
-    if not isinstance(text, str):
-        raise TypeError("The text must be a string")
-    # Convert HTML entities (like &amp;) into their corresponding characters (like &)
-    text = html.unescape(text)
-    # if a </ul> is at the end of the string, remove it
-    text = re.sub(r'</?ul>$', '', text)
-    # if a </ul> is at the end of the string, remove it
-    text = re.sub(r'<li>$', '', text)
-    # replace <li> or </li> with a ',' character
-    text = re.sub(r'</li>', ',', text)
-    # replace <li> or </li> with a newline character
-    text = re.sub(r'</?li>', ' ', text)
-    # Remove tab characters
-    text = text.replace("\t", "")
-    # Remove newline characters
-    text = text.replace("\n", "")
-    # Remove carriage return characters
-    text = text.replace("\r", "")
-    # Remove leading whitespace characters
-    text = text.lstrip()
-    # Use a regular expression to remove any HTML tags in the text
-    text = re.sub('<.*?>', '', text)
-    # Replace sequences of more than one space with a single space
-    text = re.sub(' +', ' ', text)
-    # Remove any whitespace after a dot if it's not followed by something that is not a whitespace
-    text = re.sub(r'(?<=\.)\s*(?!.)', '', text)
-    # Make sure there is a space after a period if it's followed by any capital character
-    text = re.sub(r'(?<=\.)\s*(?=[A-Z])', ' ', text)
-    # Remove any spaces that occur immediately before a period
-    text = re.sub(r'\s+(?=\.)', '', text)
-    # Remove any spaces that occur immediately after an opening parenthesis
-    text = re.sub(r'\(\s+', '(', text)
-    # Verify that there will always be a space after a closing parenthesis if there is no period after it
-    text = re.sub(r'\)\s+(?![a-z,A-Z])', ')', text)
-    # Remove any spaces that occur immediately before a comma
-    text = re.sub(r'\s+,', ',', text)
-    # Add a space after a closing parenthesis if it's followed by any capital character
-    text = re.sub(r'\)(?=[a-z,A-Z])', ') ', text)
-    return text
+    for i, db in enumerate(os.listdir('../faiss')):
+        print(f"[{i + 1}] {db}")
 
 
-def create_vector_db(data: List[str], db_path: Path | str):
+def workitem_caller(db: Dict[str, datetime]):
     """
-    Create a vector database from a list of strings
-    :param data: The list of strings
-    :type data: List[str]
-    :param db_path: The path to the database
-    :type db_path: str
+    Call the workitem_to_embed function to save workitems in a database
     """
-    if not isinstance(data, list):
-        raise TypeError("The data must be a list")
-    if not isinstance(db_path, str):
-        raise TypeError("The db_path must be a string")
+    client = get_polarion_instance()
+    for db_name, date in db.items():
+        directory = db_name.split('%')[1]
+        name = db_name.split('%')[0].split('__')[0]
+        release = db_name.split('%')[0].split('__')[1]
+        date = date.strftime("%Y%m%d") if date is not None else None
+        query = f"created:[{date} TO $today$] OR updated:[{date} TO $today$]" if date is not None else ""
 
-    if os.path.exists(db_path):
-        shutil.rmtree(db_path)
+        if directory == "project":
+            project = client.getProject(name)
+            workitems = get_workitems_from_project(
+                client, project, release,
+                additional_query=query
+            )
+        elif directory == "group":
+            group = client.getProjectGroup(name)
+            workitems = get_workitems_from_group(
+                client, group, release,
+                additional_query=query
+            )
+        else:
+            raise ValueError(f"Unknown directory: {directory}")
+        workitem_to_embed(workitems, db_name)
+        ## TO CONTINUE MAYBE
 
-    db_path_abs = Path(db_path).absolute()
-    embeddings = HuggingFaceHubEmbeddings(model=api_url)
 
-    descriptions = [description for description, _ in data]
-    metadatas = [{"reference": reference[0], "url": reference[1]} for _, reference in data]
-
-    batch_size = 32
-    texts = [descriptions[i:i + batch_size] for i in range(0, len(descriptions), batch_size)]
-    metadatas = [metadatas[i:i + batch_size] for i in range(0, len(metadatas), batch_size)]
-
-    faiss = FAISS.from_texts(texts=texts[0], metadatas=metadatas[0], embedding=embeddings)
-    for i, text in enumerate(texts[1:], start=1):
-        faiss.add_texts(texts=text, metadatas=metadatas[i])
-
-    faiss.save_local(str(db_path_abs))
+def main(
+        choice: str
+):
+    """
+    Main function to save workitems incrementally in a database
+    :param choice: The database choice (a number)
+    """
+    db = []
+    if choice == "":
+        db = os.listdir('../faiss')
+    else:
+        db_str = os.listdir('../faiss')[int(choice) - 1]
+        db.append(db_str)
+    db_date = get_update_date(db)
+    pprint(db_date.keys())
+    date = db_date[db[0]]
+    print(date.strftime("%Y%m%d"))
+    # workitem_caller(db_date)
+    # element = db.split("%")[1]
+    # get
+    # save_last_update_date(db)
 
 
 if __name__ == '__main__':
-    client = get_polarion_instance()  # To modify: use a python unique token or a user's credentials
-    project = get_project(client)  # To modify: after discussion of which project to include in DB. Return project[]
+    fh.check_backup()
+    fh.check_db_folder()
+    fh.check_update_file()
 
-    doc = get_document(project)  # Will be deleted depending on demand
-    workitems = get_workitems(doc, ['requirement', 'safetydecision'])
-    workitem_to_embed = workitem_to_embed(workitems)
-    lprint(workitem_to_embed)
+    initial_checkup()
 
-    # Vector db related
-    # filtered_list = file_loader('../data/polarion_xml_fetch.pkl')
-    # create_vector_db(filtered_list, '../faiss/polarion-tei')
+    display_file()
+    print('\n')
+
+    db_choice = "no input"
+    valid_inputs = [str(i) for i in range(1, len(os.listdir('../faiss')) + 1)] + [""]
+    while db_choice not in valid_inputs:
+        db_choice = input(
+            "Please enter a valid number: "
+            if db_choice else "Which database do you want to update? [number]: ")
+    main(db_choice)
