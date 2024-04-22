@@ -2,7 +2,7 @@ import subprocess
 
 
 def print_instructions():
-    print("Instructions for setting up and running Polarion.py:")
+    print("Instructions for setting up and running Copilot.py:")
 
     print("\n1. Install necessary packages:")
     print("   - Ensure you are in your project directory with your terminal.")
@@ -20,9 +20,9 @@ def print_instructions():
     print("   - Follow the instruction made by Luca Abs for the deployment of the cloud GPU via TensorDock.")
     print("     \u21AA Note : Automation of this process is possible but not implemented.")
 
-    print("\n3. Run the Polarion.py script:")
+    print("\n3. Run the Copilot.py script:")
     print("   - Ensure you are still in your project directory.")
-    print("   - Type 'py .\codes\Polarion.py' to run the script.")
+    print("   - Type 'py .\codes\Copilot.py' to run the script.")
 
 
 print_instructions()
