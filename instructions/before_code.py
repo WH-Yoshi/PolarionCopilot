@@ -8,7 +8,7 @@ def print_instructions():
     inputted = input("   \u21AA  Do you want to install the necessary packages? (y/n): ")
     if inputted.lower() == 'y':
         print("Installing packages...")
-        subprocess.run(["start", "/wait", "cmd", "pip install -r requirements.txt"], shell=True)
+        subprocess.run(["start", "/wait", "cmd", "/k", "pip install -r requirements.txt"], shell=True)
         print("Packages installed.")
     else:
         print("   Ensure all necessary packages are installed before running the script.")
