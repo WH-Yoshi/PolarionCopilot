@@ -33,4 +33,3 @@ def print_instructions():
 
 print_instructions()
 input("\nPress Enter to run the script.")
-input()
