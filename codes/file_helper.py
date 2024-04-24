@@ -145,5 +145,3 @@ def display_pkl_file():
 
 if __name__ == '__main__':
     raise Exception("This file isn't intended to be run directly")
-    # recover_update_file()
-    # display_pkl_file()

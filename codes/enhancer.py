@@ -53,3 +53,7 @@ class Loader:
     def __exit__(self, exc_type, exc_value, tb):
         # handle exceptions with those variables ^
         self.stop()
+
+
+if __name__ == '__main__':
+    raise Exception("This script is not meant to be run directly.")

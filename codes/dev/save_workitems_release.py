@@ -30,7 +30,7 @@ load_dotenv()
 api_url = "http://localhost:22027"
 base_url = 'https://polarion.goiba.net/polarion'
 db_folder_name = '../faiss/'
-file_path = "../data/.update_file.pkl"
+file_path = "../../data/.update_file.pkl"
 now = ""
 
 

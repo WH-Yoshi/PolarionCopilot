@@ -28,8 +28,8 @@ from polarion.project import Project
 from polarion.polarion import Polarion
 from polarion.workitem import Workitem
 
-file_path = "../data/.update_file.pkl"
-dbs_folder_path = "../faiss/"
+file_path = "../../data/.update_file.pkl"
+dbs_folder_path = "../../faiss/"
 
 
 def display_file():
@@ -178,7 +178,7 @@ def show_saved_db():
     """
     Show the saved databases
     """
-    for i, db in enumerate(os.listdir('../faiss')):
+    for i, db in enumerate(os.listdir('../../faiss')):
         print(f"[{i + 1}] {db}")
 
 
@@ -221,9 +221,9 @@ def main(
     """
     db = []
     if choice == "":
-        db = os.listdir('../faiss')
+        db = os.listdir('../../faiss')
     else:
-        db_str = os.listdir('../faiss')[int(choice) - 1]
+        db_str = os.listdir('../../faiss')[int(choice) - 1]
         db.append(db_str)
     db_date = get_update_date(db)
     pprint(db_date.keys())
@@ -246,7 +246,7 @@ if __name__ == '__main__':
     print('\n')
 
     db_choice = "no input"
-    valid_inputs = [str(i) for i in range(1, len(os.listdir('../faiss')) + 1)] + [""]
+    valid_inputs = [str(i) for i in range(1, len(os.listdir('../../faiss')) + 1)] + [""]
     while db_choice not in valid_inputs:
         db_choice = input(
             "Please enter a valid number: "
