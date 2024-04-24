@@ -229,7 +229,7 @@ if __name__ == '__main__':
             fn=predict,
             chatbot=chatbot,
             textbox=textbox,
-            additional_inputs=dropdown,
+            additional_inputs=dropdown,  # k modifiable
             css=CSS,
             fill_height=True,
         )

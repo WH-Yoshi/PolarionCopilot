@@ -11,6 +11,7 @@ _db_folder_path = current_path.parent.parent / "faiss"
 _data_path = current_path.parent.parent / "data"
 _update_path = current_path.parent.parent / "data" / ".update_file.pkl"
 _cache_path = current_path.parent.parent / ".cache"
+site_package_path = current_path.parent / "site-packages-changes"
 
 
 def get_update_path() -> Path:

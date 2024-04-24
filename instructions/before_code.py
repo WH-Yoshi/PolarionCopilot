@@ -1,4 +1,10 @@
+import os
 import subprocess
+import site
+import shutil
+from pathlib import Path
+
+from codes.file_helper import site_package_path
 
 
 def print_instructions():
@@ -9,6 +15,12 @@ def print_instructions():
     if inputted.lower() == 'y':
         print("Installing packages...")
         subprocess.run(["start", "/wait", "cmd", "/k", "pip install -r requirements.txt"], shell=True)
+        for path in site.getsitepackages():
+            if "site-packages" in path:
+                shutil.copy(site_package_path / "wrapt_certifi.py", Path(path) / "certifi_win32" / "wrapt_certifi.py")
+                for file in os.listdir(site_package_path / "polarion"):
+                    shutil.copy(file, Path(path) / "polarion" / file)
+                shutil.copy(site_package_path / "certifi_win32.py", Path(path) / "certifi_win32.py")
         print("Packages installed.")
     else:
         print("   Ensure all necessary packages are installed before running the script.")
@@ -20,4 +32,4 @@ def print_instructions():
 
 
 print_instructions()
-input("\nPress Enter when these instructions have been completed.")
+input("\nPress Enter to run the script.")
