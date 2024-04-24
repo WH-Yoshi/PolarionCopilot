@@ -239,3 +239,4 @@ fabric.properties
 /codes/dev/
 !/data/
 /data/
+!/faiss/

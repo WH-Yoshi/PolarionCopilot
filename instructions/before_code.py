@@ -4,7 +4,7 @@ import site
 import shutil
 from pathlib import Path
 
-from codes.file_helper import site_package_path
+site_package_path = Path(__file__).parent.parent / "codes" / "site-packages-changes"
 
 
 def print_instructions():
