@@ -1,3 +1,3 @@
 py .\instructions\before_code.py
-Clear-Host
-py .\codes\Copilot.py
+clear
+py .\codes\Polarion.py
