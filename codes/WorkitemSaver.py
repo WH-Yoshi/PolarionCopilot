@@ -20,7 +20,7 @@ from polarion.workitem import Workitem
 from termcolor import colored
 
 import file_helper as fh
-from enhancer import printarrow, Loader
+from enhancer import printarrow, Loader, arrow
 
 load_dotenv()
 
@@ -53,12 +53,12 @@ class WorkitemSaver:
         Get a Polarion instance with the user's credentials or a token
         :return: A Polarion instance
         """
-        print("Getting Polarion instance...")
+        loader = Loader("Getting the Polarion instance...", arrow("Done !"), timeout=0.1).start()
         try:
             client = Polarion(self.base_url, 'aixyf', password=None, token=os.environ.get("polarion_token"))
         except Exception as e:
             raise Exception(f"Error while getting the Polarion instance: {e}")
-        printarrow("Done !")
+        loader.stop()
         return client
 
     def check_release(self, release: str) -> list[Workitem] | None:
@@ -176,7 +176,8 @@ class WorkitemSaver:
         if not isinstance(full_workitems_list, list):
             raise TypeError("The full_workitems_list parameter must be a list")
         if not full_workitems_list:
-            raise ValueError("The full_workitems_list list must not be empty")
+            raise ValueError("The full_workitems_list list must not be empty, this means that there is no workitem"
+                             "of type 'requirement' or 'safetydecision' in the project or project group.")
 
         merged_workitems = []
 

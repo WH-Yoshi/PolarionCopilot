@@ -20,7 +20,7 @@ api_key = "EMPTY"
 client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_base_url"))
 embeddings = HuggingFaceHubEmbeddings(model=os.environ.get("api_url"))
 files = os.listdir(fh.get_db_path())
-icon = str(Path("public/images/favicon.ico").absolute())
+icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 
 
 def history_format(history: list[list[str, str]]) -> list[dict[str, str]]:

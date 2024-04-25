@@ -107,9 +107,8 @@ if __name__ == "__main__":
             project_or_group_id_input = ""
             while not project_or_group_id_input.strip():
                 project_or_group_id_input = input(f" \u21AA  Type the {colored('project', 'green')} ID "
-                                                  f"(e.g. PT_L2_TSS_Subsystem, PT_User_Requirements, ...): ")
+                                                  f"(e.g. PT_L2_TSS_Subsystem, PT_L2_PTS_Core_Subsystem, ...): ")
 
-        # Release examples: "P235-R12.3.0", "P235-R12.4.0", "AI-V2.4.0.0", etc...
         release_input = input(
             " \u21AA  Type the release (e.g. AI-V2.4.0.0, P235-R12.4.0, ...) or [ENTER] for None: ") or None
         if release_input:

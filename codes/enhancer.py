@@ -6,8 +6,12 @@ from time import sleep
 from termcolor import colored
 
 
+def arrow(content: str, start: str | None = '', end: str | None = ''):
+    return f"{start} \u21AA  {content}{end}"
+
+
 def printarrow(content: str, start: str | None = '', end: str | None = ''):
-    print(f"{start} \u21AA  {content}{end}")
+    print(arrow(content, start, end))
 
 
 class Loader:
@@ -38,7 +42,7 @@ class Loader:
         for c in cycle(self.steps):
             if self.done:
                 break
-            print(f"\r{self.desc} {c}", flush=True, end="")
+            print(f"\r{self.desc}  {c}", flush=True, end="")
             sleep(self.timeout)
 
     def __enter__(self):
