@@ -341,6 +341,8 @@ class WorkitemSaver:
     def caller(self) -> None:
         cache_path = fh.get_cache_path()
         cache_path = cache_path / f"cache_{self.id}__{self.release}%{self.type_chosen}.pkl"
+        if not cache_path.exists():
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
         workitems = []
 
         if self.time:  # When updating a DB

@@ -12,13 +12,16 @@ The manual part is the installation of any required software.
 ### Required installation
 
 1. Python version 3.11 (minimum) via this link: [Python](https://www.python.org/downloads/)
-   - Make sure to check the box "Add python.exe to PATH" during the installation
+   - Make sure to check the box *"Add python.exe to PATH"* during the installation
 3. Git to clone this repository via this link: [Git](https://git-scm.com/downloads)
+   - You can click *Next* for each step.
 3. **[Optional]** A new version of terminal to show you all this goodies going on in the scripts :)
+   - For Windows, you can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
+   - For Linux, you can use the ZSH shell by following this link: [ZSH](https://dev.to/yogeshdev/make-your-unix-terminal-beautiful-productive-c1d)
 
 ### Use the Repository
 
-1. Clone the repository
+1. Open Terminal and Clone the repository
    ```bash
    cd <path to a prefered directory>
    ```
@@ -29,12 +32,13 @@ The manual part is the installation of any required software.
 2. Run the desired script
    - For Windows :
     ```bash
-    ./Launcher_polarion.cmd
-    ./Launcher_copilot.cmd
+    Launcher_polarion.cmd
+    Launcher_copilot.cmd
     ```
-    - For Linux :
-     ```bash
+   - For Linux :
+    ```bash
     ./Launcher_polarion.sh
     ./Launcher_copilot.sh
     ```
+
 3. Enjoy the ride!
