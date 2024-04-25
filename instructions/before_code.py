@@ -5,7 +5,24 @@ import shutil
 from pathlib import Path
 
 site_package_path = Path(__file__).parent.parent / "codes" / "site-packages-changes"
+cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
+cert_path = cert_path.as_posix().replace(r'/', r'\\')
+line_number_to_modify = 9
+new_line_content = f'    return "{cert_path}"'
 
+
+def modify_file(file_pth, line_number, new_line):
+    with open(file_pth, 'r') as file:
+        lines = file.readlines()
+
+    if 0 < line_number <= len(lines):
+        lines[line_number - 1] = new_line + '\n'
+
+        with open(file_pth, 'w') as file:
+            file.writelines(lines)
+        return True
+    else:
+        return False
 
 def print_instructions():
     print("Instructions for setting up and running Polarion.py:")
@@ -15,12 +32,17 @@ def print_instructions():
     if inputted.lower() == 'y':
         print("Installing packages...")
         subprocess.run(["start", "/wait", "cmd", "/k", "pip install -r requirements.txt"], shell=True)
+
+        if modify_file(site_package_path / 'wrapt_certifi.py', line_number_to_modify, new_line_content):
+            print("File updated successfully.")
+
         for path in site.getsitepackages():
             path = Path(site.__file__).parent / "site-packages" / path
             if "site-packages" in str(path):
                 shutil.copy(site_package_path / "wrapt_certifi.py", path / "certifi_win32" / "wrapt_certifi.py")
                 for file in os.listdir(site_package_path / "polarion"):
                     shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
+
         print("Packages installed.")
     else:
         print("   Ensure all necessary packages are installed before running the script.")
