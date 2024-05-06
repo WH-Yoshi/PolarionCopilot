@@ -48,6 +48,19 @@ The manual part is the installation of any required software.
    pip install -r requirements.txt
    ```
 
+## Before any further steps, you need to fill the environment variables in the .env file.
+
+1. Create a new file named `.env` in the root of the repository
+2. Fill the file with the following content:
+   ```bash
+   base_url=<URL> # The URL of your Polarion server (e.g. https://polarion.example.com/polarion)
+   embedding_api=<URL> # The URL of your embedding API
+   openai_api=<URL> # The URL of your OpenAI like API (has to finish with "/v1")
+   polarion_user=<USERNAME> # The username to access the Polarion server
+   polarion_token=<TOKEN> # The user token to access the Polarion server
+   ```
+   Replace `<URL>`, `<USERNAME>`, and `<PASSWORD>` with your own values.
+
 ### Use the Code
 
 1. Run the desired script
@@ -58,4 +71,4 @@ The manual part is the installation of any required software.
 
 2. Enjoy the ride!
 
-# Made by WH-Yoshi
+#### Made by WH-Yoshi
