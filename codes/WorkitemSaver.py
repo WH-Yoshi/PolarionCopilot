@@ -40,8 +40,8 @@ class WorkitemSaver:
         self.id = saver_id
         self.type_chosen = type_chosen
         self.release = release
+        self.base_url = os.environ.get("base_url")
         self.embedding_api = os.environ.get("embedding_api")
-        self.openai_api = os.environ.get("openai_api")
         self.save_path = ""
         self.update_file_path = fh.get_update_path()
         self.now = ""
@@ -56,7 +56,7 @@ class WorkitemSaver:
         loader = Loader("Getting the Polarion instance... ", arrow("Done !"), timeout=0.1).start()
         try:
             client = Polarion(
-                self.openai_api,
+                self.base_url,
                 user=os.environ.get("polarion_user"),
                 password=None,
                 token=os.environ.get("polarion_token")
@@ -221,7 +221,7 @@ class WorkitemSaver:
             workitems_to_embed = [
                 (
                     self.str_cleaner(workitem.description.content),
-                    (item['value'], self.openai_api + f'/#/project/{workitem.project.id}/workitem?id=' + workitem.id),
+                    (item['value'], self.base_url + f'/#/project/{workitem.project.id}/workitem?id=' + workitem.id),
                 )
                 for workitem in merged_workitems for item in
                 workitem.customFields.Custom if item['key'] == 'ibaFullPuid'

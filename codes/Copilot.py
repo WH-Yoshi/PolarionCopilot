@@ -17,8 +17,8 @@ import file_helper as fh
 load_dotenv()
 
 api_key = "EMPTY"
-client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_base_url"))
-embeddings = HuggingFaceHubEmbeddings(model=os.environ.get("api_url"))
+client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
+embeddings = HuggingFaceHubEmbeddings(model=os.environ.get("embedding_api"))
 files = os.listdir(fh.get_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 
