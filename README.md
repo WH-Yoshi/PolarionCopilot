@@ -59,6 +59,7 @@ The manual part is the installation of any required software.
    polarion_token=<TOKEN> # The user token to access the Polarion server
    ```
    Replace `<URL>`, `<USERNAME>`, and `<PASSWORD>` with your own values.
+   .env file contains sensitive information, so make sure to not share it. 
 
 ### Use the Code
 
