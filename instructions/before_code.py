@@ -2,6 +2,10 @@ import os
 import subprocess
 import site
 import shutil
+import time
+
+import polarion
+from codes import enhancer as en
 from pathlib import Path
 
 site_package_path = Path(__file__).parent.parent / "codes" / "site-packages-changes"
@@ -9,6 +13,7 @@ cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
 cert_path = cert_path.as_posix().replace(r'/', r'\\')
 line_number_to_modify = 9
 new_line_content = f'    return "{cert_path}"'
+polarion_location = Path(polarion.__file__)
 
 
 def modify_file(file_pth, line_number, new_line):
@@ -24,28 +29,34 @@ def modify_file(file_pth, line_number, new_line):
     else:
         return False
 
-def print_instructions():
-    print("Instructions for setting up and running Polarion.py:")
 
-    print("\n1. Install necessary packages:")
-    inputted = input("   \u21AA  Do you want to install the necessary packages? (y/n): ")
-    if inputted.lower() == 'y':
-        print("Installing packages...")
-        subprocess.run(["start", "/wait", "cmd", "/k", "pip install -r requirements.txt"], shell=True)
-
-        if modify_file(site_package_path / 'wrapt_certifi.py', line_number_to_modify, new_line_content):
-            print("File updated successfully.")
-
+def check_packages():
+    loader = en.Loader("Checking the necessary packages... ", "All good.").start()
+    time.sleep(1)
+    installed_codes = os.listdir(polarion_location.parent)
+    required_code = "project_groups.py"
+    if required_code not in installed_codes:
+        modify_file(site_package_path / 'wrapt_certifi.py', line_number_to_modify, new_line_content)
         for path in site.getsitepackages():
             path = Path(site.__file__).parent / "site-packages" / path
             if "site-packages" in str(path):
                 shutil.copy(site_package_path / "wrapt_certifi.py", path / "certifi_win32" / "wrapt_certifi.py")
                 for file in os.listdir(site_package_path / "polarion"):
                     shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
-
+        loader.stop()
         print("Packages installed.")
+        return
     else:
-        print("   Ensure all necessary packages are installed before running the script.")
+        loader.stop()
+        print("Packages already installed.")
+        return
+
+
+def print_instructions():
+    print("Instructions for setting up and running Polarion.py:")
+
+    print("\n1. Installing the necessary packages:")
+    check_packages()
 
     print("\n2. Run the Cloud GPU:")
     print("   - Open your browser and navigate to the following link: https://marketplace.tensordock.com/deploy")

@@ -16,8 +16,7 @@ The manual part is the installation of any required software.
 2. Git to clone this repository via this link: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
 3. **[Optional]** A new version of terminal to show you all this goodies going on in the scripts :)
-   - For Windows, you can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
-   - For Linux, you can use the ZSH shell by following this link: [ZSH](https://dev.to/yogeshdev/make-your-unix-terminal-beautiful-productive-c1d)
+   - You can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
 
 
 ### Activate and fill your environment
@@ -31,6 +30,14 @@ The manual part is the installation of any required software.
    python -m venv venv
    .\venv\Scripts\activate
    ```
+   If you run into an error with execution policy, check your execution policy with:
+   ```bash
+    Get-ExecutionPolicy
+    ```
+   and remember its value if you want to go back later. Then, change it to:
+   ```bash
+    Set-ExecutionPolicy RemoteSigned
+    ```
 3. Clone the repository
    ```bash
    git clone https://github.com/WH-Yoshi/PolarionCopilot.git
