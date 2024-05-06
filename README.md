@@ -1,6 +1,6 @@
 # PolarionCopilot
 
-PolarionCopilot is a combination of 2 main components:
+PolarionCopilot is a combination of 2 main components for Windows:
 - A Python script that can be used to retrieve Polarion work items to make them understandable by a LLM.
 - A LLM that can be used to ask questions about the work items
 
@@ -11,9 +11,9 @@ The manual part is the installation of any required software.
 
 ### Required installation
 
-1. Python version 3.11 (minimum) via this link: [Python](https://www.python.org/downloads/)
+1. Python version 3.11 (minimum) via this link: [Python for Windows](https://www.python.org/downloads/)
    - Make sure to check the box *"Add python.exe to PATH"* during the installation
-3. Git to clone this repository via this link: [Git](https://git-scm.com/downloads)
+2. Git to clone this repository via this link: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
 3. **[Optional]** A new version of terminal to show you all this goodies going on in the scripts :)
    - For Windows, you can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)

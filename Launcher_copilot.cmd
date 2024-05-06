@@ -1,3 +1,3 @@
 py .\instructions\before_code.py
-clear
+cls
 py .\codes\Copilot.py
