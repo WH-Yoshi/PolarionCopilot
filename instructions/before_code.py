@@ -5,7 +5,7 @@ import shutil
 import time
 
 import polarion
-from codes import enhancer as en
+from enhancer import Loader
 from pathlib import Path
 
 site_package_path = Path(__file__).parent.parent / "codes" / "site-packages-changes"
@@ -31,7 +31,7 @@ def modify_file(file_pth, line_number, new_line):
 
 
 def check_packages():
-    loader = en.Loader("Checking the necessary packages... ", "All good.").start()
+    loader = Loader("Checking the necessary packages... ", "All good.").start()
     time.sleep(1)
     installed_codes = os.listdir(polarion_location.parent)
     required_code = "project_groups.py"
