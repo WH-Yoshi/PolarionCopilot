@@ -27,7 +27,7 @@ The manual part is the installation of any required software.
    ```
 2. Create and activate a virtual environment
    ```bash
-   python -m venv venv
+   py -m venv venv
    .\venv\Scripts\activate
    ```
    If you run into an error with execution policy, check your execution policy with:
