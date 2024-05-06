@@ -57,3 +57,5 @@ The manual part is the installation of any required software.
     ```
 
 2. Enjoy the ride!
+
+# Made by WH-Yoshi
