@@ -51,7 +51,7 @@ The manual part is the installation of any required software.
 #### Before any further steps, you need to fill the environment variables in the .env file.
 
 1. Create a new file named `.env` in the root of the repository
-2. Fill the file with the following content:
+2. Fill the file with the following content, each value must be between quotes "":
    ```bash
    base_url=<URL> # The URL of your Polarion server (e.g. https://polarion.example.com/polarion)
    embedding_api=<URL> # The URL of your embedding API
