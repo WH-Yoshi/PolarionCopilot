@@ -48,7 +48,7 @@ The manual part is the installation of any required software.
    pip install -r requirements.txt
    ```
 
-## Before any further steps, you need to fill the environment variables in the .env file.
+#### Before any further steps, you need to fill the environment variables in the .env file.
 
 1. Create a new file named `.env` in the root of the repository
 2. Fill the file with the following content:
