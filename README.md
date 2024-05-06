@@ -19,26 +19,34 @@ The manual part is the installation of any required software.
    - For Windows, you can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
    - For Linux, you can use the ZSH shell by following this link: [ZSH](https://dev.to/yogeshdev/make-your-unix-terminal-beautiful-productive-c1d)
 
-### Use the Repository
 
-1. Open Terminal and Clone the repository
+### Activate and fill your environment
+
+1. Define a location for the repository
    ```bash
-   cd <path to a prefered directory>
+   cd <DIRECTORY>
    ```
+2. Create and activate a virtual environment
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate
+   ```
+3. Clone the repository
    ```bash
    git clone https://github.com/WH-Yoshi/PolarionCopilot.git
    cd PolarionCopilot
    ```
-2. Run the desired script
-   - For Windows :
+4. Install the required libraries
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Use the Code
+
+1. Run the desired script
     ```bash
     Launcher_polarion.cmd
     Launcher_copilot.cmd
     ```
-   - For Linux :
-    ```bash
-    ./Launcher_polarion.sh
-    ./Launcher_copilot.sh
-    ```
 
-3. Enjoy the ride!
+2. Enjoy the ride!
