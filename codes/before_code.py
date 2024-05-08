@@ -56,6 +56,7 @@ def check_packages():
                 elif platform.system() == 'Linux':
                     shutil.copy(certifi_path, "/etc/ssl/certs/")
                     os.system("sudo update-ca-certificates")
+                    print("Certificates updated.")
                 for file in os.listdir(site_package_path / "polarion"):
                     shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
         loader.stop()
