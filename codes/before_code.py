@@ -10,7 +10,7 @@ from enhancer import Loader
 from pathlib import Path
 
 site_package_path = Path(__file__).parent.parent / "codes" / "site-packages-changes"
-certifi_path = Path(__file__).parent.parent / "certifi" / "cacert.pem"
+certifi_path = Path(__file__).parent.parent / "certifi" / "polarion_cert.pem"
 line_number_to_modify = 9
 polarion_location = Path(polarion.__file__)
 
@@ -31,10 +31,10 @@ def modify_file(file_pth, line_number, new_line):
 
 def os_identification():
     if platform.system() == 'Windows':
-        cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
+        cert_path = Path(__file__).parent.parent / 'certifi' / 'polarion_cert.pem'
         cert_path = cert_path.as_posix().replace(r'/', r'\\')
     elif platform.system() == 'Linux':
-        cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
+        cert_path = Path(__file__).parent.parent / 'certifi' / 'polarion_cert.pem'
     else:
         raise OSError('Unsupported OS')
     return f'    return "{cert_path}"'

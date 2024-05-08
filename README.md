@@ -20,7 +20,7 @@ The manual part is the installation of any required software.
 
 
 ### Activate and fill your environment
-
+#### Windows
 1. Define a location for the repository
    ```bash
    cd <DIRECTORY>
@@ -33,11 +33,11 @@ The manual part is the installation of any required software.
    If you run into an error with execution policy, check your execution policy with:
    ```bash
     Get-ExecutionPolicy
-    ```
+   ```
    and remember its value if you want to go back later. Then, change it to:
    ```bash
     Set-ExecutionPolicy RemoteSigned
-    ```
+   ```
 3. Clone the repository
    ```bash
    git clone https://github.com/WH-Yoshi/PolarionCopilot.git
@@ -47,9 +47,9 @@ The manual part is the installation of any required software.
    ```bash
    pip install -r requirements.txt
    ```
+#### Linux (Not supported yet)
 
 #### Before any further steps, you need to fill the environment variables in the .env file.
-
 1. Fill the .env file with the following content, each value must be between quotes "":
    ```bash
    base_url=<URL> # The URL of your Polarion server (e.g. https://polarion.example.com/polarion)
@@ -59,16 +59,12 @@ The manual part is the installation of any required software.
    polarion_token=<TOKEN> # The user token to access the Polarion server
    ```
    Replace `<URL>`, `<USERNAME>`, and `<PASSWORD>` with your own values.
-   .env file contains sensitive information, so make sure to not share it. 
-
+   .env file contains sensitive information, so make sure to not share it.
 ### Use the Code
-
 1. Run the desired script
-    ```bash
-    Launcher_polarion.cmd
-    Launcher_copilot.cmd
-    ```
-
+   ```bash
+   python run_copilot.py
+   python run_polarion.py
+   ```
 2. Enjoy the ride!
-
-#### Made by WH-Yoshi
+##### Made by me <3
