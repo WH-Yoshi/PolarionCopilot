@@ -1,6 +1,6 @@
 from termcolor import colored
 
-import file_helper as fh
+from codes import file_helper as fh
 
 
 def display_file():
