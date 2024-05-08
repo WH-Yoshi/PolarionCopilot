@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 import site
 import shutil
@@ -9,10 +10,8 @@ from enhancer import Loader
 from pathlib import Path
 
 site_package_path = Path(__file__).parent.parent / "codes" / "site-packages-changes"
-cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
-cert_path = cert_path.as_posix().replace(r'/', r'\\')
+certifi_path = Path(__file__).parent.parent / "certifi" / "cacert.pem"
 line_number_to_modify = 9
-new_line_content = f'    return "{cert_path}"'
 polarion_location = Path(polarion.__file__)
 
 
@@ -30,7 +29,19 @@ def modify_file(file_pth, line_number, new_line):
         return False
 
 
+def os_identification():
+    if platform.system() == 'Windows':
+        cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
+        cert_path = cert_path.as_posix().replace(r'/', r'\\')
+    elif platform.system() == 'Linux':
+        cert_path = Path(__file__).parent.parent / 'certifi' / 'cacert.pem'
+    else:
+        raise OSError('Unsupported OS')
+    return f'    return "{cert_path}"'
+
+
 def check_packages():
+    new_line_content = os_identification()
     loader = Loader("Checking the necessary packages... ", "All good.").start()
     time.sleep(1)
     installed_codes = os.listdir(polarion_location.parent)
@@ -40,7 +51,11 @@ def check_packages():
         for path in site.getsitepackages():
             path = Path(site.__file__).parent / "site-packages" / path
             if "site-packages" in str(path):
-                shutil.copy(site_package_path / "wrapt_certifi.py", path / "certifi_win32" / "wrapt_certifi.py")
+                if platform.system() == 'Windows':
+                    shutil.copy(site_package_path / "wrapt_certifi.py", path / "certifi_win32" / "wrapt_certifi.py")
+                elif platform.system() == 'Linux':
+                    shutil.copy(certifi_path, "/etc/ssl/certs/")
+                    os.system("sudo update-ca-certificates")
                 for file in os.listdir(site_package_path / "polarion"):
                     shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
         loader.stop()
