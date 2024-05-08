@@ -62,7 +62,7 @@ class WorkitemSaver:
                 token=os.environ.get("polarion_token")
             )
         except Exception as e:
-            raise Exception(f"Error while getting the Polarion instance: {e}")
+            raise Exception(f"Error while getting the Polarion instance. Did you create .env file ? : {e}")
         loader.stop()
         return client
 
