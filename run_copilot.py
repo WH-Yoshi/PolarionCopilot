@@ -5,7 +5,6 @@ from pathlib import Path
 
 
 def run_copilot():
-    print(Path(r'.\codes\launchers\Launcher_copilot.cmd').absolute())
     if platform.system() == 'Windows':
         os.system('cmd /c "start /wait ' + str(Path(r'.\codes\launchers\Launcher_copilot.cmd').absolute()) + '"')
     elif platform.system() == 'Linux':
