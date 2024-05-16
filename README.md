@@ -73,7 +73,7 @@ The manual part is the installation of any required software.
 7. Deploy
 8. SSH into the machine :
    ```bash
-   ssh -p xxxxx user@host -L 22027:localhost:8000 -L 22028:localhost:8080
+   ssh -p xxxxx user@host -L 22028:localhost:8000 -L 22027:localhost:8080
    ```
 9. Run the two docker images :
    ```bash
