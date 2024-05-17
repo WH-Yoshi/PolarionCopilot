@@ -77,10 +77,10 @@ The manual part is the installation of any required software.
    ```
 9. Run the two docker images :
    ```bash
-   docker run --runtime nvidia --gpus all -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=<secret>" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.2
+   docker run -d --gpus all -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=<secret>" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.2 --max-model-len 2048
    ```
    ```bash
-   docker run --gpus all -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:1.2 --model-id intfloat/multilingual-e5-large-instruct
+   docker run -d --gpus all -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:1.2 --model-id intfloat/multilingual-e5-large-instruct
    ```
 When the two images are booted up, you can proceed.
 
