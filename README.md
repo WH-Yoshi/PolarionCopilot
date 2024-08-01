@@ -60,6 +60,30 @@ The manual part is the installation of any required software.
    ```
    Replace `<URL>`, `<USERNAME>`, and `<PASSWORD>` with your own values.
    .env file contains sensitive information, so make sure to not share it.
+
+
+### Tensordock virtual machine
+
+1. Open [TensorDock](https://dashboard.tensordock.com/deploy)
+2. Get a GPU with at least 48Gb of VRAM
+3. 1GPU, 8Gb of RAM, 2CPU and 30Gb SSD
+4. Select one of the available locations
+5. Choose Ubuntu as operating system
+6. Put a password and a machine name
+7. Deploy
+8. SSH into the machine :
+   ```bash
+   ssh -p xxxxx user@host -L 22028:localhost:8000 -L 22027:localhost:8080
+   ```
+9. Run the two docker images :
+   ```bash
+   docker run -d --gpus all -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=<secret>" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.2 --max-model-len 2048
+   ```
+   ```bash
+   docker run -d --gpus all -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:1.2 --model-id intfloat/multilingual-e5-large-instruct
+   ```
+When the two images are booted up, you can proceed.
+
 ### Use the Code
 1. Run the desired script
    ```bash
@@ -67,4 +91,3 @@ The manual part is the installation of any required software.
    python run_polarion.py
    ```
 2. Enjoy the ride!
-##### Made by me <3
