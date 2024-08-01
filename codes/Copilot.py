@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import gradio as gr
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceHubEmbeddings
+from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
 from openai import OpenAI
@@ -18,7 +18,7 @@ load_dotenv()
 
 api_key = "EMPTY"
 client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
-embeddings = HuggingFaceHubEmbeddings(model=os.environ.get("embedding_api"))
+embeddings = HuggingFaceEndpointEmbeddings(model=os.environ.get("embedding_api"))
 files = os.listdir(fh.get_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 

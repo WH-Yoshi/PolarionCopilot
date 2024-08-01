@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceHubEmbeddings
+from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from polarion.polarion import Polarion
 from polarion.workitem import Workitem
@@ -315,7 +315,7 @@ class WorkitemSaver:
                     sys.exit(0)
 
         absolute_db_path = db_path.absolute()
-        embeddings = HuggingFaceHubEmbeddings(model=self.embedding_api, model_kwargs={"truncate": True})
+        embeddings = HuggingFaceEndpointEmbeddings(model=self.embedding_api, model_kwargs={"truncate": True})
 
         descriptions = []
         metadatas = []
