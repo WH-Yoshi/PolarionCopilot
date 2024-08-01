@@ -240,3 +240,5 @@ fabric.properties
 /codes/dev/
 !/data/
 /data/
+!/certifi/
+/certifi/
