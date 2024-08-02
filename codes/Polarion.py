@@ -8,10 +8,7 @@ To launch file while in project folder from terminal :
 """
 import time
 
-try:
-    import requests.exceptions
-except ImportError:
-    raise FileNotFoundError("The requests library needs your ssl certificate to be placed into the certifi folder.")
+import requests.exceptions
 from termcolor import colored
 
 from WorkitemSaver import WorkitemSaver
@@ -88,6 +85,7 @@ if __name__ == "__main__":
         project_or_group_id_input = db.split('%')[0].split('__')[0].replace('../faiss/', '')
         type_choice = db.split('%')[1]
         release_input = db.split('%')[0].split('__')[1]
+        workitem_type = None
     else:
         choice_available = ["Group", "Project"]
         type_choice = ""
@@ -113,10 +111,24 @@ if __name__ == "__main__":
                                                   f"(e.g. PT_L2_TSS_Subsystem, PT_L2_PTS_Core_Subsystem, ...): ")
 
         release_input = input(
-            " \u21AA  Type the release (e.g. AI-V2.4.0.0, P235-R12.4.0, ...) or [ENTER] for None: ") or None
+            " \u21AA  Type the release (e.g. AI-V2.4.0.0, P235-R12.4.0, ...) or [ENTER] for ALL RELEASE: ") or None
         if release_input:
             release_input = release_input.strip()
-    ws = WorkitemSaver(project_or_group_id_input, type_choice, release_input, time)
+
+        print()
+        print(f"Choose one or multiple from the following workitem objects: ")
+        print(f"{colored('[1]', 'green')} Requirements")
+        print(f"{colored('[2]', 'green')} Safety decisions")
+        print(f"{colored('[3]', 'green')} Risk analysis")
+        type_list = ["requirement", "safetydecision", "hazard failuremode"]
+        workitem_type = input(
+            " \u21AA  Type the number(s) of the workitem object(s) you want to save (e.g. 1, 2, 3): ")
+        workitem_type = workitem_type.split(",")
+        workitem_type = [int(i) for i in workitem_type]
+        workitem_type = [type_list[i - 1] for i in workitem_type if i in range(1, 4)]
+        if not workitem_type:
+            raise ValueError("Invalid input. Please enter at least one of the numbers 1, 2, 3")
+    ws = WorkitemSaver(project_or_group_id_input, type_choice, workitem_type, release_input, time)
     try:
         ws.caller()
     except requests.exceptions.ConnectionError:

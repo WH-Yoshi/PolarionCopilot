@@ -1,6 +1,5 @@
 """
-Save Workitems from a given RELEASE (e.g. R12.3, R12.4, AI-V2.4.0.0, etc.) in a corresponding database.
-R13.3 will have a different database than R12.4, for example.
+Save Workitems from given PROJECT(S) in a corresponding database.
 """
 import html
 import os
@@ -36,7 +35,14 @@ class WorkitemSaver:
     """
     db_folder_name = fh.get_db_path()
 
-    def __init__(self, saver_id: str, type_chosen: str, release: str | None = "", time: str | None = None):
+    def __init__(
+            self,
+            saver_id: str,
+            type_chosen: str,
+            workitem_type: list[str] | None = None,
+            release: str | None = "",
+            time: str | None = None
+    ):
         self.id = saver_id
         self.type_chosen = type_chosen
         self.release = release
@@ -47,6 +53,7 @@ class WorkitemSaver:
         self.now = ""
         self.client = self.get_polarion_instance()
         self.time = time
+        self.workitem_type = workitem_type
 
     def get_polarion_instance(self) -> Polarion:
         """
@@ -105,11 +112,11 @@ class WorkitemSaver:
 
         if self.release and self.release != "None":
             match = self.check_release(self.release)
-            query = f"""type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)") AND 
+            query = f"""type:({' '.join(self.workitem_type)}) AND NOT ibaFullPuid:("(cont'd)") AND 
             ibaApplicableConfiguration.KEY:("{match[0].id}")"""
             self.save_path = WorkitemSaver.db_folder_name / f'{match[0].id}__{self.release}%project'
         else:
-            query = """type:("requirement" "safetydecision") AND NOT ibaFullPuid:("(cont'd)")"""
+            query = f"""type:({' '.join(self.workitem_type)} AND NOT ibaFullPuid:("(cont'd)")"""
         query += f" AND {additional_query}" if additional_query else ""
         return query
 
