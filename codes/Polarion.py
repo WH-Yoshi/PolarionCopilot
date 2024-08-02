@@ -8,7 +8,10 @@ To launch file while in project folder from terminal :
 """
 import time
 
-import requests.exceptions
+try:
+    import requests.exceptions
+except ImportError:
+    raise FileNotFoundError("The requests library needs your ssl certificate to be placed into the certifi folder.")
 from termcolor import colored
 
 from WorkitemSaver import WorkitemSaver
