@@ -116,7 +116,8 @@ class WorkitemSaver:
             ibaApplicableConfiguration.KEY:("{match[0].id}")"""
             self.save_path = WorkitemSaver.db_folder_name / f'{match[0].id}__{self.release}%project'
         else:
-            query = f"""type:({' '.join(self.workitem_type)} AND NOT ibaFullPuid:("(cont'd)")"""
+            query = f"""type:({' '.join(self.workitem_type)} AND NOT ibaFullPuid:("(cont'd)") AND 
+            HAS_VALUE:ibaApplicableConfiguration.KEY"""
         query += f" AND {additional_query}" if additional_query else ""
         return query
 
