@@ -18,5 +18,5 @@ if __name__ == '__main__':
     if fh.get_db_path().exists():
         display_file()
     else:
-        print("Your database seems empty."
+        print("Your database seems empty.\n"
               "You can create databases with 'py ./run_polarion.py' command.")
