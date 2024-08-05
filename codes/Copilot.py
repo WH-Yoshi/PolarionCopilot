@@ -21,6 +21,7 @@ client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
 embeddings = HuggingFaceEndpointEmbeddings(model=os.environ.get("embedding_api"))
 files = os.listdir(fh.get_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
+print("[CTRL] + Click on the link to open the interface in your browser.")
 
 
 def history_format(history: list[list[str, str]]) -> list[dict[str, str]]:
@@ -56,11 +57,12 @@ def faiss_loader(release: str) -> FAISS:
     return db
 
 
-def document_search(message: str, db: FAISS) -> List[Tuple[Document, float]]:
+def document_search(message: str, db: FAISS, k: int) -> List[Tuple[Document, float]]:
     """
     This function is used to search for documents in the database
     :param message: the user input
     :param db: The faiss database
+    :param k: The number of documents to return
     :return: The documents found in the database
     """
     if not isinstance(message, str):
@@ -124,13 +126,15 @@ def append_context_to_history(
 def predict(
         message: str,
         history: list[list[str, str]],
-        release: str
+        release: str,
+        k: int
 ) -> str:
     """
     This function is used to predict the response of the VLLM model
     :param message: gr.ChatInterface input
     :param history: gr.ChatInterface input
-    :param release: A release to filter the searches in the database
+    :param release: Two additional inputs, the release and the number of documents
+    :param k: Two additional inputs, the release and the number of documents
     :return: The response of the VLLM model
     """
     if not isinstance(message, str):
@@ -139,12 +143,14 @@ def predict(
         raise Exception("The history should be a list")
     if not isinstance(release, str):
         raise Exception("The release should be a string")
+    if not isinstance(k, int):
+        raise Exception("The number of documents should be an integer")
 
     if release == "General":
         documents = None
     else:
         db = faiss_loader(release)
-        documents = document_search(message, db)
+        documents = document_search(message, db, k)
 
     history_openai_format = history_format(history)
     messages, system_prompt = append_context_to_history(documents, history_openai_format, message)
@@ -200,9 +206,11 @@ if __name__ == '__main__':
         scale=7,
         label="Message",
     )
-    choices = [(f"{file.split('%')[0].split('__')[0]} + {file.split('%')[0].split('__')[1] if not None else ''}", file)
-               for file in files]
-    choices.insert(0, ("Unfed Chat Bot", "General"))
+    choices1 = [(f"{file.split('%')[0].split('__')[0]} + {file.split('%')[0].split('__')[1] if not None else ''}", file)
+                for file in files]
+    choices1.insert(0, ("Unfed Chat Bot", "General"))
+
+    choices2 = [n + 1 for n in range(10)]
 
     with gr.Blocks(
             fill_height=True,
@@ -214,24 +222,37 @@ if __name__ == '__main__':
                 font=[gr.themes.GoogleFont("Barlow", weights=(500, 700))]),
             title="VLLM Copilot Polarion",
     ) as demo:
-        dropdown = gr.Dropdown(
-            choices=choices,
-            value="General",
-            multiselect=False,
-            label="Release",
-            info="You can specify a release that will act as a filter during the feeding of the chatbot.",
-            show_label=True,
-            interactive=True,
-            elem_id="dropdown_release"
-        )
+        with gr.Row():
+            dropdown1 = gr.Dropdown(
+                choices=choices1,
+                value="General",
+                multiselect=False,
+                label="Release",
+                info="You can specify a release that will act as a filter during the feeding of the chatbot.",
+                show_label=True,
+                interactive=True,
+                elem_id="dropdown_release",
+                scale=7
+            )
+            dropdown2 = gr.Dropdown(
+                choices=choices2,
+                value=5,
+                multiselect=False,
+                label="Number of documents",
+                info="You can specify the number of documents to retrieve.",
+                show_label=True,
+                interactive=True,
+                elem_id="dropdown_k",
+                scale=2
+            )
 
         gr.ChatInterface(
             fn=predict,
             chatbot=chatbot,
             textbox=textbox,
-            additional_inputs=dropdown,  # k modifiable
+            additional_inputs=[dropdown1, dropdown2],
             css=CSS,
             fill_height=True,
         )
 
-    demo.launch(favicon_path=icon)
+    demo.launch(favicon_path=icon.__str__())
