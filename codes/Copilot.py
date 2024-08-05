@@ -69,7 +69,7 @@ def document_search(message: str, db: FAISS, k: int) -> List[Tuple[Document, flo
         raise Exception("The message should be a string")
 
     try:
-        documents = db.similarity_search_with_score(query=message, k=5, score_threshold=0.35)
+        documents = db.similarity_search_with_score(query=message, k=k, score_threshold=0.35)
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
@@ -107,9 +107,11 @@ def append_context_to_history(
         history_openai_format.append(
             {
                 "role": "user",
-                "content": f"""You are a helpful assistant. If the context provide sufficient information,
-                 use it to answer the question (don't display links). 
-                 if the context has nothing to do with the subject, answer naturally.
+                "content": f"""You are a helpful assistant. The following CONTEXT might be useful for the question.
+                 Consider it as knowledge and not provided information, use it to answer the question.
+                 Don't display the links of the CONTEXT. You might get multiples CONTEXT, use the most relevant ones.
+                 Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY,
+                 answer to the question without using the CONTEXT.
                 ### Context :
                 {system_prompt}
                 ### Question :
@@ -236,10 +238,10 @@ if __name__ == '__main__':
             )
             dropdown2 = gr.Dropdown(
                 choices=choices2,
-                value=5,
+                value=4,
                 multiselect=False,
                 label="Number of documents",
-                info="You can specify the number of documents to retrieve.",
+                info="You can specify the number of documents (workitems) to retrieve.",
                 show_label=True,
                 interactive=True,
                 elem_id="dropdown_k",

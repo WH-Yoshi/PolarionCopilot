@@ -1,5 +1,5 @@
 """
-Save Workitems from given PROJECT(S) in a corresponding database.
+Object to save Workitems from given PROJECT(S) in a corresponding database.
 """
 import html
 import os

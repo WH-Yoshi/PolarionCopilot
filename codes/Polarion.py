@@ -58,15 +58,15 @@ if __name__ == "__main__":
         action_available = ["Save", "Update"]
         loader.stop()
     update_file_path = fh.get_update_path()
-    print("\n|------Polarion Workitem Saver------|\n")
 
+    print("\n|------Polarion Workitem Saver------|\n")
     action_choice = ""
     printable_actions = ""
     for i, string in enumerate(action_available):
         printable_actions += f"{colored(f'[{i + 1}]', 'green')} {string}\n"
     while action_choice not in [str(i) for i in range(1, len(action_available) + 1)]:
         action_choice = input(
-            "Invalid input. Please enter either '1' or '2': "
+            "Invalid input. Please enter the right number: "
             if action_choice else "Choose an action:\n" + printable_actions + " \u21AA  Number input : ")
 
     time = None
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         type_choice = db.split('%')[1]
         release_input = db.split('%')[0].split('__')[1]
         workitem_type = None
-    else:
+    elif action_choice == "1":
         choice_available = ["Group", "Project"]
         type_choice = ""
         printable_actions = ""
