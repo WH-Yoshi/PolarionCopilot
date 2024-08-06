@@ -93,7 +93,7 @@ class WorkitemSaver:
             elif len(match) > 1:
                 raise ValueError(f"Multiple releases found with the title '{release}'...")
             else:
-                printarrow(f'Found release "{colored(release,"green")}" with id: {match[0].id}.', start="\n")
+                printarrow(f'Found release "{colored(release, "green")}" with id: {match[0].id}.', start="\n")
                 return match
         except Exception as e:
             raise Exception(f"Error while searching for the release: {e}")
@@ -116,8 +116,9 @@ class WorkitemSaver:
             ibaApplicableConfiguration.KEY:("{match[0].id}")"""
             self.save_path = WorkitemSaver.db_folder_name / f'{match[0].id}__{self.release}%project'
         else:
-            query = f"""type:({' '.join(self.workitem_type)} AND NOT ibaFullPuid:("(cont'd)") AND 
-            HAS_VALUE:ibaApplicableConfiguration.KEY"""
+            query = f"""type:({' '.join(self.workitem_type)}) AND NOT ibaFullPuid:("(cont'd)") AND 
+            HAS_VALUE:ibaApplicableConfiguration"""
+            self.save_path = WorkitemSaver.db_folder_name / f'{self.id}__{self.release}%{self.type_chosen}'
         query += f" AND {additional_query}" if additional_query else ""
         return query
 
@@ -140,11 +141,11 @@ class WorkitemSaver:
         project_group = self.client.getProjectGroup(project_group_id)
 
         try:
-            print(f"Getting {colored('workitems','green')} from groups... might take a long time")
-            workitems = project_group.get_workitem_with_fields(query=query,
-                                                               field_list=['id', 'description', 'project',
-                                                                           'linkedWorkItems',
-                                                                           'customFields.ibaFullPuid'])
+            print(f"Getting {colored('workitems', 'green')} from groups... might take a long time")
+            workitems = project_group.getWorkitemsWithFields(query=query,
+                                                             field_list=['id', 'description', 'project',
+                                                                         'linkedWorkItems',
+                                                                         'customFields.ibaFullPuid'])
             return workitems
         except Exception as e:
             raise Exception(f"Error while getting the workitems: {e}")
@@ -168,7 +169,7 @@ class WorkitemSaver:
         project = self.client.getProject(project_id)
 
         try:
-            print(f"Getting {colored('workitems','green')} from project... might take a while for big queries.")
+            print(f"Getting {colored('workitems', 'green')} from project... might take a while for big queries.")
             workitem_list = project.searchWorkitemFullItem(query=query,
                                                            field_list=['id', 'description', 'project',
                                                                        'linkedWorkItems', 'customFields.ibaFullPuid'])
@@ -194,7 +195,7 @@ class WorkitemSaver:
 
         merged_workitems = []
 
-        print(f"\nGetting {colored('children','green')}... might take a while accordingly")
+        print(f"\nGetting {colored('children', 'green')}... might take a while accordingly")
         for i, workitem in enumerate(full_workitems_list):
             sent = (' \u21AA  Loading workitems children: ' + str(i + 1) + ' of ' + str(len(full_workitems_list)))
             sys.stdout.write('\r' + sent)
@@ -216,7 +217,7 @@ class WorkitemSaver:
                 raise AttributeError(e)
             except Exception as e:
                 if "Workitem not retrieved from Polarion" in str(e):
-                    print(f"\nWorkitem {colored(workitem.id,'red')} not retrieved from Polarion")
+                    print(f"\nWorkitem {colored(workitem.id, 'red')} not retrieved from Polarion")
                 else:
                     raise Exception(e)
         return merged_workitems
