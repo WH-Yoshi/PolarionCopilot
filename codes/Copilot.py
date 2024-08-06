@@ -241,7 +241,7 @@ if __name__ == '__main__':
                 value=4,
                 multiselect=False,
                 label="Number of documents",
-                info="You can specify the number of documents (workitems) to retrieve.",
+                info="You can specify the number of documents to retrieve.",
                 show_label=True,
                 interactive=True,
                 elem_id="dropdown_k",
@@ -257,4 +257,7 @@ if __name__ == '__main__':
             fill_height=True,
         )
 
-    demo.launch(favicon_path=icon.__str__())
+    demo.launch(favicon_path=icon.__str__(),
+                ssl_verify=False,
+                ssl_keyfile="C:\\Users\\AIXYF\\Certfiles\\key.pem",
+                ssl_certfile="C:\\Users\\AIXYF\\Certfiles\\cert.pem")
