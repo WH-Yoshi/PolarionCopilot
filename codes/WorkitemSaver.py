@@ -176,15 +176,14 @@ class WorkitemSaver:
         except Exception as e:
             raise Exception(f"Error while getting the workitems: {e}")
 
-    def workitem_to_embed(
+    def merge_workitem_children_descriptions(
             self,
             full_workitems_list: list[Workitem],
     ) -> list[Workitem]:
         """
-        Get linked workitems from every workitems in the list and add them to the parent description.
-        Create a list of workitems and their metadatas ready to embed
+        Get the children of a workitem and merge their description with the parent workitem
         :param full_workitems_list: A list of workitems
-        :return: A tuple of workitems with their metadatas
+        :return: A list of parent workitems with the children's description merged
         """
         if not isinstance(full_workitems_list, list):
             raise TypeError("The full_workitems_list parameter must be a list")
@@ -373,7 +372,7 @@ class WorkitemSaver:
             if not workitems:
                 print(colored(" \u21AA  The database is already up to date!", 'green'))
                 sys.exit(0)
-            merged_workitems = self.workitem_to_embed(workitems)
+            merged_workitems = self.merge_workitem_children_descriptions(workitems)
             formatted_list_workitems = self.format_workitem(merged_workitems)
             self.save_path = WorkitemSaver.db_folder_name / f"{self.id}__{self.release}%{self.type_chosen}"
             self.create_vector_db(formatted_list_workitems, self.save_path, from_existent=True)
@@ -395,7 +394,7 @@ class WorkitemSaver:
                     workitems = self.get_workitems_from_project(self.id)
                 else:
                     raise ValueError("The choice parameter must be either 'project' or 'group'")
-                merged_workitems = self.workitem_to_embed(workitems)
+                merged_workitems = self.merge_workitem_children_descriptions(workitems)
                 formatted_list_workitems = self.format_workitem(merged_workitems)
                 with open(cache_path, 'wb') as f:
                     pickle.dump(formatted_list_workitems, f)

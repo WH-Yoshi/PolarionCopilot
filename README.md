@@ -18,23 +18,23 @@ The manual part is the installation of any required software.
 3. **[Optional]** A new version of terminal to show you all this goodies going on in the scripts :)
    - You can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
 
-
-### Activate and fill your environment
+### Activate and fill your environment *(Important steps)*
+Using a virtual environment is a good practice to avoid conflicts between libraries and versions. And also to keep your main Python installation clean.
 #### Windows
-1. Define a location for the repository
+1. Find a suitable location for the repository
    ```bash
    cd <DIRECTORY>
    ```
-2. Create and activate a virtual environment
+2. Create and activate the virtual environment
    ```bash
-   py -m venv venv
-   .\venv\Scripts\activate
+   py -m venv .venv
+   .\.venv\Scripts\activate
    ```
-   If you run into an error with execution policy, check your execution policy with:
+   If you run into an error with execution policy, check your own execution policy with:
    ```bash
     Get-ExecutionPolicy
    ```
-   and remember its value if you want to go back later. Then, change it to:
+   remember it if you want to put it back later. Then, change it to RemoteSigned and try to activate the environment again:
    ```bash
     Set-ExecutionPolicy RemoteSigned
    ```
@@ -58,8 +58,8 @@ The manual part is the installation of any required software.
    polarion_user=<USERNAME> # The username to access the Polarion server
    polarion_token=<TOKEN> # The user token to access the Polarion server
    ```
-   Replace `<URL>`, `<USERNAME>`, and `<PASSWORD>` with your own values.
-   .env file contains sensitive information, so make sure to not share it.
+   Replace `<URL>`, `<USERNAME>`, and `<TOKEN>` with your own values.
+   .env file contains sensitive information, make sure to not share it.
 
 
 ### Tensordock virtual machine
@@ -73,7 +73,7 @@ The manual part is the installation of any required software.
 7. Deploy
 8. SSH into the machine :
    ```bash
-   ssh -p xxxxx user@host -L 22028:localhost:8000 -L 22027:localhost:8080
+   ssh -p xxxxx user@host -L 22027:localhost:8080 -L 22028:localhost:8000
    ```
 9. Run the two docker images :
    ```bash
