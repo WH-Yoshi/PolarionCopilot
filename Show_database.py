@@ -15,7 +15,7 @@ def display_file():
 
 
 if __name__ == '__main__':
-    if fh.get_db_path().exists():
+    if fh.get_db_path().exists() and any(fh.get_db_path().iterdir()):
         display_file()
     else:
         print(colored('Your database seems empty.', 'yellow'))
