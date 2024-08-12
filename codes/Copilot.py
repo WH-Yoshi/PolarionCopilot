@@ -112,6 +112,7 @@ def append_context_to_history(
                  Don't display the links of the CONTEXT. You might get multiples CONTEXT, use the most relevant ones.
                  Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY,
                  answer to the question without using the CONTEXT.
+                 ABBREVIATION: PTS : Proton Therapy System, PBS : Pencil Beam Scanning, DS : Double Scattering, SIS : Single Scattering, US : Uniform Scanning
                 ### Context :
                 {system_prompt}
                 ### Question :
@@ -158,7 +159,7 @@ def predict(
     messages, system_prompt = append_context_to_history(documents, history_openai_format, message)
 
     response = client.chat.completions.create(
-        model="mistralai/Mistral-7B-Instruct-v0.2",
+        model="mistralai/Mistral-7B-Instruct-v0.3",
         messages=messages,
         temperature=0.5,
         stream=True,
@@ -208,11 +209,14 @@ if __name__ == '__main__':
         scale=7,
         label="Message",
     )
+    # Choices over the database
     choices1 = [(f"{file.split('%')[0].split('__')[0]} + {file.split('%')[0].split('__')[1] if not None else ''}", file)
                 for file in files]
     choices1.insert(0, ("Unfed Chat Bot", "General"))
-
+    # Choices over the number of workitems to retrieve
     choices2 = [n + 1 for n in range(10)]
+    # Choices over the precision of the search
+    choices3 = [n / 10.0 for n in range(1, 11)]
 
     with gr.Blocks(
             fill_height=True,
@@ -224,38 +228,58 @@ if __name__ == '__main__':
                 font=[gr.themes.GoogleFont("Barlow", weights=(500, 700))]),
             title="VLLM Copilot Polarion",
     ) as demo:
-        with gr.Row():
-            dropdown1 = gr.Dropdown(
-                choices=choices1,
-                value="General",
-                multiselect=False,
-                label="Release",
-                info="You can specify a release that will act as a filter during the feeding of the chatbot.",
-                show_label=True,
-                interactive=True,
-                elem_id="dropdown_release",
-                scale=7
-            )
-            dropdown2 = gr.Dropdown(
-                choices=choices2,
-                value=4,
-                multiselect=False,
-                label="Number of documents",
-                info="You can specify the number of documents to retrieve.",
-                show_label=True,
-                interactive=True,
-                elem_id="dropdown_k",
+        with gr.Row(
+                equal_height=False,
+        ):
+            yourself = gr.Textbox(
+                lines=5,
+                max_lines=10,
+                placeholder="Tell me more about you and why you are here...",
                 scale=2
             )
-
-        gr.ChatInterface(
-            fn=predict,
-            chatbot=chatbot,
-            textbox=textbox,
-            additional_inputs=[dropdown1, dropdown2],
-            css=CSS,
-            fill_height=True,
-        )
+            with gr.Column(scale=5):
+                with gr.Row(equal_height=False):
+                    dropdown1 = gr.Dropdown(
+                        choices=choices1,
+                        value="General",
+                        multiselect=False,
+                        label="Release",
+                        info="You can specify a release that will act as a filter during the feeding of the chatbot.",
+                        show_label=True,
+                        interactive=True,
+                        elem_id="dropdown_release",
+                        scale=10
+                    )
+                    dropdown2 = gr.Dropdown(
+                        choices=choices2,
+                        value=4,
+                        multiselect=False,
+                        label="Number of documents",
+                        info="You can specify the number of workitems to retrieve.",
+                        show_label=True,
+                        interactive=True,
+                        elem_id="dropdown_k",
+                        scale=2
+                    )
+                    dropdown3 = gr.Dropdown(
+                        choices=choices3,
+                        value=0.3,
+                        multiselect=False,
+                        label="Precision",
+                        info="You can specify the precision of the search. ",
+                        show_label=True,
+                        interactive=True,
+                        elem_id="dropdown_precision",
+                        scale=1
+                    )
+                gr.ChatInterface(
+                    fn=predict,
+                    chatbot=chatbot,
+                    textbox=textbox,
+                    additional_inputs=[dropdown1, dropdown2],
+                    css=CSS,
+                    fill_height=True,
+                )
 
     demo.launch(favicon_path=icon.__str__(),
                 ssl_verify=False,
