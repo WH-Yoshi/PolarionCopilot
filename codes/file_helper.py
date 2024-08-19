@@ -1,112 +1,145 @@
 import os
 import pickle
-import site
 from datetime import datetime
 from pathlib import Path
 from pprint import pprint
-from termcolor import colored
 
+from termcolor import colored
 
 current_path = Path(__file__)
 
-_db_folder_path = current_path.parent.parent / "faiss"
+_faiss_path = current_path.parent.parent / "faiss"
 _data_path = current_path.parent.parent / "data"
-_update_path = current_path.parent.parent / "data" / ".update_file.pkl"
 _cache_path = current_path.parent.parent / ".cache"
+_cache_data_path = current_path.parent.parent / "data" / ".cache.pkl"
+_faiss_data_path = current_path.parent.parent / "data" / ".faiss.pkl"
 
 
-def get_update_path() -> Path:
+def get_faiss_data_path() -> Path:
     """
-    Returns ../folder/update_file absolute path
+    Returns ../data/.faiss.pkl absolute path
     """
     try:
-        return Path(_update_path).absolute()
+        get_faiss_path()
+        update_path = Path(_faiss_data_path).absolute()
+        if not update_path.exists():
+            update_path.touch()
+            with open(update_path, 'wb') as f:
+                pickle.dump({}, f)
+        return update_path
     except Exception as e:
         raise Exception(f"Error : {e}")
 
 
-def get_db_path() -> Path:
+def get_cache_data_path() -> Path:
     """
-    Returns ../db_folder/ absolute path
+    Returns ../data/.cache.pkl absolute path
     """
     try:
-        return Path(_db_folder_path).absolute()
+        get_cache_path()
+        cache_path = Path(_cache_data_path).absolute()
+        if not cache_path.exists():
+            cache_path.touch()
+            with open(cache_path, 'wb') as f:
+                pickle.dump({}, f)
+        return cache_path
+    except Exception as e:
+        raise Exception(f"Error : {e}")
+
+
+def get_data_path() -> Path:
+    """
+    Returns ../data/ absolute path
+    """
+    try:
+        data_path = Path(_data_path).absolute()
+        if not data_path.exists():
+            data_path.mkdir(parents=True)
+        return data_path
+    except Exception as e:
+        raise Exception(f"Error : {e}")
+
+
+def get_faiss_path() -> Path:
+    """
+    Returns ../faiss/ absolute path
+    """
+    try:
+        db_path = Path(_faiss_path).absolute()
+        if not db_path.exists():
+            db_path.mkdir(parents=True)
+        return db_path
     except Exception as e:
         raise Exception(f"Error : {e}")
 
 
 def get_cache_path() -> Path:
     """
-    Returns ../cache_folder/ absolute path
+    Returns ../.cache/ absolute path
     """
     try:
-        return Path(_cache_path).absolute()
+        cache_path = Path(_cache_path).absolute()
+        if not cache_path.exists():
+            cache_path.mkdir(parents=True)
+        return cache_path
     except Exception as e:
         raise Exception(f"Error : {e}")
 
 
 def check_db_folder():  # First to check
     try:
-        abs_dbs_path = get_db_path()
-        if abs_dbs_path.exists():
-            dbs = os.listdir(abs_dbs_path)
-            if dbs:
-                return True
-            return False
-        else:
-            os.mkdir(abs_dbs_path)
-            return False
+        abs_dbs_path = get_faiss_path()
+        dbs = os.listdir(abs_dbs_path)
+        if dbs:
+            return True
+        return False
     except Exception as e:
         raise Exception(f"Error while checking database folder: {e}")
 
 
 def check_update_file():  # second one
     try:
-        abs_file_path = get_update_path()
-        if abs_file_path.exists():
-            infos = open_pkl_file_rb(abs_file_path)
-            if not infos or infos == {}:
-                return False
-            return True
-        else:
-            if not Path(_data_path).exists():
-                Path(_data_path).mkdir()
-            with open(abs_file_path, 'wb') as f:
-                pickle.dump({}, f)
+        abs_file_path = get_faiss_data_path()
+        infos = open_pkl_file_rb(abs_file_path)
+        if not infos or infos == {}:
             return False
+        return True
     except Exception as e:
         raise Exception(f"Error while checking update file: {e}")
 
 
-def db_to_update_file(db_name: Path, time: str):
+def db_to_update_file(db_id: str, pr_name: str, release: str, pr_type: str, wi_type: list[str], update_date: datetime):
     """
     Add a database to the update file
-    :param time: The time of the update
-    :param db_name: The name of the database
+    :param db_id: The ID of the database
+    :param pr_name: The name of the database
+    :param release: The release of the database
+    :param pr_type: The type of the database (project or group)
+    :param wi_type: The type of workitems in the database
+    :param update_date: The date of the last update
     """
-    if not isinstance(db_name, Path):
-        raise ValueError(f"The database name must be a string.")
-    if not isinstance(time, str):
-        raise ValueError(f"The time must be a string.")
-
     format_time = "%A %d %B %Y - %H:%M:%S"
-    try:
-        result = bool(datetime.strptime(time, format_time))
-    except ValueError:
-        result = False
-    if not result:
-        raise ValueError(f"The time format is incorrect.")
+    update_date = update_date.strftime(format_time)
 
-    abs_path = get_update_path()
-    with open(abs_path, 'rb') as f:
+    abs_update_path = get_faiss_data_path()
+    with open(abs_update_path, 'rb') as f:
         infos = pickle.load(f)
-    infos[db_name.name] = time
-    with open(abs_path, 'wb') as f:
+
+    infos[db_id] = {
+            "name": pr_name,
+            "release": release if release else "All releases",
+            "type": pr_type,
+            "workitem_type": wi_type,
+            "last_update": update_date
+        }
+
+    with open(abs_update_path, 'wb') as f:
         pickle.dump(infos, f)
-    print(f"Database '{colored(db_name.name, 'green')}': last update date : {colored(infos[db_name.name], 'green')}.")
+
+    print(f"Database {colored(db_id, 'green')} updated : {colored(update_date, 'green')}.")
 
 
-def open_pkl_file_rb(path: Path) -> dict[str, datetime | None] | None:
+def open_pkl_file_rb(path: Path):
     """
     Open the pkl file
     """
@@ -127,22 +160,26 @@ def open_pkl_file_rb(path: Path) -> dict[str, datetime | None] | None:
 
 
 def recover_update_file():
-    faiss_subfolders = os.listdir(_db_folder_path)
+    faiss_subfolders = os.listdir(_faiss_path)
     to_insert = {}
     for folder in faiss_subfolders:
-        times = os.path.getctime(_db_folder_path / folder)
+        times = os.path.getctime(_faiss_path / folder)
         times = datetime.fromtimestamp(times).strftime("%A %d %B %Y - %H:%M:%S")
         to_insert[folder] = times
     if not check_update_file():
-        with open(_update_path, "wb") as f:
+        with open(_faiss_data_path, "wb") as f:
             pickle.dump(to_insert, f)
         return True
     return False
 
 
-def display_pkl_file():
-    infos = open_pkl_file_rb(get_update_path())
+def display_update_file():
+    infos = open_pkl_file_rb(get_faiss_data_path())
     pprint(infos)
+
+
+def display_cache_file():
+    pprint("\n".join([item.stem for item in get_cache_path().iterdir()]))
 
 
 if __name__ == '__main__':
