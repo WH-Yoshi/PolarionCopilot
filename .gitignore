@@ -239,8 +239,6 @@ fabric.properties
 # Custom ignores
 !/faiss/
 /faiss/
-!/codes/dev/
-/codes/dev/
 !/data/
 /data/
 !/certifi/
