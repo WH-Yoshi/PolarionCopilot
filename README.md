@@ -11,12 +11,12 @@ The manual part is the installation of any required software.
 
 ### Required installation
 
-1. Python version 3.11 (minimum) via this link: [Python for Windows](https://www.python.org/downloads/)
+1. Python, minimum version 3.11: [Python for Windows](https://www.python.org/downloads/)
    - Make sure to check the box *"Add python.exe to PATH"* during the installation
-2. Git to clone this repository via this link: [Git](https://git-scm.com/downloads)
+2. Git, to clone this repository: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
-3. **[Optional]** A new version of terminal to show you all this goodies going on in the scripts :)
-   - You can use the new Windows Terminal via this link: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
+3. **[Optional]** A good terminal to show you all this goodies going on in the scripts :)
+   - You can use the new Windows Terminal for exemple: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
 
 ### Activate and fill your environment *(Important steps)*
 Using a virtual environment is a good practice to avoid conflicts between libraries and versions. And also to keep your main Python installation clean.
