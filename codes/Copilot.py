@@ -19,7 +19,7 @@ load_dotenv()
 api_key = "EMPTY"
 client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
 embeddings = HuggingFaceEndpointEmbeddings(model=os.environ.get("embedding_api"))
-files = os.listdir(fh.get_db_path())
+files = os.listdir(fh.get_faiss_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 print("[CTRL] + Click on the link to open the interface in your browser.")
 
@@ -49,7 +49,7 @@ def faiss_loader(release: str) -> FAISS:
     if not isinstance(release, str):
         raise Exception("The release should be a string")
 
-    db_path = str(fh.get_db_path() / release)
+    db_path = str(fh.get_faiss_path() / release)
     try:
         db = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
     except Exception as e:
@@ -57,19 +57,20 @@ def faiss_loader(release: str) -> FAISS:
     return db
 
 
-def document_search(message: str, db: FAISS, k: int) -> List[Tuple[Document, float]]:
+def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple[Document, float]]:
     """
     This function is used to search for documents in the database
     :param message: the user input
     :param db: The faiss database
     :param k: The number of documents to return
+    :param score: The score threshold
     :return: The documents found in the database
     """
     if not isinstance(message, str):
         raise Exception("The message should be a string")
 
     try:
-        documents = db.similarity_search_with_score(query=message, k=k, score_threshold=0.35)
+        documents = db.similarity_search_with_score(query=message, k=k, score_threshold=score)
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
@@ -109,7 +110,7 @@ def append_context_to_history(
                 "role": "user",
                 "content": f"""You are a helpful assistant. The following CONTEXT might be useful for the question.
                  Consider it as knowledge and not provided information, use it to answer the question.
-                 Don't display the links of the CONTEXT. You might get multiples CONTEXT, use the most relevant ones.
+                 DO NOT display the links of the CONTEXT. You might get multiples CONTEXT, use the most relevant ones.
                  Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY,
                  answer to the question without using the CONTEXT.
                  ABBREVIATION: PTS : Proton Therapy System, PBS : Pencil Beam Scanning, DS : Double Scattering, SIS : Single Scattering, US : Uniform Scanning
@@ -130,14 +131,16 @@ def predict(
         message: str,
         history: list[list[str, str]],
         release: str,
-        k: int
+        k: int,
+        score: float
 ) -> str:
     """
     This function is used to predict the response of the VLLM model
-    :param message: gr.ChatInterface input
-    :param history: gr.ChatInterface input
-    :param release: Two additional inputs, the release and the number of documents
-    :param k: Two additional inputs, the release and the number of documents
+    :param message: The user input
+    :param history: The history of the conversation
+    :param release: The chosen database
+    :param k: The number of documents to retrieve
+    :param score: The score threshold
     :return: The response of the VLLM model
     """
     if not isinstance(message, str):
@@ -153,7 +156,7 @@ def predict(
         documents = None
     else:
         db = faiss_loader(release)
-        documents = document_search(message, db, k)
+        documents = document_search(message, db, k, score)
 
     history_openai_format = history_format(history)
     messages, system_prompt = append_context_to_history(documents, history_openai_format, message)
@@ -186,22 +189,9 @@ def predict(
 
 
 if __name__ == '__main__':
-    CSS = """
-    .contain { display: flex; flex-direction: column; }
-    .gradio-container { height: 100vh !important; }
-    #component-0 { height: 100%; }
-    #chatbot { flex-grow: 1; overflow: auto; cursor: default}
-    a { cursor: pointer}
-    p { cursor: text}
-    .border-none.svelte-vomtxz { cursor: pointer}
-    """
+    CSS = """#row1 {flex-grow: 1; align-items: unset;}
+    .form {height: fit-content;}"""
 
-    examples = [
-        ["What is the height of the Mount Everest?", "General"],
-    ]
-    chatbot = gr.Chatbot(
-        elem_id="chatbot",
-    )
     textbox = gr.Textbox(
         lines=2,
         max_lines=5,
@@ -209,75 +199,77 @@ if __name__ == '__main__':
         scale=7,
         label="Message",
     )
+
     # Choices over the database
-    choices1 = [(f"{file.split('%')[0].split('__')[0]} + {file.split('%')[0].split('__')[1] if not None else ''}", file)
-                for file in files]
-    choices1.insert(0, ("Unfed Chat Bot", "General"))
+    choices1 = [str(file) for file in files]
+    # choices1.insert(0, ("Unfed Chat Bot", "General"))
+
     # Choices over the number of workitems to retrieve
     choices2 = [n + 1 for n in range(10)]
+
     # Choices over the precision of the search
     choices3 = [n / 10.0 for n in range(1, 11)]
 
     with gr.Blocks(
-            fill_height=True,
-            css=CSS,
-            theme=gr.themes.Base(
-                primary_hue="green",
-                spacing_size="sm",
-                radius_size="sm",
-                font=[gr.themes.GoogleFont("Barlow", weights=(500, 700))]),
-            title="VLLM Copilot Polarion",
+        fill_height=True,
+        css=CSS,
+        theme=gr.themes.Base(
+            primary_hue="green",
+            spacing_size="sm",
+            radius_size="sm",
+            font=[gr.themes.GoogleFont("Montserrat", weights=(500, 700))]),
+        title="VLLM Copilot Polarion",
     ) as demo:
         with gr.Row(
-                equal_height=False,
+            equal_height=False,
+            elem_id="row1"
         ):
             yourself = gr.Textbox(
                 lines=5,
                 max_lines=10,
                 placeholder="Tell me more about you and why you are here...",
-                scale=2
+                scale=2,
+                elem_id="yourself",
             )
-            with gr.Column(scale=5):
-                with gr.Row(equal_height=False):
+            with gr.Column(scale=7):
+                with gr.Row(equal_height=True):
                     dropdown1 = gr.Dropdown(
                         choices=choices1,
                         value="General",
                         multiselect=False,
-                        label="Release",
-                        info="You can specify a release that will act as a filter during the feeding of the chatbot.",
+                        label="Feeding the chatbot",
+                        info="If a database is selected, similarity search will be performed into it before the response is generated.",
                         show_label=True,
                         interactive=True,
                         elem_id="dropdown_release",
-                        scale=10
+                        scale=5
                     )
                     dropdown2 = gr.Dropdown(
                         choices=choices2,
-                        value=4,
+                        value=7,
                         multiselect=False,
-                        label="Number of documents",
-                        info="You can specify the number of workitems to retrieve.",
+                        label="Number of workitems",
+                        info="Start with a larger value and then decrease it if the response is inconvenient.",
                         show_label=True,
                         interactive=True,
                         elem_id="dropdown_k",
-                        scale=2
+                        scale=3
                     )
                     dropdown3 = gr.Dropdown(
                         choices=choices3,
-                        value=0.3,
+                        value=0.4,
                         multiselect=False,
                         label="Precision",
-                        info="You can specify the precision of the search. ",
+                        info="Higher value increases the precision of the search by demanding a closer match.",
                         show_label=True,
                         interactive=True,
                         elem_id="dropdown_precision",
-                        scale=1
+                        scale=3
                     )
                 gr.ChatInterface(
                     fn=predict,
-                    chatbot=chatbot,
                     textbox=textbox,
-                    additional_inputs=[dropdown1, dropdown2],
-                    css=CSS,
+                    additional_inputs=[dropdown1, dropdown2, dropdown3],
                     fill_height=True,
                 )
 
