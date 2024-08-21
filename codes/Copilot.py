@@ -2,6 +2,7 @@
 This script is used to create a gradio interface for the VLLM API. The API is used to interact with the VLLM model
 """
 import os
+import pickle
 from pathlib import Path
 from typing import List, Tuple
 
@@ -24,32 +25,13 @@ icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 print("[CTRL] + Click on the link to open the interface in your browser.")
 
 
-def history_format(history: list[list[str, str]]) -> list[dict[str, str]]:
-    """
-    This function is used to format the history in the OpenAI format
-    :param history: The history of the conversation
-    :return: The history in the OpenAI format
-    """
-    if not isinstance(history, list):
-        raise Exception("The history should be a list of tuples")
-
-    history_openai = []
-    for human, assistant in history:
-        history_openai.append({"role": "user", "content": human})
-        history_openai.append({"role": "assistant", "content": assistant})
-    return history_openai
-
-
-def faiss_loader(release: str) -> FAISS:
+def faiss_loader(db_id: str) -> FAISS:
     """
     This function is used to load the faiss database
-    :param release: The release of the database
+    :param db_id: The id of the database
     :return: The faiss database
     """
-    if not isinstance(release, str):
-        raise Exception("The release should be a string")
-
-    db_path = str(fh.get_faiss_path() / release)
+    db_path = str(fh.get_faiss_path() / db_id)
     try:
         db = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
     except Exception as e:
@@ -66,32 +48,43 @@ def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple
     :param score: The score threshold
     :return: The documents found in the database
     """
-    if not isinstance(message, str):
-        raise Exception("The message should be a string")
-
+    # instruction = "Given a user input, return the most similar documents from the database."
+    # message = f"Instruct: {instruction}\nQuery: {message}"
     try:
         documents = db.similarity_search_with_score(query=message, k=k, score_threshold=score)
+        print("Done")
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
 
 
+def history_format(history: list[list[str, str]]) -> list[dict[str, str]]:
+    """
+    This function is used to format the history in the OpenAI format
+    :param history: The history of the conversation
+    :return: The history in the OpenAI format
+    """
+    history_openai = []
+    for human, assistant in history:
+        history_openai.append({"role": "user", "content": human})
+        history_openai.append({"role": "assistant", "content": assistant})
+    return history_openai
+
+
 def append_context_to_history(
         documents: List[Tuple[Document, float]] | None,
         history_openai_format: list,
-        message: str
+        message: str,
+        user_summary: str
 ) -> Tuple[list, str]:
     """
     This function is used to append the context to the history
     :param documents: The documents found in the database
     :param history_openai_format: The history in the OpenAI format
     :param message: The user input
+    :param user_summary: The information about the user
     :return: The updated history and the system prompt in a tuple
     """
-    if not isinstance(history_openai_format, list):
-        raise Exception("The history should be a list of dictionaries")
-    if not isinstance(message, str):
-        raise Exception("The message should be a string")
     if documents is not None and not isinstance(documents, list):
         raise Exception("The documents should be a list")
     system_prompt = ""
@@ -105,61 +98,67 @@ def append_context_to_history(
                 f"{doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
             )
 
-        history_openai_format.append(
-            {
-                "role": "user",
-                "content": f"""You are a helpful assistant. The following CONTEXT might be useful for the question.
-                 Consider it as knowledge and not provided information, use it to answer the question.
-                 DO NOT display the links of the CONTEXT. You might get multiples CONTEXT, use the most relevant ones.
-                 Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY,
-                 answer to the question without using the CONTEXT.
-                 ABBREVIATION: PTS : Proton Therapy System, PBS : Pencil Beam Scanning, DS : Double Scattering, SIS : Single Scattering, US : Uniform Scanning
-                ### Context :
-                {system_prompt}
-                ### Question :
-                {message}"""
-            }
-        )
+        history_openai_format.append({
+            "role":
+                "user",
+            "content":
+                "You are a helpful assistant. The following CONTEXT might be useful for the question."
+                "Consider it as knowledge and not provided information, use it to answer the question."
+                "DO NOT display the links of the CONTEXT."
+                "Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY, provide the "
+                "answer to the question without using the CONTEXT."
+                "ABBREVIATION: PTS : Proton Therapy System, PBS : Pencil Beam Scanning, DS : Double Scattering, "
+                "SIS : Single Scattering, US : Uniform Scanning"
+                "Your might get a brief user presentation, I want you to use it to adapt to the user."
+                "### User presentation :"
+                f"{user_summary}"
+                "### Context :"
+                f"{system_prompt}"
+                "### Question :"
+                f"{message}"
+        })
     else:
-        history_openai_format.append(
-            {"role": "user", "content": f"Question : {message}"}
-        )
+        history_openai_format.append({
+            "role":
+                "user",
+            "content":
+                "You are a helpful and appreciated assistant, answer the question naturally."
+                "You might get a brief user presentation, I want you to use it to adapt to "
+                "the user."
+                "### User presentation : "
+                f"{user_summary}"
+                "### Question : "
+                f"{message}"
+        })
     return history_openai_format, system_prompt
 
 
 def predict(
         message: str,
         history: list[list[str, str]],
-        release: str,
+        db_id: str,
         k: int,
-        score: float
+        score: float,
+        user_summary: str
 ) -> str:
     """
     This function is used to predict the response of the VLLM model
     :param message: The user input
     :param history: The history of the conversation
-    :param release: The chosen database
+    :param db_id: The chosen database
     :param k: The number of documents to retrieve
     :param score: The score threshold
+    :param user_summary: The information about the user
     :return: The response of the VLLM model
     """
-    if not isinstance(message, str):
-        raise Exception("The message should be a string")
-    if not isinstance(history, list):
-        raise Exception("The history should be a list")
-    if not isinstance(release, str):
-        raise Exception("The release should be a string")
-    if not isinstance(k, int):
-        raise Exception("The number of documents should be an integer")
-
-    if release == "General":
+    if db_id == "General":
         documents = None
     else:
-        db = faiss_loader(release)
+        db = faiss_loader(db_id)
         documents = document_search(message, db, k, score)
 
     history_openai_format = history_format(history)
-    messages, system_prompt = append_context_to_history(documents, history_openai_format, message)
+    messages, system_prompt = append_context_to_history(documents, history_openai_format, message, user_summary)
 
     response = client.chat.completions.create(
         model="mistralai/Mistral-7B-Instruct-v0.3",
@@ -190,39 +189,49 @@ def predict(
 
 if __name__ == '__main__':
     CSS = """#row1 {flex-grow: 1; align-items: unset;}
-    .form {height: fit-content;}"""
+    .form {height: fit-content;}
+    footer {display: none !important;}"""
 
     textbox = gr.Textbox(
         lines=2,
-        max_lines=5,
+        max_lines=20,
         placeholder="Enter your message here...",
         scale=7,
         label="Message",
     )
 
     # Choices over the database
-    choices1 = [str(file) for file in files]
-    # choices1.insert(0, ("Unfed Chat Bot", "General"))
-
+    choices1 = [("No database", "General")]
+    with open(fh.get_faiss_data_path(), "rb") as f:
+        databases = pickle.load(f)
+    for file in files:
+        file = str(file)
+        db_location = databases[file]["location"]
+        db_release = databases[file]["release"]
+        db_type = databases[file]["type"]
+        db_wi_type = databases[file]["workitem_type"]
+        db_wi_type = ", ".join(db_wi_type)
+        choices1.append((f"{'Group' if db_type == 'group' else 'Project'}: {db_location} - {db_release} ({db_wi_type})",
+                         str(file)))
     # Choices over the number of workitems to retrieve
-    choices2 = [n + 1 for n in range(10)]
+    choices2 = [n + 1 for n in range(20)]
 
     # Choices over the precision of the search
     choices3 = [n / 10.0 for n in range(1, 11)]
 
     with gr.Blocks(
-        fill_height=True,
-        css=CSS,
-        theme=gr.themes.Base(
-            primary_hue="green",
-            spacing_size="sm",
-            radius_size="sm",
-            font=[gr.themes.GoogleFont("Montserrat", weights=(500, 700))]),
-        title="VLLM Copilot Polarion",
+            fill_height=True,
+            css=CSS,
+            theme=gr.themes.Base(
+                primary_hue="green",
+                spacing_size="sm",
+                radius_size="sm",
+                font=[gr.themes.GoogleFont("Montserrat", weights=(500, 700))]),
+            title="VLLM Copilot Polarion",
     ) as demo:
         with gr.Row(
-            equal_height=False,
-            elem_id="row1"
+                equal_height=False,
+                elem_id="row1"
         ):
             yourself = gr.Textbox(
                 lines=5,
@@ -269,7 +278,7 @@ if __name__ == '__main__':
                 gr.ChatInterface(
                     fn=predict,
                     textbox=textbox,
-                    additional_inputs=[dropdown1, dropdown2, dropdown3],
+                    additional_inputs=[dropdown1, dropdown2, dropdown3, yourself],
                     fill_height=True,
                 )
 

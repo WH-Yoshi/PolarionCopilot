@@ -141,13 +141,19 @@ if __name__ == "__main__":
         print(f"{colored('[2]', 'green')} Safety decisions")
         print(f"{colored('[3]', 'green')} Risk analysis (Hazard and Failure mode)")
         type_list = ["requirement", "safetydecision", "hazard failuremode"]
-        workitem_type = input(
-            " \u21AA  Type the number(s) of the workitem object(s) you want to save (example for req and sd: '1, 2'): ")
-        workitem_type = workitem_type.split(",")
-        workitem_type = [int(i) for i in workitem_type]
-        workitem_type = [type_list[i - 1] for i in workitem_type if i in range(1, 4)]
-        if not workitem_type:
-            raise ValueError("Invalid input. Please enter at least one of the numbers 1, 2, 3")
+
+        while True:
+            workitem_type = input(
+                " \u21AA  Type the number(s) of the workitem object(s) you want to save (example for req and sd: '1, 2'): ")
+            workitem_type = workitem_type.split(",")
+            try:
+                workitem_type = [int(i) for i in workitem_type]
+                workitem_type = [type_list[i - 1] for i in workitem_type if i in range(1, 4)]
+                if not workitem_type:
+                    raise ValueError
+                break
+            except ValueError:
+                print("Invalid input. Please enter at least one of the numbers 1, 2, 3")
         time = None
         db_id = None
     elif action == "2":  # Update

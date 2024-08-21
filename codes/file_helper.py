@@ -126,7 +126,7 @@ def db_to_update_file(db_id: str, pr_name: str, release: str, pr_type: str, wi_t
         infos = pickle.load(f)
 
     infos[db_id] = {
-            "name": pr_name,
+            "location": pr_name,
             "release": release if release else "All releases",
             "type": pr_type,
             "workitem_type": wi_type,
@@ -137,6 +137,22 @@ def db_to_update_file(db_id: str, pr_name: str, release: str, pr_type: str, wi_t
         pickle.dump(infos, f)
 
     print(f"Database {colored(db_id, 'green')} updated : {colored(update_date, 'green')}.")
+
+
+def delete_from_cache_file(db_id: str):
+    """
+    Delete a database from the cache file
+    :param db_id: The ID of the database
+    """
+    abs_cache_path = get_cache_data_path()
+    with open(abs_cache_path, 'rb') as f:
+        infos = pickle.load(f)
+
+    if db_id in infos:
+        del infos[db_id]
+
+    with open(abs_cache_path, 'wb') as f:
+        pickle.dump(infos, f)
 
 
 def open_pkl_file_rb(path: Path):

@@ -5,39 +5,34 @@ import html
 import os
 import pickle
 import re
-import shutil
 import sys
 import uuid
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
+from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from polarion.polarion import Polarion
 from polarion.workitem import Workitem
 from termcolor import colored
 
 import file_helper as fh
-from enhancer import printarrow, Loader, arrow
+import risk_analysis_helper as ra
+from enhancer import printarrow, Loader
 
 load_dotenv()
 
 
-def modify_value_in_list_of_dicts(list_of_dicts, value_to_find, new_value, operand):
-    found = False
+def modify_value_in_list_of_dicts(list_of_dicts, value_to_find, new_value):
     for dictionary in list_of_dicts:
         if dictionary['key'] == value_to_find:
-            if operand == "add":
-                dictionary['value']['content'] += f", {new_value}"
-            elif operand == "replace":
+            try:
                 dictionary['value']['content'] = new_value
-            found = True
-            break
-    if not found:
-        new_dict = {'key': value_to_find, 'value': new_value}
-        list_of_dicts.append(new_dict)
+                break
+            except TypeError:
+                new_dict = {'key': value_to_find, 'value': new_value}
+                list_of_dicts.append(new_dict)
 
 
 def str_cleaner(text: str) -> str:
@@ -104,11 +99,12 @@ class WorkitemSaver:
     This class is used as a Workitem Saver. It saves workitems from a given project or project group in a database.
     After instantiating the class, you can call the caller method to start the process like so :
     WorkitemSaver.caller()
-    :param location: A string representing the project or project group id
-    :param location_type: A string representing the choice between 'project' or 'group'
+    :param location: A string representing the project or project group polarion ID
+    :param location_type: A string representing the type between 'project' or 'group'
     :param workitem_type: A list of strings representing the workitem types
-    :param release: [Optional] A string representing the release
+    :param release: [Optional] A string representing the release for filtering purposes
     :param last_update_date: [Optional] A string representing the time of the last update
+    :param db_id: [Optional] A string representing the database id
     """
     db_folder_name = fh.get_faiss_path()
 
@@ -138,7 +134,7 @@ class WorkitemSaver:
         Get a Polarion instance with the user's credentials or a token
         :return: A Polarion instance
         """
-        loader = Loader("Getting the Polarion instance... ", arrow("Done !"), timeout=0.1).start()
+        loader = Loader("Connecting to polarion ", "Connected.", timeout=0.1).start()
         try:
             client = Polarion(
                 self.polarion_url,
@@ -147,7 +143,7 @@ class WorkitemSaver:
                 token=os.environ.get("polarion_token")
             )
         except Exception as e:
-            raise Exception(f"Error while getting the Polarion instance. Did you create .env file ? : {e}")
+            raise Exception(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
         loader.stop()
         return client
 
@@ -276,31 +272,35 @@ class WorkitemSaver:
         for i, workitem in enumerate(full_workitems_list):
             sent = (' \u21AA  Loading workitems children: ' + str(i + 1) + ' of ' + str(len(full_workitems_list)))
             sys.stdout.write('\r' + sent)
-            try:
-                if workitem.type['id'] in ["safetydecision", "requirement"]:
-                    linked_workitems_descriptions = []
+            if workitem.type['id'] in ["safetydecision", "requirement"]:  # We append the child description to the parent one
+                try:
                     if workitem.description is not None and workitem.description != "" and workitem.linkedWorkItemsDerived is not None:
                         for w_child in workitem.linkedWorkItemsDerived['LinkedWorkItem']:
                             if w_child.role['id'] == "parent":
                                 link_w = Workitem(self.client, workitem.project, uri=w_child.workItemURI,
                                                   field_list=["id", "description", "customFields.ibaFullPuid"])
-                                if "cont'd" in next(item for item in link_w.customFields['Custom']
-                                                    if item['key'] == 'ibaFullPuid')['value']:
-                                    linked_workitems_descriptions.append(link_w.description.content)
+                                if "cont'd" in ra.get_iba_full_puid_value(link_w.customFields):
+                                    workitem.description.content += (", " + link_w.description.content)
                             else:
                                 continue
-                        for description in linked_workitems_descriptions:
-                            if description:
-                                workitem.description.content += f', {description}'
                         merged_workitems.append(workitem)
-                elif workitem.type['id'] == "hazard":
-                    parent_hazardous_situation = next(item for item in workitem.customFields['Custom']
-                                                      if item['key'] == 'ibaHazardousSituation')['value']
-                    parent_initiating_event = next(item for item in workitem.customFields['Custom']
-                                                   if item['key'] == 'ibaInitiatingEvent')['value']
-                    parent_harm = next(item for item in workitem.customFields['Custom']
-                                       if item['key'] == 'ibaHarm')['value']
+                    else:
+                        print(f"\nWorkitem {colored(workitem.id, 'red')} has no description or linked workitems")
+                except AttributeError as e:
+                    print()
+                    raise AttributeError(e)
+                except Exception as e:
+                    if "Workitem not retrieved from Polarion" in str(e):
+                        print(f"\nWorkitem {colored(workitem.id, 'red')} not retrieved from Polarion")
+                    else:
+                        print()
+                        raise Exception(e)
+            elif workitem.type['id'] == "hazard":  # We separate children and parents
+                try:
                     if workitem.linkedWorkItemsDerived is not None:
+                        parent_hazardous_situation = ra.get_hazardous_situation_value(workitem.customFields)
+                        parent_initiating_event = ra.get_initiating_event_value(workitem.customFields)
+                        parent_harm = ra.get_harm_value(workitem.customFields)
                         for w_child in workitem.linkedWorkItemsDerived['LinkedWorkItem']:
                             if w_child.role['id'] == "parent":
                                 link_w = Workitem(self.client, workitem.project, uri=w_child.workItemURI,
@@ -308,91 +308,121 @@ class WorkitemSaver:
                                                               "customFields.ibaHazardousSituation",
                                                               "customFields.ibaInitiatingEvent",
                                                               "customFields.ibaHarm"])
-                                if "cont'd" in next(item for item in link_w.customFields['Custom']
-                                                    if item['key'] == 'ibaFullPuid')['value']:
-                                    modify_value_in_list_of_dicts(link_w.customFields['Custom'],
-                                                                  'ibaHazardousSituation',
-                                                                  parent_hazardous_situation, "replace")
+                                if "cont'd" in ra.get_iba_full_puid_value(link_w.customFields):
+                                    if ra.get_hazardous_situation_value(link_w.customFields) != parent_hazardous_situation:
+                                        modify_value_in_list_of_dicts(link_w.customFields['Custom'],
+                                                                      'ibaHazardousSituation',
+                                                                      parent_hazardous_situation)
+                                    if ra.get_initiating_event_value(link_w.customFields) is None:
+                                        modify_value_in_list_of_dicts(link_w.customFields['Custom'],
+                                                                      'ibaHazardousSituation',
+                                                                      parent_initiating_event)
+                                    if ra.get_harm_value(link_w.customFields) is None:
+                                        modify_value_in_list_of_dicts(link_w.customFields['Custom'],
+                                                                      'ibaHazardousSituation',
+                                                                      parent_harm)
                                     merged_workitems.append(link_w)
                             else:
                                 continue
-                elif workitem.type['id'] == "failuremode":
-                    parent_failure_mode = \
-                        next(item for item in workitem.customFields['Custom'] if item['key'] == 'ibaRAFailureMode')[
-                            'value']
+                except AttributeError as e:
+                    print()
+                    raise AttributeError(e)
+                except Exception as e:
+                    if "Workitem not retrieved from Polarion" in str(e):
+                        print(f"\nWorkitem {colored(workitem.id, 'red')} not retrieved from Polarion")
+                    else:
+                        print()
+                        raise Exception(e)
+            elif workitem.type['id'] == "failuremode":  # We separate children and parents
+                try:
                     if workitem.linkedWorkItemsDerived is not None:
+                        parent_failure_mode = ra.get_ra_failure_mode_value(workitem.customFields)
+                        parent_cause = ra.get_ra_cause_value(workitem.customFields)
+                        parent_effects = ra.get_ra_effects_value(workitem.customFields)
                         for w_child in workitem.linkedWorkItemsDerived['LinkedWorkItem']:
                             if w_child.role['id'] == "parent":
                                 link_w = Workitem(self.client, workitem.project, uri=w_child.workItemURI,
-                                                  field_list=["id", "project", "type", "customFields.ibaFullPuid",
+                                                  field_list=["id", "project.id", "type", "customFields.ibaFullPuid",
                                                               "customFields.ibaRAFailureMode",
                                                               "customFields.ibaRACause", "customFields.ibaRAEffects"])
-                                if "cont'd" in next(
-                                        item for item in link_w.customFields['Custom']
-                                        if item['key'] == 'ibaFullPuid')['value']:
-                                    modify_value_in_list_of_dicts(link_w.customFields['Custom'], 'ibaRAFailureMode',
-                                                                  parent_failure_mode, "replace")
+                                if "cont'd" in ra.get_iba_full_puid_value(link_w.customFields):
+                                    if ra.get_ra_failure_mode_value(link_w.customFields) != parent_failure_mode:
+                                        modify_value_in_list_of_dicts(link_w.customFields['Custom'], 'ibaRAFailureMode',
+                                                                      parent_failure_mode)
+                                    if ra.get_ra_cause_value(link_w.customFields) is None:
+                                        modify_value_in_list_of_dicts(link_w.customFields['Custom'], 'ibaRACause',
+                                                                      parent_cause)
+                                    if ra.get_ra_effects_value(link_w.customFields) is None:
+                                        modify_value_in_list_of_dicts(link_w.customFields['Custom'], 'ibaRAEffects',
+                                                                      parent_effects)
                                     merged_workitems.append(link_w)
                             else:
                                 continue
-            except AttributeError as e:
-                raise AttributeError(e)
-            except Exception as e:
-                if "Workitem not retrieved from Polarion" in str(e):
-                    print(f"\nWorkitem {colored(workitem.id, 'red')} not retrieved from Polarion")
-                else:
-                    raise Exception(e)
+                except AttributeError as e:
+                    print()
+                    raise AttributeError(e)
+                except Exception as e:
+                    if "Workitem not retrieved from Polarion" in str(e):
+                        print(f"\nWorkitem {colored(workitem.id, 'red')} not retrieved from Polarion")
+                    else:
+                        print()
+                        raise Exception(e)
+        print()
         return merged_workitems
 
     def format_workitem(
             self,
             merged_workitems: list[Workitem]
     ) -> list[tuple[str, tuple[Any, str | Any]]]:
-        try:
-            workitems_to_embed = []
-            for workitem in merged_workitems:
-                if workitem.type['id'] in ["safetydecision", "requirement"]:
-                    for item in workitem.customFields.Custom:
+        workitems_to_embed = []
+        for workitem in merged_workitems:
+            if workitem.type['id'] in ["safetydecision", "requirement"]:
+                try:
+                    workitems_to_embed.extend(
+                        [
+                            (str_cleaner(workitem.description.content),
+                             (item['value'],
+                              self.polarion_url + f'/#/project/{workitem.project.id}/workitem?id=' + workitem.id))
+                            for item in workitem.customFields.Custom
+                            if item['key'] == 'ibaFullPuid'
+                        ]
+                    )
+                except Exception as e:
+                    print(f"An error occurred while processing workitem {workitem.id}: {e}")
+            elif workitem.type['id'] == "hazard":
+                try:
+                    for item in workitem.customFields['Custom']:
                         if item['key'] == 'ibaFullPuid':
-                            description = str_cleaner(workitem.description.content)
+                            ibaHS = ("[Risk analysis] Hazardous situation: " +
+                                     str(ra.get_hazardous_situation_value(workitem.customFields)))
+                            ibaIE = ("Initiating event: " +
+                                     str(ra.get_initiating_event_value(workitem.customFields)))
+                            ibaHarm = "Harm :" + str(ra.get_harm_value(workitem.customFields))
+                            description = str_cleaner(ibaHS + ". " + ibaIE + ". " + ibaHarm)
                             puid = item['value']
                             url = self.polarion_url + f'/#/project/{workitem.project.id}/workitem?id=' + workitem.id
                             workitems_to_embed.append((description, (puid, url)))
-                elif workitem.type['id'] == "hazard":
+                except StopIteration:
+                    print(f"Skipping workitem {workitem.id} due to missing required keys.")
+                except Exception as e:
+                    raise Exception(f"An error occurred while processing workitem {workitem.id}: {e}")
+            elif workitem.type['id'] == "failuremode":
+                try:
                     for item in workitem.customFields.Custom:
                         if item['key'] == 'ibaFullPuid':
-                            ibaHS = "[Risk analysis] Hazardous situation: " + str(next(
-                                item for item in workitem.customFields['Custom'] if
-                                item['key'] == 'ibaHazardousSituation')['value']['content'])
-                            ibaIE = "Initiating event: " + str(next(item for item in workitem.customFields['Custom'] if
-                                                                    item['key'] == 'ibaInitiatingEvent')['value'][
-                                                                   'content'])
-                            ibaHarm = "Harm :" + str(
-                                next(item for item in workitem.customFields['Custom'] if item['key'] == 'ibaHarm')[
-                                    'value']['content'])
-                            description = str_cleaner(ibaHS + ". " + ibaIE + ". " + ibaHarm)
-                            puid = item['value']
-                            url = self.polarion_url + f'/#/project/{workitem.project.location_id}/workitem?id=' + workitem.id
-                            workitems_to_embed.append((description, (puid, url)))
-                elif workitem.type['id'] == "failuremode":
-                    for item in workitem.customFields.Custom:
-                        if item['key'] == 'ibaFullPuid':
-                            ibaFM = "[Risk analysis] Failure mode: " + str(next(
-                                item for item in workitem.customFields['Custom'] if item['key'] == 'ibaRAFailureMode')[
-                                                                               'value']['content'])
-                            ibaC = "Cause: " + str(
-                                next(item for item in workitem.customFields['Custom'] if item['key'] == 'ibaRACause')[
-                                    'value']['content'])
-                            ibaE = "Effects: " + str(
-                                next(item for item in workitem.customFields['Custom'] if item['key'] == 'ibaRAEffects')[
-                                    'value']['content'])
+                            ibaFM = ("[Risk analysis] Failure mode: " +
+                                     str(ra.get_ra_failure_mode_value(workitem.customFields)))
+                            ibaC = "Cause: " + str(ra.get_ra_cause_value(workitem.customFields))
+                            ibaE = "Effects: " + str(ra.get_ra_effects_value(workitem.customFields))
                             description = str_cleaner(ibaFM + ". " + ibaC + ". " + ibaE)
                             puid = item['value']
-                            url = self.polarion_url + f'/#/project/{workitem.project.location_id}/workitem?id=' + workitem.id
+                            url = self.polarion_url + f'/#/project/{workitem.project.id}/workitem?id=' + workitem.id
                             workitems_to_embed.append((description, (puid, url)))
-            return workitems_to_embed
-        except Exception as e:
-            raise e
+                except StopIteration:
+                    print(f"Skipping workitem {workitem.id} due to missing required keys.")
+                except Exception as e:
+                    raise Exception(f"An error occurred while processing workitem {workitem.id}: {e}")
+        return workitems_to_embed
 
     def create_vector_db(
             self,
@@ -501,7 +531,13 @@ class WorkitemSaver:
 
             try:
                 self.create_vector_db(formatted_list_workitems)
+                (fh.get_cache_path() / f"{uid}.pkl").unlink()
+                fh.delete_from_cache_file(uid)
             except Exception as e:
+                if "Failed to establish a new connection" and "22027" in str(e):
+                    print(f"This happens because the 22027 port is not open to communication."
+                          f"A SSH tunnel has to be opened to the distant server."
+                          f"Find instructions here: https://github.com/WH-Yoshi/PolarionCopilot?tab=readme-ov-file#tensordock-virtual-machine")
                 print(f"Some error occured: {e}")
 
 
