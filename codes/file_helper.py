@@ -20,7 +20,7 @@ def get_faiss_data_path() -> Path:
     Returns ../data/.faiss.pkl absolute path
     """
     try:
-        get_faiss_path()
+        get_data_path()
         update_path = Path(_faiss_data_path).absolute()
         if not update_path.exists():
             update_path.touch()
@@ -29,6 +29,7 @@ def get_faiss_data_path() -> Path:
         return update_path
     except Exception as e:
         raise Exception(f"Error : {e}")
+
 
 
 def get_cache_data_path() -> Path:
