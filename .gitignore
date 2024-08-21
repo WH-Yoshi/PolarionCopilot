@@ -243,3 +243,4 @@ fabric.properties
 /data/
 !/certifi/
 /certifi/
+/codes/tests/
