@@ -134,7 +134,7 @@ class WorkitemSaver:
         Get a Polarion instance with the user's credentials or a token
         :return: A Polarion instance
         """
-        loader = Loader("Connecting to polarion ", "Connected.", timeout=0.1).start()
+        loader = Loader("Connecting to polarion ", colored("Connected.","green"), timeout=0.1).start()
         try:
             client = Polarion(
                 self.polarion_url,

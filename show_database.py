@@ -15,7 +15,7 @@ def print_formatted_info(info):
     """
     for db_id, details in info.items():
         print(colored(f"Database ID: {db_id}", 'green'))
-        print(f"  Location: {details['name']}")
+        print(f"  Location: {details['location']}")
         print(f"  Release: {details['release']}")
         print(f"  Type: {'Project' if details['type'] == 'project' else 'Project group'}")
         print(f"  Workitem Types: {', '.join(details['workitem_type'])}")

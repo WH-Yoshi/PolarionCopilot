@@ -42,6 +42,10 @@ def prepare_available_choices(action_available: list) -> tuple[str, str]:
 
 def preliminary_checks():
     print("---------Preliminary checks---------")
+    try:
+        WorkitemSaver("Group", "group", ["requirement"])
+    except Exception as e:
+        print(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
     if not check_db_folder() and not check_update_file():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.1).start()
         time.sleep(random.uniform(1.5, 3))
