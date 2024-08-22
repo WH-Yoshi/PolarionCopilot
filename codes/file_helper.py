@@ -119,9 +119,6 @@ def db_to_update_file(db_id: str, pr_name: str, release: str, pr_type: str, wi_t
     :param wi_type: The type of workitems in the database
     :param update_date: The date of the last update
     """
-    format_time = "%A %d %B %Y - %H:%M:%S"
-    update_date = update_date.strftime(format_time)
-
     abs_update_path = get_faiss_data_path()
     with open(abs_update_path, 'rb') as f:
         infos = pickle.load(f)
@@ -149,8 +146,7 @@ def delete_from_cache_file(db_id: str):
     with open(abs_cache_path, 'rb') as f:
         infos = pickle.load(f)
 
-    if db_id in infos:
-        del infos[db_id]
+    del infos[db_id]
 
     with open(abs_cache_path, 'wb') as f:
         pickle.dump(infos, f)

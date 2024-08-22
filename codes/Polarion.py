@@ -26,7 +26,7 @@ def display_file(path: Path) -> None:
     update_dict = fh.open_pkl_file_rb(path)
     try:
         for i, (_, value) in enumerate(update_dict.items()):
-            print(f"{colored(f'[{i + 1}]', 'green')} Database : {value['name']} "
+            print(f"{colored(f'[{i + 1}]', 'green')} Database : {value['location']} "
                   f"({value['release'] if value['release'] is not None else 'All release'}) "
                   f"filled with {', '.join(value['workitem_type'])}")
     except Exception as e:
@@ -47,12 +47,12 @@ def preliminary_checks():
     except Exception as e:
         print(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
     if not check_db_folder() and not check_update_file():
-        loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.1).start()
+        loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
         time.sleep(random.uniform(1.5, 3))
         loader.stop()
         actions = ["Save"]
     elif check_db_folder() and not check_update_file():
-        loader = Loader("Checking", "Update file has no records but database(s) exist(s)\n", "yellow", 0.1).start()
+        loader = Loader("Checking", "Update file has no records but database(s) exist(s)\n", "yellow", 0.05).start()
         time.sleep(random.uniform(1.5, 3))
         loader.stop()
         print("Recovering update file...")
@@ -60,7 +60,7 @@ def preliminary_checks():
             print("Recover complete.")
         actions = ["Save", "Update"]
     else:
-        loader = Loader("Checking", "All good.", "green", 0.1).start()
+        loader = Loader("Checking", "All good.", "green", 0.05).start()
         time.sleep(random.uniform(1.5, 3))
         loader.stop()
         actions = ["Save", "Update"]
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             db_id = list(dictio.keys())[int(cache_choice) - 1]
             details = dictio[db_id]
 
-            location = details["name"]
+            location = details["location"]
             db_type = details["type"]
             workitem_type = details["workitem_type"]
             release_input = details["release"] if details["release"] is not None else ""
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         dictio = fh.open_pkl_file_rb(update_file_path)
         db_id = list(dictio.keys())[int(db_choice) - 1]
         details = dictio[db_id]
-        location = details["name"]
+        location = details["location"]
         db_type = details["type"]
         workitem_type = details["workitem_type"]
         release_input = details["release"]

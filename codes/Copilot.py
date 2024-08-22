@@ -217,7 +217,7 @@ if __name__ == '__main__':
     choices2 = [n + 1 for n in range(20)]
 
     # Choices over the precision of the search
-    choices3 = [n / 10.0 for n in range(1, 11)]
+    choices3 = [n / 20.0 for n in range(1, 21)]
 
     with gr.Blocks(
             fill_height=True,
@@ -269,7 +269,7 @@ if __name__ == '__main__':
                         value=0.4,
                         multiselect=False,
                         label="Precision",
-                        info="Higher value increases the precision of the search by demanding a closer match.",
+                        info="Lower values increase the precision of the search by demanding a closer match.",
                         show_label=True,
                         interactive=True,
                         elem_id="dropdown_precision",

@@ -134,7 +134,7 @@ class WorkitemSaver:
         Get a Polarion instance with the user's credentials or a token
         :return: A Polarion instance
         """
-        loader = Loader("Connecting to polarion ", colored("Connected.","green"), timeout=0.1).start()
+        loader = Loader("Connecting to polarion ", colored("Connected.","green"), timeout=0.05).start()
         try:
             client = Polarion(
                 self.polarion_url,
@@ -150,12 +150,9 @@ class WorkitemSaver:
     def check_release(self, release: str) -> Workitem:
         """
         Check if the release exists in the PTS_Config project
-        :param release: A string representing the name of the release
-        :return: Should return only one workitem associated to the release
+        :param release: A string representing the ID of the release
+        :return: Should return a unique workitem associated to the release
         """
-        if not isinstance(release, str):
-            raise TypeError("The release parameter must be a string")
-
         print(f"Checking if {colored('release', 'green')} exists...")
         try:
             pts_config = self.client.getProject("PTS_Config")
@@ -166,16 +163,15 @@ class WorkitemSaver:
                     f"Release '{release}' not found in PTS_Config project. Make sure it's the exact title.")
             elif len(match) > 1:
                 raise ValueError(f"Multiple releases found with the title '{release}'...")
+            elif match[0] is None:
+                raise ValueError(f"Release '{release}' has a None value.")
             else:
                 print(f'Found release "{colored(release, "green")}" with id: {match[0].id}.')
                 return match[0]
         except Exception as e:
             raise Exception(f"Error while searching for the release: {e}")
 
-    def define_query(
-            self,
-            additional_query: str | None = ""
-    ) -> str:
+    def define_query(self, additional_query: str | None = "") -> str:
         """
         Define the query to get workitems from a project or a project group
         :param additional_query: [Optional] A string representing an additional query
@@ -203,9 +199,6 @@ class WorkitemSaver:
         :param project_group_id: A string representing the project group id
         :return: A list of workitem objects
         """
-        if not isinstance(project_group_id, str):
-            raise TypeError("The group_name parameter must be a Project Group object")
-
         query = self.define_query(additional_query)
         project_group = self.client.getProjectGroup(project_group_id)
 
@@ -264,8 +257,8 @@ class WorkitemSaver:
         if not isinstance(full_workitems_list, list):
             raise TypeError("The full_workitems_list parameter must be a list")
         if not full_workitems_list:
-            raise ValueError("The full_workitems_list list must not be empty, this means that there is no workitem"
-                             "of type 'requirement' or 'safetydecision' in the project or project group.")
+            raise ValueError(f"The full_workitems_list list must not be empty, this means that there is no workitem "
+                             f"of type {', '.join(self.workitem_type)} in the project or project group.")
 
         print(f"\nGetting {colored('children', 'green')}... might take a while accordingly")
         merged_workitems = []
@@ -424,12 +417,12 @@ class WorkitemSaver:
                     raise Exception(f"An error occurred while processing workitem {workitem.id}: {e}")
         return workitems_to_embed
 
-    def create_vector_db(
-            self,
-            data: list[tuple[Any, tuple[Any, str | Any]]],
-    ):
-        if not isinstance(data, list):
-            raise TypeError("The data must be a list")
+    def create_vector_db(self, data: list[tuple[Any, tuple[Any, str | Any]]]):
+        """
+        Create a vector database from a list of workitems
+        :param data: A list of tuples containing the workitem description and the workitem references
+        """
+
         if not data:
             raise Exception("This error comes because the function received a empty list. This means that there are no "
                             "workitems with the IBAApplicabilityConfiguration field set to the release you provided in "
@@ -454,24 +447,21 @@ class WorkitemSaver:
             path = str(fh.get_faiss_path() / self.db_id)
             faiss = FAISS.load_local(path, embeddings, allow_dangerous_deserialization=True)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
-                            timeout=0.1).start()
+                            timeout=0.05).start()
             for i, text in enumerate(texts):
                 faiss.add_texts(text, metadatas[i])
             loader.stop()
             faiss.save_local(path)
-            fh.db_to_update_file(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type,
-                                 self.now)
         else:
             faiss = FAISS.from_texts(texts=texts[0], metadatas=metadatas[0], embedding=embeddings)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
-                            timeout=0.1).start()
+                            timeout=0.05).start()
             for i, text in enumerate(texts[1:], start=1):
                 faiss.add_texts(texts=text, metadatas=metadatas[i])
             loader.stop()
             self.db_id = uuid.uuid4().hex
             faiss.save_local(str(fh.get_faiss_path() / self.db_id))
-            fh.db_to_update_file(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type,
-                                 self.now)
+        fh.db_to_update_file(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type, self.now)
 
     def caller(self) -> None:
         workitems = []
@@ -509,17 +499,17 @@ class WorkitemSaver:
             merged_workitems = self.merge_workitem_children_descriptions(workitems)
             formatted_list_workitems = self.format_workitem(merged_workitems)
 
+            uid = uuid.uuid4().hex
             try:
                 with open(fh.get_cache_data_path(), "rb") as f:
                     infos = pickle.load(f)
                 infos_to_dump = {
-                    "name": self.location_id,
+                    "location": self.location_id,
                     "release": self.release,
                     "type": self.location_type,
                     "workitem_type": self.workitem_type,
                     "last_update": None
                 }
-                uid = uuid.uuid4().hex
                 infos[uid] = infos_to_dump
                 with open(fh.get_cache_data_path(), "wb") as f:
                     pickle.dump(infos, f)
@@ -535,10 +525,12 @@ class WorkitemSaver:
                 fh.delete_from_cache_file(uid)
             except Exception as e:
                 if "Failed to establish a new connection" and "22027" in str(e):
-                    print(f"This happens because the 22027 port is not open to communication."
-                          f"A SSH tunnel has to be opened to the distant server."
-                          f"Find instructions here: https://github.com/WH-Yoshi/PolarionCopilot?tab=readme-ov-file#tensordock-virtual-machine")
-                print(f"Some error occured: {e}")
+                    print(colored("This happens because the 22027 port is not open to communication. "
+                                  "A SSH tunnel has to be opened to the distant server.\n"
+                                  "Find instructions here: https://github.com/WH-Yoshi/PolarionCopilot?tab=readme-ov-file#tensordock-virtual-machine", 'red'),
+                          colored("A cache file has been created, try again after enabling the SSH tunnel.", 'yellow'))
+                else:
+                    raise Exception(f"Some error occured: {e}")
 
 
 if __name__ == '__main__':
