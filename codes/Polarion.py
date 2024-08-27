@@ -8,15 +8,14 @@ import pickle
 import random
 import time
 from pathlib import Path
-from typing import Tuple
 
 import requests.exceptions
 from termcolor import colored
 
+import file_helper as fh
 from WorkitemSaver import WorkitemSaver
 from enhancer import Loader
 from file_helper import check_update_file, check_db_folder
-import file_helper as fh
 
 
 def display_file(path: Path) -> None:

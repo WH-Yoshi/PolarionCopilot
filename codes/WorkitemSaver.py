@@ -1,5 +1,5 @@
 """
-Object to save Workitems from given PROJECT(S) in a corresponding database.
+Object to save Workitems from given PROJECTS in a corresponding database.
 """
 import html
 import os
@@ -69,7 +69,7 @@ def str_cleaner(text: str) -> str:
     text = re.sub('<.*?>', '', text)
     # Replace sequences of more than one space with a single space
     text = re.sub(' +', ' ', text)
-    # Make sure a white space is after a dot if it's not a dot of end of sentence
+    # Make sure a white space is after a dot
     text = re.sub(r'\.(?=\S)', '. ', text)
     # Remove any whitespace after a dot if it's not followed by something that is not a whitespace
     text = re.sub(r'(?<=\.)\s*(?!.)', '', text)
@@ -96,7 +96,8 @@ def str_cleaner(text: str) -> str:
 
 class WorkitemSaver:
     """
-    This class is used as a Workitem Saver. It saves workitems from a given project or project group in a database.
+    This class is used as a Workitem Saver.
+    It saves work items from a given project or project group in a database.
     After instantiating the class, you can call the caller method to start the process like so :
     WorkitemSaver.caller()
     :param location: A string representing the project or project group polarion ID
@@ -143,7 +144,8 @@ class WorkitemSaver:
                 token=os.environ.get("polarion_token")
             )
         except Exception as e:
-            raise Exception(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
+            loader.stop(print_exit=False)
+            raise Exception(f"Error while getting the Polarion instance. Did you fill .env file ? :\n\n{e}")
         loader.stop()
         return client
 
@@ -213,7 +215,7 @@ class WorkitemSaver:
             )
             return workitems
         except Exception as e:
-            raise Exception(f"Error while getting the workitems: {e}")
+            raise Exception(f"Error while getting the workitems:\n\n{e}")
 
     def get_workitems_from_project(
             self,
@@ -243,7 +245,7 @@ class WorkitemSaver:
             )
             return workitem_list
         except Exception as e:
-            raise Exception(f"Error while getting the workitems: {e}")
+            raise Exception(f"Error while getting the workitems:\n\n{e}")
 
     def merge_workitem_children_descriptions(
             self,
@@ -530,7 +532,7 @@ class WorkitemSaver:
                                   "Find instructions here: https://github.com/WH-Yoshi/PolarionCopilot?tab=readme-ov-file#tensordock-virtual-machine", 'red'),
                           colored("A cache file has been created, try again after enabling the SSH tunnel.", 'yellow'))
                 else:
-                    raise Exception(f"Some error occured: {e}")
+                    raise Exception(f"Some error occurred: {e}")
 
 
 if __name__ == '__main__':

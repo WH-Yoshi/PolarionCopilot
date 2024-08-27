@@ -48,11 +48,15 @@ class Loader:
     def __enter__(self):
         self.start()
 
-    def stop(self):
+    def stop(self, print_exit=True):
         self.done = True
         cols = get_terminal_size((80, 20)).columns
-        print("\r" + " " * cols, end="", flush=True)
-        print(f"\r{colored(self.end, self.exit_color)}", flush=True)
+        if print_exit:
+            print("\r" + " " * cols, end="", flush=True)
+            print(f"\r{colored(self.end, self.exit_color)}", flush=True)
+        else:
+            print("\r" + " " * cols, end="", flush=True)
+            print("\n")
 
     def __exit__(self, exc_type, exc_value, tb):
         # handle exceptions with those variables ^

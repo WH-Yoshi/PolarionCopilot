@@ -1,25 +1,27 @@
 # PolarionCopilot
 
-PolarionCopilot is a combination of 2 main components for Windows:
-- A Python script that can be used to retrieve Polarion work items to make them understandable by a LLM.
-- A LLM that can be used to ask questions about the work items
+PolarionCopilot is a combination of two main codes:
+- A Polarion workitem retrieval script.
+- A Copilot script to use the workitems.
 
 ## Installation
 
-The installation is half automated, half manual. The automated part is the installation of each library, and specific changes dones to them.
-The manual part is the installation of any required software.
+The installation is half-manual, half-automated.\
+The manual and the first part is the installation of the required software.\
+The automated part is the installation of each library, and specific changes done to them.
 
-### Required installation
+### Required installations
 
-1. Python, minimum version 3.11: [Python for Windows](https://www.python.org/downloads/)
+1. Python, any version is good: [Python for Windows](https://www.python.org/downloads/)
    - Make sure to check the box *"Add python.exe to PATH"* during the installation
-2. Git, to clone this repository: [Git](https://git-scm.com/downloads)
+2. Git if not already, to clone this repository: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
-3. **[Optional]** A good terminal to show you all this goodies going on in the scripts :)
+3. **[Optional]** A good terminal to have a more user-friendly experience.
    - You can use the new Windows Terminal for exemple: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
 
 ### Activate and fill your environment *(Important steps)*
-Using a virtual environment is a good practice to avoid conflicts between libraries and versions. And also to keep your main Python installation clean.
+Using a virtual environment is a good practice to avoid conflicts between libraries and versions.\
+Also to keep your main Python installation clean.
 #### Windows
 1. Find a suitable location for the repository
    ```bash
@@ -56,20 +58,21 @@ Using a virtual environment is a good practice to avoid conflicts between librar
    embedding_api=<URL> # The URL of your embedding API
    openai_api=<URL> # The URL of your OpenAI like API (has to finish with "/v1")
    polarion_user=<USERNAME> # The username to access the Polarion server
+   polarion_password=<PASSWORD> # The password to access the Polarion server [Not recommended]
    polarion_token=<TOKEN> # The user token to access the Polarion server
    ```
-   Replace `<URL>`, `<USERNAME>`, and `<TOKEN>` with your own values.
+   Replace `<URL>`, `<USERNAME>`, and `<TOKEN>`(or `<PASSWORD>`) with your own values.
    .env file contains sensitive information, make sure to not share it.
 
 
 ### Tensordock virtual machine
 
 1. Open [TensorDock](https://dashboard.tensordock.com/deploy)
-2. Get a GPU with at least 48Gb of VRAM
-3. 1GPU, 8Gb of RAM, 2CPU and 30Gb SSD
+2. Get two GPU with at least 48Gb of VRAM
+3. 2GPUs, 8Gb of RAM, 2CPU and 80Gb SSD
 4. Select one of the available locations
-5. Choose Ubuntu as operating system
-6. Put a password and a machine name
+5. Choose Ubuntu 22.04 as an operating system
+6. Put a secure password and a machine name
 7. Deploy
 8. SSH into the machine :
    ```bash
@@ -77,15 +80,15 @@ Using a virtual environment is a good practice to avoid conflicts between librar
    ```
 9. Run the two docker images :
    ```bash
-   docker run -d --gpus all -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=<secret>" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.2 --max-model-len 2048
+   docker run -d --gpus '"device=0"' -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=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" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.3
    ```
    ```bash
-   docker run -d --gpus all -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:1.2 --model-id intfloat/multilingual-e5-large-instruct
+   docker run -d --gpus '"device=1"' -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:86-1.5 --model-id dunzhang/stella_en_1.5B_v5 
    ```
 When the two images are booted up, you can proceed.
 
 ### Use the Code
-1. Run the desired script
+1. Run the desired script in the main directory:
    ```bash
    python run_copilot.py
    python run_polarion.py

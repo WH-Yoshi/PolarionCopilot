@@ -78,12 +78,13 @@ def append_context_to_history(
         user_summary: str
 ) -> Tuple[list, str]:
     """
-    This function is used to append the context to the history
-    :param documents: The documents found in the database
-    :param history_openai_format: The history in the OpenAI format
-    :param message: The user input
-    :param user_summary: The information about the user
-    :return: The updated history and the system prompt in a tuple
+    This function is used to append the context to the history.
+
+    @param documents: The documents found in the database
+    @param history_openai_format: The history in the OpenAI format
+    @param message: The user input
+    @param user_summary: The information about the user
+    @return: The updated history and the system prompt in a tuple
     """
     if documents is not None and not isinstance(documents, list):
         raise Exception("The documents should be a list")
@@ -95,7 +96,7 @@ def append_context_to_history(
             doc_url = doc[0].metadata["url"]
 
             system_prompt += (
-                f"{doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
+                f" - {doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
             )
 
         history_openai_format.append({
@@ -142,14 +143,15 @@ def predict(
         user_summary: str
 ) -> str:
     """
-    This function is used to predict the response of the VLLM model
-    :param message: The user input
-    :param history: The history of the conversation
-    :param db_id: The chosen database
-    :param k: The number of documents to retrieve
-    :param score: The score threshold
-    :param user_summary: The information about the user
-    :return: The response of the VLLM model
+    This function is used to predict the response of the VLLM model.
+
+    @param message: The user inputs
+    @param history: The history of the conversation
+    @param db_id: The chosen database
+    @param k: The number of documents to retrieve
+    @param score: The score threshold
+    @param user_summary: The information about the user
+    @return: The response of the VLLM model
     """
     if db_id == "General":
         documents = None
@@ -198,6 +200,7 @@ if __name__ == '__main__':
         placeholder="Enter your message here...",
         scale=7,
         label="Message",
+        max_length=2000,
     )
 
     # Choices over the database
@@ -239,6 +242,7 @@ if __name__ == '__main__':
                 placeholder="Tell me more about you and why you are here...",
                 scale=2,
                 elem_id="yourself",
+                max_length=500,
             )
             with gr.Column(scale=7):
                 with gr.Row(equal_height=True):
@@ -264,21 +268,22 @@ if __name__ == '__main__':
                         elem_id="dropdown_k",
                         scale=3
                     )
-                    dropdown3 = gr.Dropdown(
-                        choices=choices3,
-                        value=0.4,
-                        multiselect=False,
+                    slider = gr.Slider(
+                        minimum=0.0,
+                        maximum=1.0,
+                        step=0.02,
+                        value=0.66,
                         label="Precision",
                         info="Lower values increase the precision of the search by demanding a closer match.",
                         show_label=True,
                         interactive=True,
-                        elem_id="dropdown_precision",
+                        elem_id="slider_precision",
                         scale=3
                     )
                 gr.ChatInterface(
                     fn=predict,
                     textbox=textbox,
-                    additional_inputs=[dropdown1, dropdown2, dropdown3, yourself],
+                    additional_inputs=[dropdown1, dropdown2, slider, yourself],
                     fill_height=True,
                 )
 
