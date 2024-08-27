@@ -139,8 +139,8 @@ class WorkitemSaver:
             client = Polarion(
                 self.polarion_url,
                 user=os.environ.get("polarion_user"),
-                password=None,
-                token=os.environ.get("polarion_token")
+                password=os.environ.get("polarion_password") if os.environ.get("polarion_password") else None,
+                token=os.environ.get("polarion_token") if os.environ.get("polarion_token") else None
             )
         except Exception as e:
             raise Exception(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
