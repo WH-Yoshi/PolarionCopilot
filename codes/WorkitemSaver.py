@@ -280,8 +280,6 @@ class WorkitemSaver:
                             else:
                                 continue
                         merged_workitems.append(workitem)
-                    else:
-                        print(f"\nWorkitem {colored(workitem.id, 'red')} has no description or linked workitems")
                 except AttributeError as e:
                     print()
                     raise AttributeError(e)
