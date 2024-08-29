@@ -8,7 +8,7 @@ def run_copilot():
     if platform.system() == 'Windows':
         os.system('cmd /c "start /wait ' + str(Path(r'.\codes\launchers\Launcher_polarion.cmd').absolute()) + '"')
     elif platform.system() == 'Linux':
-        subprocess.run(['bash', str(Path(r'./codes/launchers/Launcher_polarion.sh').absolute())], check=True, capture_output=True, text=True)
+        subprocess.run(['bash', str(Path(r'./codes/launchers/Launcher_polarion.sh').absolute())], check=True)
     else:
         raise OSError('Unsupported OS yet')
 
