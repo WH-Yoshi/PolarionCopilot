@@ -1,4 +1,4 @@
 #!/bin/bash
 
-./codes/before_code_linux.py
-./codes/Polarion.py
+python3 ./codes/before_code_linux.py
+python3 ./codes/Polarion.py
