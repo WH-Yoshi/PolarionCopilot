@@ -13,6 +13,7 @@ from enhancer import Loader
 site_package_path = Path(__file__).parent / "site-packages-changes"
 polarion_location = Path(polarion.__file__)
 
+
 def check_packages():
     loader = Loader("Checking packages... ", "All good.").start()
     for path in site.getsitepackages():
