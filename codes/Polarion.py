@@ -56,7 +56,7 @@ def preliminary_checks():
         time.sleep(random.uniform(1.5, 3))
         loader.stop()
         print("Recovering update file...")
-        if fh.recover_update_file():
+        if fh.recover_faiss_file():
             print("Recover complete.")
         actions = ["Save", "Update"]
     else:
