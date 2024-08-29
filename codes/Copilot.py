@@ -75,7 +75,7 @@ def append_context_to_history(
         documents: List[Tuple[Document, float]] | None,
         history_openai_format: list,
         message: str,
-        user_summary: str
+        prebuilt_context: str
 ) -> Tuple[list, str]:
     """
     This function is used to append the context to the history.
@@ -83,7 +83,7 @@ def append_context_to_history(
     @param documents: The documents found in the database
     @param history_openai_format: The history in the OpenAI format
     @param message: The user input
-    @param user_summary: The information about the user
+    @param prebuilt_context: The information about the user
     @return: The updated history and the system prompt in a tuple
     """
     if documents is not None and not isinstance(documents, list):
@@ -99,6 +99,40 @@ def append_context_to_history(
                 f" - {doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
             )
 
+    if prebuilt_context:
+        match prebuilt_context:
+            case "Test Case [generation & modification]":
+                prebuilt_context = """
+                Your main goal is to write or modify test steps from a given requirement. 
+                Here are some examples of the provided task.
+                --- Start of example 
+                Requirements to test 
+                • The system shall prevent motion if pit is not secured 
+                • The system shall prevent motion if motion enable button is not pressed 
+                Test steps for the requirements 
+                Step number	| Step description			            | Expected Result 
+                ------------------------------------------------------------------------------------- 
+                1		    | Unsecure the pit			            | Motion enable = OFF 
+                2		    | Press motion enable button		    | Motion enable = OFF 
+                3		    | Stop pressing motion enable button	| Motion enable = OFF 
+                4		    | Secure the pit				        | Motion enable = OFF 
+                5		    | Press motion enable button		    | Motion enable = ON 
+                6		    | Stop pressing motion enable button	| Motion enable = OFF 
+                --- End of example 
+                If the user asks you to write test steps from a requirement, you should provide the test steps with the same logic as the example.
+                If the user asks you to modify the test steps, you should modify the test steps with the same logic as the example.
+                If the users asks you to complete test steps DO NOT modify the provided test steps. DO NOT change the test steps order or provide MINIMUM 2 ways to do it.
+                ALWAYS present your response in a table format with clear headers and neatly organized rows and columns. 
+                Do not replicate the user's structured input directly, even if it looks like a table or structured text. 
+                Instead, reformat all information into a new table with appropriate adjustments as needed.
+                Ensure that:
+                - Each step is listed clearly with step numbers.
+                - The step description is concise and formatted uniformly.
+                - Expected results are accurately represented in their own column.
+                - Headers should be explicitly stated and aligned correctly. 
+                Even if the user provides a structured answer, do not replicate it directly. Instead, format your response in a structured table with clear headers and neatly organized rows and columns.
+                """
+
         history_openai_format.append({
             "role":
                 "user",
@@ -110,9 +144,9 @@ def append_context_to_history(
                 "answer to the question without using the CONTEXT."
                 "ABBREVIATION: PTS : Proton Therapy System, PBS : Pencil Beam Scanning, DS : Double Scattering, "
                 "SIS : Single Scattering, US : Uniform Scanning"
-                "Your might get a brief user presentation, I want you to use it to adapt to the user."
-                "### User presentation :"
-                f"{user_summary}"
+                "Your might get a specific context, I want you to use it to adapt to the user."
+                "### Specific context :"
+                f"{prebuilt_context}"
                 "### Context :"
                 f"{system_prompt}"
                 "### Question :"
@@ -127,7 +161,7 @@ def append_context_to_history(
                 "You might get a brief user presentation, I want you to use it to adapt to "
                 "the user."
                 "### User presentation : "
-                f"{user_summary}"
+                f"{prebuilt_context}"
                 "### Question : "
                 f"{message}"
         })
@@ -200,8 +234,10 @@ if __name__ == '__main__':
         placeholder="Enter your message here...",
         scale=7,
         label="Message",
-        max_length=2000,
     )
+    # AVE Start
+    choices0 = ["Test case [generation & modification]", ""]
+    # AVE End
 
     # Choices over the database
     choices1 = [("No database", "General")]
@@ -236,13 +272,16 @@ if __name__ == '__main__':
                 equal_height=False,
                 elem_id="row1"
         ):
-            yourself = gr.Textbox(
-                lines=5,
-                max_lines=10,
-                placeholder="Tell me more about you and why you are here...",
-                scale=2,
-                elem_id="yourself",
-                max_length=500,
+            selected_context = gr.Dropdown(
+                choices=choices0,
+                value="Test",
+                multiselect=False,
+                label="Prebuilt context",
+                info="Here are some premade contexts to help you test the chatbot.",
+                show_label=True,
+                interactive=True,
+                elem_id="dropdown_context",
+                scale=3
             )
             with gr.Column(scale=7):
                 with gr.Row(equal_height=True):
@@ -283,11 +322,8 @@ if __name__ == '__main__':
                 gr.ChatInterface(
                     fn=predict,
                     textbox=textbox,
-                    additional_inputs=[dropdown1, dropdown2, slider, yourself],
+                    additional_inputs=[dropdown1, dropdown2, slider, selected_context],
                     fill_height=True,
                 )
 
-    demo.launch(favicon_path=icon.__str__(),
-                ssl_verify=False,
-                ssl_keyfile="C:\\Users\\AIXYF\\Certfiles\\key.pem",
-                ssl_certfile="C:\\Users\\AIXYF\\Certfiles\\cert.pem")
+    demo.launch(favicon_path=icon.__str__())
