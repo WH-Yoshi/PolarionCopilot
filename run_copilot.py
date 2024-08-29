@@ -8,9 +8,7 @@ def run_copilot():
     if platform.system() == 'Windows':
         os.system('cmd /c "start /wait ' + str(Path(r'.\codes\launchers\Launcher_copilot.cmd').absolute()) + '"')
     elif platform.system() == 'Linux':
-        process = subprocess.Popen(r'./codes/launchers/Launcher_copilot.sh', shell=True)
-        # subprocess.run(['bash', str(Path(r'./codes/launchers/Launcher_copilot.sh').absolute())], check=True)
-        process.wait()
+        subprocess.run(['bash', str(Path(r'./codes/launchers/Launcher_copilot.sh').absolute())], check=True, capture_output=True, text=True)
     else:
         raise OSError('Unsupported OS yet')
 
