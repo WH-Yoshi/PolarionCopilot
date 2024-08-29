@@ -42,25 +42,23 @@ def prepare_available_choices(action_available: list) -> tuple[str, str]:
 def preliminary_checks():
     print("---------Preliminary checks---------")
     try:
-        WorkitemSaver("Group", "group", ["requirement"])
+        WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
     except Exception as e:
         print(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
     if not check_db_folder() and not check_update_file():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
-        time.sleep(random.uniform(1.5, 3))
+        time.sleep(random.uniform(1.5, 2.0))
         loader.stop()
         actions = ["Save"]
     elif check_db_folder() and not check_update_file():
-        loader = Loader("Checking", "Update file has no records but database(s) exist(s)\n", "yellow", 0.05).start()
-        time.sleep(random.uniform(1.5, 3))
+        loader = Loader("Checking", "Some databases exist but are unusable, deleting...", "yellow", 0.05).start()
+        time.sleep(random.uniform(1.5, 2.0))
         loader.stop()
-        print("Recovering update file...")
-        if fh.recover_faiss_file():
-            print("Recover complete.")
-        actions = ["Save", "Update"]
+        fh.delete_all_faiss_databases()
+        actions = ["Save"]
     else:
         loader = Loader("Checking", "All good.", "green", 0.05).start()
-        time.sleep(random.uniform(1.5, 3))
+        time.sleep(1)
         loader.stop()
         actions = ["Save", "Update"]
     return actions
