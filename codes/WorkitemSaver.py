@@ -141,7 +141,8 @@ class WorkitemSaver:
                 self.polarion_url,
                 user=os.environ.get("polarion_user"),
                 password=os.environ.get("polarion_password") if os.environ.get("polarion_password") else None,
-                token=os.environ.get("polarion_token") if os.environ.get("polarion_token") else None
+                token=os.environ.get("polarion_token") if os.environ.get("polarion_token") else None,
+                verify_certificate=fh.path_to_certs()
             )
         except Exception as e:
             loader.stop(print_exit=False)
@@ -463,7 +464,7 @@ class WorkitemSaver:
             loader.stop()
             self.db_id = uuid.uuid4().hex
             faiss.save_local(str(fh.get_faiss_path() / self.db_id))
-        fh.db_to_update_file(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type, self.now)
+        fh.db_to_faiss_file(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type, self.now)
 
     def caller(self) -> None:
         workitems = []

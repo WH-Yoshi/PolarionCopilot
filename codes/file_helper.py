@@ -109,9 +109,10 @@ def check_update_file():  # second one
         raise Exception(f"Error while checking update file: {e}")
 
 
-def db_to_update_file(db_id: str, pr_name: str, release: str, pr_type: str, wi_type: list[str], update_date: datetime):
+def db_to_faiss_file(db_id: str, pr_name: str, release: str, pr_type: str, wi_type: list[str], update_date: datetime):
     """
-    Add a database to the update file
+    Add a database to the faiss file.
+
     :param db_id: The ID of the database
     :param pr_name: The name of the database
     :param release: The release of the database
@@ -172,7 +173,7 @@ def open_pkl_file_rb(path: Path):
         raise Exception(f"Unknown error : {e}")
 
 
-def recover_update_file():
+def recover_faiss_file():
     faiss_subfolders = os.listdir(_faiss_path)
     to_insert = {}
     for folder in faiss_subfolders:
@@ -186,13 +187,15 @@ def recover_update_file():
     return False
 
 
-def display_update_file():
-    infos = open_pkl_file_rb(get_faiss_data_path())
-    pprint(infos)
-
-
-def display_cache_file():
-    pprint("\n".join([item.stem for item in get_cache_path().iterdir()]))
+def path_to_certs() -> Path:
+    """
+    Returns the path to the certificates
+    """
+    try:
+        cert_path = current_path.parent.parent / 'certifi' / 'ca-certificates.crt'
+        return cert_path
+    except Exception as e:
+        raise Exception(f"Error : {e}")
 
 
 if __name__ == '__main__':
