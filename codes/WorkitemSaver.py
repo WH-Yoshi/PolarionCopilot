@@ -142,7 +142,7 @@ class WorkitemSaver:
                 user=os.environ.get("polarion_user"),
                 password=os.environ.get("polarion_password") if os.environ.get("polarion_password") else None,
                 token=os.environ.get("polarion_token") if os.environ.get("polarion_token") else None,
-                verify_certificate=fh.path_to_certs()
+                verify_certificate=str(fh.path_to_certs())
             )
         except Exception as e:
             loader.stop(print_exit=False)
