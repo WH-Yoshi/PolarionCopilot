@@ -531,7 +531,7 @@ class WorkitemSaver:
                     print(colored("This happens because the 22027 port is not open to communication. "
                                   "A SSH tunnel has to be opened to the distant server.\n"
                                   "Find instructions here: https://github.com/WH-Yoshi/PolarionCopilot?tab=readme-ov-file#tensordock-virtual-machine", 'red'),
-                          colored("A cache file has been created, try again after enabling the SSH tunnel.", 'yellow'))
+                          colored("\nA cache file has been created, try again after enabling the SSH tunnel.", 'yellow'))
                 else:
                     raise Exception(f"Some error occurred: {e}")
 
