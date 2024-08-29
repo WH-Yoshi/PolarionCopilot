@@ -15,23 +15,16 @@ polarion_location = Path(polarion.__file__)
 
 def check_packages():
     loader = Loader("Checking packages... ", "All good.").start()
-    installed_codes = os.listdir(polarion_location.parent)
-    required_code = "project_groups.py"
-    if required_code not in installed_codes:
-        for path in site.getsitepackages():
-            path = Path(site.__file__).parent / "site-packages" / path
-            if "site-packages" in str(path):
-                for file in os.listdir(site_package_path / "polarion"):
-                    shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
-        time.sleep(random.uniform(0.8, 1.5))
-        loader.stop()
-        print("Packages installed.")
-        return
-    else:
-        time.sleep(random.uniform(0.5, 1.0))
-        loader.stop()
-        print("Packages already installed.")
-        return
+    for path in site.getsitepackages():
+        path = Path(site.__file__).parent / "site-packages" / path
+        if "site-packages" in str(path):
+            for file in os.listdir(site_package_path / "polarion"):
+                shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
+    time.sleep(random.uniform(0.8, 1.2))
+    loader.stop()
+    print("Packages installed.")
+    return
+
 
 def print_instructions():
     print("Instructions for setting up and running Polarion.py:")

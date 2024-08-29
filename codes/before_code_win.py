@@ -43,26 +43,18 @@ def os_identification():
 def check_packages():
     # new_line_content = os_identification()
     loader = Loader("Checking packages... ", "All good.").start()
-    installed_codes = os.listdir(polarion_location.parent)
-    required_code = "project_groups.py"
-    if required_code not in installed_codes:
-        # modify_file(site_package_path / 'wrapt_certifi.py', line_number_to_modify, new_line_content)
-        for path in site.getsitepackages():
-            path = Path(site.__file__).parent / "site-packages" / path
-            if "site-packages" in str(path):
-                # if platform.system() == 'Windows':
-                #     shutil.copy(site_package_path / "wrapt_certifi.py", path / "certifi_win32" / "wrapt_certifi.py")
-                for file in os.listdir(site_package_path / "polarion"):
-                    shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
-        time.sleep(random.uniform(0.8, 1.5))
-        loader.stop()
-        print("Packages installed.")
-        return
-    else:
-        time.sleep(random.uniform(0.5, 1.0))
-        loader.stop()
-        print("Packages already installed.")
-        return
+    # modify_file(site_package_path / 'wrapt_certifi.py', line_number_to_modify, new_line_content)
+    for path in site.getsitepackages():
+        path = Path(site.__file__).parent / "site-packages" / path
+        if "site-packages" in str(path):
+            # if platform.system() == 'Windows':
+            #     shutil.copy(site_package_path / "wrapt_certifi.py", path / "certifi_win32" / "wrapt_certifi.py")
+            for file in os.listdir(site_package_path / "polarion"):
+                shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
+    time.sleep(random.uniform(0.8, 1.2))
+    loader.stop()
+    print("Packages installed.")
+    return
 
 
 def print_instructions():
