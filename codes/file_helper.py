@@ -98,10 +98,9 @@ def check_db_folder():  # First to check
         raise Exception(f"Error while checking database folder: {e}")
 
 
-def check_update_file():  # second one
+def check_update_file():
     try:
-        abs_file_path = get_faiss_data_path()
-        infos = open_pkl_file_rb(abs_file_path)
+        infos = open_pkl_file_rb(get_faiss_data_path())
         if not infos or infos == {}:
             return False
         return True
@@ -173,18 +172,18 @@ def open_pkl_file_rb(path: Path):
         raise Exception(f"Unknown error : {e}")
 
 
-def recover_faiss_file():
-    faiss_subfolders = os.listdir(_faiss_path)
-    to_insert = {}
-    for folder in faiss_subfolders:
-        times = os.path.getctime(_faiss_path / folder)
-        times = datetime.fromtimestamp(times).strftime("%A %d %B %Y - %H:%M:%S")
-        to_insert[folder] = times
-    if not check_update_file():
-        with open(_faiss_data_path, "wb") as f:
-            pickle.dump(to_insert, f)
-        return True
-    return False
+def delete_all_faiss_databases():
+    """
+    Delete all the databases in the faiss folder
+    """
+    try:
+        abs_dbs_path = get_faiss_path()
+        dbs = os.listdir(abs_dbs_path)
+        for db in dbs:
+            os.remove(abs_dbs_path / db)
+        print("All databases deleted.")
+    except Exception as e:
+        raise Exception(f"Error while deleting databases: {e}")
 
 
 def path_to_certs() -> Path:
