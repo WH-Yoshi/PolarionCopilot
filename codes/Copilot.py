@@ -222,6 +222,12 @@ def predict(
     except Exception as e:
         yield f"Sorry, an unexpected error occurred: {str(e)}"
 
+def update_visibility(selected_dropdown: str):
+    if selected_dropdown == "General":
+        return gr.update(visible=False), gr.update(visible=False)
+    else:
+        return gr.update(visible=True), gr.update(visible=True)
+
 
 if __name__ == '__main__':
     CSS = """#row1 {flex-grow: 1; align-items: unset;}
@@ -305,7 +311,8 @@ if __name__ == '__main__':
                         show_label=True,
                         interactive=True,
                         elem_id="dropdown_k",
-                        scale=3
+                        scale=3,
+                        visible=False
                     )
                     slider = gr.Slider(
                         minimum=0.0,
@@ -317,7 +324,8 @@ if __name__ == '__main__':
                         show_label=True,
                         interactive=True,
                         elem_id="slider_precision",
-                        scale=3
+                        scale=3,
+                        visible=False
                     )
                 gr.ChatInterface(
                     fn=predict,
@@ -325,5 +333,8 @@ if __name__ == '__main__':
                     additional_inputs=[dropdown1, dropdown2, slider, selected_context],
                     fill_height=True,
                 )
+
+        dropdown1.change(fn=update_visibility, inputs=dropdown1, outputs=[dropdown2, slider])
+
 
     demo.launch(favicon_path=icon.__str__())
