@@ -242,7 +242,7 @@ if __name__ == '__main__':
         label="Message",
     )
     # AVE Start
-    choices0 = ["Test case [generation & modification]", ""]
+    choices0 = ["No use case", "Test case [generation & modification]", ""]
     # AVE End
 
     # Choices over the database
@@ -280,10 +280,10 @@ if __name__ == '__main__':
         ):
             selected_context = gr.Dropdown(
                 choices=choices0,
-                value="Test",
+                value="No use case",
                 multiselect=False,
                 label="Prebuilt context",
-                info="Here are some premade contexts to help you test the chatbot.",
+                info="Here are some pre made contexts to help you test the chatbot.",
                 show_label=True,
                 interactive=True,
                 elem_id="dropdown_context",
