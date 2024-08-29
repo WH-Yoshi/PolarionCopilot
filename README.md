@@ -11,34 +11,61 @@ The manual and the first part is the installation of the required software.\
 The automated part is the installation of each library, and specific changes done to them.
 
 ### Required installations
-
+#### Windows
 1. Python, any version is good: [Python for Windows](https://www.python.org/downloads/)
    - Make sure to check the box *"Add python.exe to PATH"* during the installation
-2. Git if not already, to clone this repository: [Git](https://git-scm.com/downloads)
+2. Git if not already installed, to clone this repository: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
 3. **[Optional]** A good terminal to have a more user-friendly experience.
    - You can use the new Windows Terminal for exemple: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
-
+#### Linux
+1. Python, any version is good: 
+   ```bash
+   sudo apt-get install python3 python3-venv
+   ```
+2. Git if not already installed, to clone this repository: 
+   ```bash
+   sudo apt-get install git
+   ```
 ### Activate and fill your environment *(Important steps)*
 Using a virtual environment is a good practice to avoid conflicts between libraries and versions.\
 Also to keep your main Python installation clean.
 #### Windows
 1. Find a suitable location for the repository
-   ```bash
-   cd <DIRECTORY>
+   ```batsh
+   cd \your\directory\
    ```
 2. Create and activate the virtual environment
-   ```bash
+   ```batsh
    py -m venv .venv
    .\.venv\Scripts\activate
    ```
    If you run into an error with execution policy, check your own execution policy with:
-   ```bash
+   ```batsh
     Get-ExecutionPolicy
    ```
    remember it if you want to put it back later. Then, change it to RemoteSigned and try to activate the environment again:
-   ```bash
+   ```batsh
     Set-ExecutionPolicy RemoteSigned
+   ```
+3. Clone the repository
+   ```batsh
+   git clone https://github.com/WH-Yoshi/PolarionCopilot.git
+   cd PolarionCopilot
+   ```
+4. Install the required libraries
+   ```batsh
+   pip install -r requirements.txt
+   ```
+#### Linux 
+1. Find a suitable location for the repository
+   ```bash
+   cd /your/directory/
+   ```
+2. Create and activate the virtual environment
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
    ```
 3. Clone the repository
    ```bash
@@ -49,11 +76,10 @@ Also to keep your main Python installation clean.
    ```bash
    pip install -r requirements.txt
    ```
-#### Linux (Not supported yet)
 
 #### Before any further steps, you need to fill the environment variables in the .env file.
 1. Fill the .env file with the following content, each value must be between quotes "":
-   ```bash
+   ```
    base_url=<URL> # The URL of your Polarion server (e.g. https://polarion.example.com/polarion)
    embedding_api=<URL> # The URL of your embedding API
    openai_api=<URL> # The URL of your OpenAI like API (has to finish with "/v1")
@@ -89,8 +115,14 @@ When the two images are booted up, you can proceed.
 
 ### Use the Code
 1. Run the desired script in the main directory:
-   ```bash
-   python run_copilot.py
-   python run_polarion.py
-   ```
+   #### Windows
+      ```batsh
+      python run_polarion.py
+      python run_copilot.py
+      ```
+   #### Linux
+      ```bash
+      python3 run_polarion.py
+      python3 run_copilot.py
+      ```
 2. Enjoy the ride!

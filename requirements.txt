@@ -1,7 +1,6 @@
 polarion
 requests
 python-dotenv
-python-certifi-win32
 gradio
 openai
 termcolor
