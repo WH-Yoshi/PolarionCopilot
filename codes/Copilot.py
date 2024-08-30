@@ -170,7 +170,6 @@ def append_context_to_history(
                 "If a question is ambiguous, ask clarifying questions to better understand the user's needs."
                 "*DO NOT make up information*; if you don't know the answer, it's okay to say so in a polite way."
                 "When applicable, provide **examples** or **references** to support your answer."
-                "You can format your answer with html structure."
                 "### Question : "
                 f"{message}"
         })
