@@ -8,6 +8,7 @@ from typing import List, Tuple
 
 import gradio as gr
 from dotenv import load_dotenv
+from langchain_core.runnables.utils import Output
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
@@ -110,14 +111,17 @@ def append_context_to_history(
                 • The system shall prevent motion if pit is not secured 
                 • The system shall prevent motion if motion enable button is not pressed 
                 Test steps for the requirements 
-                Step number	| Step description			            | Expected Result 
-                ------------------------------------------------------------------------------------- 
-                1		    | Unsecure the pit			            | Motion enable = OFF 
-                2		    | Press motion enable button		    | Motion enable = OFF 
-                3		    | Stop pressing motion enable button	| Motion enable = OFF 
-                4		    | Secure the pit				        | Motion enable = OFF 
-                5		    | Press motion enable button		    | Motion enable = ON 
-                6		    | Stop pressing motion enable button	| Motion enable = OFF 
+                <table>
+                <thead><tr><th>Step Number</th><th>Step Description</th><th>Expected Result</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Unsecure the pit</td><td>Motion enable = OFF</td></tr><tr><td>2</td>
+                        <td>Press motion enable button</td><td>Motion enable = OFF</td></tr><tr><td>3</td>
+                        <td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
+                        <tr><td>4</td><td>Secure the pit</td><td>Motion enable = OFF</td></tr>
+                        <tr><td>5</td><td>Press motion enable button</td><td>Motion enable = ON</td></tr>
+                        <tr><td>6</td><td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
+                    </tbody>
+                </table>
                 --- End of example 
                 If the user asks you to write test steps from a requirement, you should provide the test steps with the same logic as the example.
                 If the user asks you to modify the test steps, you should modify the test steps with the same logic as the example.
@@ -196,35 +200,37 @@ def predict(
     history_openai_format = history_format(history)
     messages, system_prompt = append_context_to_history(documents, history_openai_format, message, user_summary)
 
-    response = client.chat.completions.create(
-        model="mistralai/Mistral-7B-Instruct-v0.3",
-        messages=messages,
-        temperature=0.5,
-        stream=True,
-    )
+    if message:
+        response = client.chat.completions.create(
+            model="mistralai/Mistral-7B-Instruct-v0.3",
+            messages=messages,
+            temperature=0.5,
+            stream=True,
+        )
+        partial_message = ""
+        try:
+            if documents:
+                for chunk in response:
+                    if chunk.choices[0].delta.content is not None:
+                        partial_message = partial_message + chunk.choices[0].delta.content
+                        yield partial_message + "\n\n<i><b>References:</b></i>\n" + system_prompt
+            else:
+                for chunk in response:
+                    if chunk.choices[0].delta.content is not None:
+                        partial_message = partial_message + chunk.choices[0].delta.content
+                        yield partial_message
+        except AttributeError:
+            yield "Sorry, the response object does not have the expected structure."
+        except TypeError:
+            yield "Sorry, the documents object is not iterable."
+        except Exception as e:
+            yield f"Sorry, an unexpected error occurred: {str(e)}"
+    else:
+        gr.Warning("Please enter a message.")
+        yield "Oops! I'd love to help, but I need a bit more information to assist you better."
 
-    partial_message = ""
-    try:
-        if documents:
-            for chunk in response:
-                if chunk.choices[0].delta.content is not None:
-                    partial_message = partial_message + chunk.choices[0].delta.content
-                    yield partial_message + "\n\n<i><b>References:</b></i>\n" + system_prompt
-        else:
-            for chunk in response:
-                if chunk.choices[0].delta.content is not None:
-                    partial_message = partial_message + chunk.choices[0].delta.content
-                    yield partial_message
-    except AttributeError:
-        yield "Sorry, the response object does not have the expected structure."
-    except TypeError:
-        yield "Sorry, the documents object is not iterable."
-    except Exception as e:
-        yield f"Sorry, an unexpected error occurred: {str(e)}"
-
-
-def update_visibility(selected_dropdown: str):
-    if selected_dropdown == "General":
+def update_visibility(selected_dropdown: str, gradio_value: str):
+    if selected_dropdown == gradio_value:
         return gr.update(visible=False), gr.update(visible=False)
     else:
         return gr.update(visible=True), gr.update(visible=True)
@@ -243,7 +249,7 @@ textbox = gr.Textbox(
 )
 
 # AVE Start
-choices0 = ["No use case", "Test case [generation & modification]", ""]
+choices0 = ["No use case", "Test case [generation & modification]"]
 # AVE End
 
 # Choices over the database
@@ -335,7 +341,7 @@ with gr.Blocks(
                 fill_height=True,
             )
 
-    dropdown1.change(fn=update_visibility, inputs=dropdown1, outputs=[dropdown2, slider])
+    dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("General")], outputs=[dropdown2, slider])
 
 if __name__ == '__main__':
     demo.launch(favicon_path=icon.__str__(), show_error=True)
