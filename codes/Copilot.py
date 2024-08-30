@@ -15,6 +15,7 @@ from langchain_core.documents import Document
 from openai import OpenAI
 
 import file_helper as fh
+from PolarionCopilot.codes.file_helper import get_glossary
 
 load_dotenv()
 
@@ -23,6 +24,8 @@ client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
 embeddings = HuggingFaceEndpointEmbeddings(model=os.environ.get("embedding_api"))
 files = os.listdir(fh.get_faiss_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
+glossary_path = Path(__file__).parent / "public" / "glossary" / "glossary.csv"
+
 print("[CTRL] + Click on the link to open the interface in your browser.")
 
 
@@ -87,6 +90,8 @@ def append_context_to_history(
     @param prebuilt_context: The information about the user
     @return: The updated history and the system prompt in a tuple
     """
+    glossary = get_glossary(str(glossary_path))
+
     if documents is not None and not isinstance(documents, list):
         raise Exception("The documents should be a list")
     system_prompt = ""
@@ -100,7 +105,7 @@ def append_context_to_history(
                 f" - {doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
             )
 
-    if prebuilt_context:
+    if prebuilt_context != "No use case":
         match prebuilt_context:
             case "Test Case [generation & modification]":
                 prebuilt_context = """
@@ -146,8 +151,7 @@ def append_context_to_history(
                 "DO NOT display the links of the CONTEXT."
                 "Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY, provide the "
                 "answer to the question without using the CONTEXT."
-                "ABBREVIATION: PTS : Proton Therapy System, PBS : Pencil Beam Scanning, DS : Double Scattering, "
-                "SIS : Single Scattering, US : Uniform Scanning"
+                f"ABBREVIATION: {glossary}"
                 "Your might get a specific context, I want you to use it to adapt to the user."
                 "### Specific context :"
                 f"{prebuilt_context}"
@@ -162,10 +166,11 @@ def append_context_to_history(
                 "user",
             "content":
                 "You are a helpful and appreciated assistant, answer the question naturally."
-                "You might get a brief user presentation, I want you to use it to adapt to "
-                "the user."
-                "### User presentation : "
-                f"{prebuilt_context}"
+                "Your primary goal is to provide accurate and natural responses to the user's questions."
+                "If a question is ambiguous, ask clarifying questions to better understand the user's needs."
+                "*DO NOT make up information*; if you don't know the answer, it's okay to say so in a polite way."
+                "When applicable, provide **examples** or **references** to support your answer."
+                "You can format your answer with html structure."
                 "### Question : "
                 f"{message}"
         })
