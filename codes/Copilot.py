@@ -222,6 +222,7 @@ def predict(
     except Exception as e:
         yield f"Sorry, an unexpected error occurred: {str(e)}"
 
+
 def update_visibility(selected_dropdown: str):
     if selected_dropdown == "General":
         return gr.update(visible=False), gr.update(visible=False)
@@ -229,112 +230,112 @@ def update_visibility(selected_dropdown: str):
         return gr.update(visible=True), gr.update(visible=True)
 
 
-if __name__ == '__main__':
-    CSS = """#row1 {flex-grow: 1; align-items: unset;}
-    .form {height: fit-content;}
-    footer {display: none !important;}"""
+CSS = """#row1 {flex-grow: 1; align-items: unset;}
+.form {height: fit-content;}
+footer {display: none !important;}"""
 
-    textbox = gr.Textbox(
-        lines=2,
-        max_lines=20,
-        placeholder="Enter your message here...",
-        scale=7,
-        label="Message",
-    )
-    # AVE Start
-    choices0 = ["No use case", "Test case [generation & modification]", ""]
-    # AVE End
+textbox = gr.Textbox(
+    lines=2,
+    max_lines=20,
+    placeholder="Enter your message here...",
+    scale=7,
+    label="Message",
+)
 
-    # Choices over the database
-    choices1 = [("No database", "General")]
-    with open(fh.get_faiss_data_path(), "rb") as f:
-        databases = pickle.load(f)
-    for file in files:
-        file = str(file)
-        db_location = databases[file]["location"]
-        db_release = databases[file]["release"]
-        db_type = databases[file]["type"]
-        db_wi_type = databases[file]["workitem_type"]
-        db_wi_type = ", ".join(db_wi_type)
-        choices1.append((f"{'Group' if db_type == 'group' else 'Project'}: {db_location} - {db_release} ({db_wi_type})",
-                         str(file)))
-    # Choices over the number of workitems to retrieve
-    choices2 = [n + 1 for n in range(20)]
+# AVE Start
+choices0 = ["No use case", "Test case [generation & modification]", ""]
+# AVE End
 
-    # Choices over the precision of the search
-    choices3 = [n / 20.0 for n in range(1, 21)]
+# Choices over the database
+choices1 = [("No database", "General")]
+with open(fh.get_faiss_data_path(), "rb") as f:
+    databases = pickle.load(f)
+for file in files:
+    file = str(file)
+    db_location = databases[file]["location"]
+    db_release = databases[file]["release"]
+    db_type = databases[file]["type"]
+    db_wi_type = databases[file]["workitem_type"]
+    db_wi_type = ", ".join(db_wi_type)
+    choices1.append((f"{'Group' if db_type == 'group' else 'Project'}: {db_location} - {db_release} ({db_wi_type})",
+                     str(file)))
+# Choices over the number of workitems to retrieve
+choices2 = [n + 1 for n in range(20)]
 
-    with gr.Blocks(
-            fill_height=True,
-            css=CSS,
-            theme=gr.themes.Base(
-                primary_hue="green",
-                spacing_size="sm",
-                radius_size="sm",
-                font=[gr.themes.GoogleFont("Montserrat", weights=(500, 700))]),
-            title="VLLM Copilot Polarion",
-    ) as demo:
-        with gr.Row(
-                equal_height=False,
-                elem_id="row1"
-        ):
-            selected_context = gr.Dropdown(
-                choices=choices0,
-                value="No use case",
-                multiselect=False,
-                label="Prebuilt context",
-                info="Here are some pre made contexts to help you test the chatbot.",
-                show_label=True,
-                interactive=True,
-                elem_id="dropdown_context",
-                scale=3
-            )
-            with gr.Column(scale=7):
-                with gr.Row(equal_height=True):
-                    dropdown1 = gr.Dropdown(
-                        choices=choices1,
-                        value="General",
-                        multiselect=False,
-                        label="Feeding the chatbot",
-                        info="If a database is selected, similarity search will be performed into it before the response is generated.",
-                        show_label=True,
-                        interactive=True,
-                        elem_id="dropdown_release",
-                        scale=5
-                    )
-                    dropdown2 = gr.Dropdown(
-                        choices=choices2,
-                        value=7,
-                        multiselect=False,
-                        label="Number of workitems",
-                        info="Start with a larger value and then decrease it if the response is inconvenient.",
-                        show_label=True,
-                        interactive=True,
-                        elem_id="dropdown_k",
-                        scale=3,
-                        visible=False
-                    )
-                    slider = gr.Slider(
-                        minimum=0.0,
-                        maximum=1.0,
-                        step=0.02,
-                        value=0.66,
-                        label="Precision",
-                        info="Lower values increase the precision of the search by demanding a closer match.",
-                        show_label=True,
-                        interactive=True,
-                        elem_id="slider_precision",
-                        scale=3,
-                        visible=False
-                    )
-                gr.ChatInterface(
-                    fn=predict,
-                    textbox=textbox,
-                    additional_inputs=[dropdown1, dropdown2, slider, selected_context],
-                    fill_height=True,
+# Choices over the precision of the search
+choices3 = [n / 20.0 for n in range(1, 21)]
+
+with gr.Blocks(
+        fill_height=True,
+        css=CSS,
+        theme=gr.themes.Base(
+            primary_hue="green",
+            spacing_size="sm",
+            radius_size="sm",
+            font=[gr.themes.GoogleFont("Montserrat", weights=(500, 700))]),
+        title="VLLM Copilot Polarion",
+) as demo:
+    with gr.Row(
+            equal_height=False,
+            elem_id="row1"
+    ):
+        selected_context = gr.Dropdown(
+            choices=choices0,
+            value="No use case",
+            multiselect=False,
+            label="Prebuilt context",
+            info="Here are some pre made contexts to help you test the chatbot.",
+            show_label=True,
+            interactive=True,
+            elem_id="dropdown_context",
+            scale=3
+        )
+        with gr.Column(scale=7):
+            with gr.Row(equal_height=True):
+                dropdown1 = gr.Dropdown(
+                    choices=choices1,
+                    value="General",
+                    multiselect=False,
+                    label="Feeding the chatbot",
+                    info="If a database is selected, similarity search will be performed into it before the response is generated.",
+                    show_label=True,
+                    interactive=True,
+                    elem_id="dropdown_release",
+                    scale=5
                 )
+                dropdown2 = gr.Dropdown(
+                    choices=choices2,
+                    value=7,
+                    multiselect=False,
+                    label="Number of workitems",
+                    info="Start with a larger value and then decrease it if the response is inconvenient.",
+                    show_label=True,
+                    interactive=True,
+                    elem_id="dropdown_k",
+                    scale=3,
+                    visible=False
+                )
+                slider = gr.Slider(
+                    minimum=0.0,
+                    maximum=1.0,
+                    step=0.02,
+                    value=0.66,
+                    label="Precision",
+                    info="Lower values increase the precision of the search by demanding a closer match.",
+                    show_label=True,
+                    interactive=True,
+                    elem_id="slider_precision",
+                    scale=3,
+                    visible=False
+                )
+            gr.ChatInterface(
+                fn=predict,
+                textbox=textbox,
+                additional_inputs=[dropdown1, dropdown2, slider, selected_context],
+                fill_height=True,
+            )
 
-        dropdown1.change(fn=update_visibility, inputs=dropdown1, outputs=[dropdown2, slider])
+    dropdown1.change(fn=update_visibility, inputs=dropdown1, outputs=[dropdown2, slider])
 
-
-    demo.launch(favicon_path=icon.__str__())
+if __name__ == '__main__':
+    demo.launch(favicon_path=icon.__str__(), show_error=True)
