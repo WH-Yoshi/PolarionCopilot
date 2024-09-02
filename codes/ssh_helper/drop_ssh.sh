@@ -3,7 +3,7 @@
 # Function to display active SSH connections
 list_ssh_connections() {
   echo "Active SSH connections:"
-  netstat -tnpa | grep 'ESTABLISHED.*sshd' | awk '{print NR, $5, $7}' | while read -r line; do
+  netstat -tnpa | grep 'ESTABLISHED.*ssh' | awk '{print NR, $5, $7}' | while read -r line; do
     echo "$line"
   done
 }
