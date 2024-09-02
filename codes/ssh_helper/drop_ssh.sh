@@ -11,7 +11,7 @@ list_ssh_connections() {
 # Function to drop a selected SSH connection
 drop_ssh_connection() {
   local connection_number=$1
-  local pid=$(netstat -tnpa | grep 'ESTABLISHED.*sshd' | awk "NR==$connection_number {print \$7}" | cut -d'/' -f1)
+  local pid=$(netstat -tnpa | grep 'ESTABLISHED.*ssh' | awk "NR==$connection_number {print \$7}" | cut -d'/' -f1)
   if [ -n "$pid" ]; then
     kill -9 "$pid"
     echo "Connection $connection_number dropped."
