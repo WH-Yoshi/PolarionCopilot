@@ -78,7 +78,7 @@ Also to keep your main Python installation clean.
    ```
 
 #### Before any further steps, you need to fill the environment variables in the .env file.
-1. Fill the .env file with the following content, each value must be between quotes "":
+Create and fill the .env file with the following content, each value must be between quotes "":
    ```
    base_url=<URL> # The URL of your Polarion server (e.g. https://polarion.example.com/polarion)
    embedding_api=<URL> # The URL of your embedding API
