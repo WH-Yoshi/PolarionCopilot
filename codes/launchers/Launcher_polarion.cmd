@@ -7,7 +7,7 @@ netstat -an | findstr /i ":%PORT%.*LISTENING" >nul
 if %ERRORLEVEL% equ 0 (
     echo Port %PORT% is open on localhost
 ) else (
-    start cmd /c %SSH_COMMAND%
+    %SSH_COMMAND%
     if %ERRORLEVEL% equ 0 (
         echo SSH command successful.
     ) else (

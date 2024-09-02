@@ -146,7 +146,11 @@ class WorkitemSaver:
             )
         except Exception as e:
             loader.stop(print_exit=False)
-            raise Exception(f"Error while getting the Polarion instance.\nPossible error: Your .env file might not be created and/or filled.\nReal error: {e}\n")
+            if "Could not find a suitable TLS CA certificate bundle" in str(e):
+                raise Exception(f"Unable to get the Polarion instance. Could not find a suitable TLS CA certificate bundle.\nSolution : {colored('Please make sure that the certificates are in the certifi folder.', 'yellow')}")
+            elif "frfr" in str(e):
+                raise Exception(e)
+            raise Exception(f"Error while getting the Polarion instance.\nPossible error: {colored('Your.env file might not be created and / or filled.', 'yellow')}\nReal error: {colored(e, 'red')}\n")
         loader.stop()
         return client
 

@@ -21,14 +21,14 @@ if %ERRORLEVEL% equ 0 (
 
 rem If either port is closed, run the SSH command in a new terminal
 if %PORT1_STATUS% neq 0 (
-  start cmd /c %SSH_COMMAND%
+  %SSH_COMMAND%
   if %ERRORLEVEL% equ 0 (
     echo SSH command successful.
   ) else (
     echo Error: SSH command failed with exit code %ERRORLEVEL%.
   )
 ) else if %PORT2_STATUS% neq 0 (
-  start cmd /c %SSH_COMMAND%
+  %SSH_COMMAND%
   if %ERRORLEVEL% equ 0 (
     echo SSH command successful. Leave the terminal open.
   ) else (
