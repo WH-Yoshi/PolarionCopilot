@@ -203,12 +203,18 @@ def predict(
     messages, system_prompt = append_context_to_history(documents, history_openai_format, message, user_summary)
 
     if message:
-        response = client.chat.completions.create(
-            model="mistralai/Mistral-7B-Instruct-v0.3",
-            messages=messages,
-            temperature=0.5,
-            stream=True,
-        )
+        try:
+            response = client.chat.completions.create(
+                model="mistralai/Mistral-7B-Instruct-v0.3",
+                messages=messages,
+                temperature=0.5,
+                stream=True,
+            )
+        except Exception as e:
+            if "openai.AuthenticationError" in str(e):
+                raise Exception("You didn't create and/or fill your .env file...")
+            else:
+                raise Exception(e)
         partial_message = ""
         try:
             if documents:
