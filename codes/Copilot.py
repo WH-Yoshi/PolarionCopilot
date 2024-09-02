@@ -8,14 +8,12 @@ from typing import List, Tuple
 
 import gradio as gr
 from dotenv import load_dotenv
-from langchain_core.runnables.utils import Output
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
 from openai import OpenAI
 
 import file_helper as fh
-from PolarionCopilot.codes.file_helper import get_glossary
 
 load_dotenv()
 
@@ -90,7 +88,7 @@ def append_context_to_history(
     @param prebuilt_context: The information about the user
     @return: The updated history and the system prompt in a tuple
     """
-    glossary = get_glossary(str(glossary_path))
+    glossary = fh.get_glossary(str(glossary_path))
 
     if documents is not None and not isinstance(documents, list):
         raise Exception("The documents should be a list")
