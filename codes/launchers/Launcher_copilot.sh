@@ -23,7 +23,7 @@ PORT2_STATUS=$?
 
 if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
   echo "One or both ports are closed. Running SSH command in a new terminal..."
-  gnome-terminal -- bash -c "$SSH_COMMAND; exec bash"
+  $SSH_COMMAND
   if [ $? -eq 0 ]; then
     echo "SSH command successful. Leave the terminal open."
   else

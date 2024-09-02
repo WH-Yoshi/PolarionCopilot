@@ -6,7 +6,7 @@ SSH_COMMAND="ssh -N -f -p 41708 user@91.150.160.37 -i ~/.ssh/id_rsa_tensordock -
 if nc -zv localhost "$PORT" 2>&1 | grep -q 'succeeded'; then
   echo "Port $PORT is open on localhost"
 else
-  gnome-terminal -- bash -c "$SSH_COMMAND; exec bash"
+  $SSH_COMMAND
   if [ $? -eq 0 ]; then
     echo "SSH command successful. Leave the terminal open."
   else
