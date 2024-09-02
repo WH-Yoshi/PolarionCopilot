@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import gradio as gr
+import openai
 from dotenv import load_dotenv
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
@@ -210,11 +211,11 @@ def predict(
                 temperature=0.5,
                 stream=True,
             )
+        except openai.AuthenticationError:
+            raise Exception("You didn't create and/or fill your .env file...")
         except Exception as e:
-            if "openai.AuthenticationError" in str(e):
-                raise Exception("You didn't create and/or fill your .env file...")
-            else:
-                raise Exception(e)
+            raise Exception(e)
+
         partial_message = ""
         try:
             if documents:
