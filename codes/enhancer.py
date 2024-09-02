@@ -20,9 +20,9 @@ class Loader:
         A loader-like context manager
 
         Args:
-            desc (str, optional): The loader's description. Defaults to "Loading...".
+            desc (str, optional): The loader's description. Default to "Loading...".
             end (str, optional): Final print. Defaults to "Done!".
-            timeout (float, optional): Sleep time between prints. Defaults to 0.1.
+            timeout (float, optional): Sleep time between prints. Default to 0.1.
         """
         self.desc = desc
         self.end = end
@@ -31,7 +31,7 @@ class Loader:
 
         self._thread = Thread(target=self._animate, daemon=True)
         self.steps = ["⢿", "⣻", "⣽", "⣾", "⣷", "⣯", "⣟", "⡿"]
-        # self.steps = ['|', '/', '--', '\\']
+        # self.steps = ['|', '/', '-', '\\']
         self.done = False
 
     def start(self):
@@ -56,7 +56,6 @@ class Loader:
             print(f"\r{colored(self.end, self.exit_color)}", flush=True)
         else:
             print("\r" + " " * cols, end="", flush=True)
-            print("\n")
 
     def __exit__(self, exc_type, exc_value, tb):
         # handle exceptions with those variables ^

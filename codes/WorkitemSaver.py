@@ -146,7 +146,7 @@ class WorkitemSaver:
             )
         except Exception as e:
             loader.stop(print_exit=False)
-            raise Exception(f"Error while getting the Polarion instance. Did you fill .env file ? :\n\t{e}\n")
+            raise Exception(f"Error while getting the Polarion instance.\nPossible error: Your .env file might not be created and/or filled.\nReal error: {e}\n")
         loader.stop()
         return client
 
