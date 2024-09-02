@@ -2,6 +2,7 @@ import os
 import pickle
 from datetime import datetime
 from pathlib import Path
+import pandas as pd
 from pprint import pprint
 
 from termcolor import colored
@@ -195,6 +196,11 @@ def path_to_certs() -> Path:
         return cert_path
     except Exception as e:
         raise Exception(f"Error : {e}")
+
+def get_glossary(path: str):
+    df = pd.read_csv(path, on_bad_lines='skip', header=None, delimiter=';')
+    glossary_dict = dict(zip(df[0], df[1]))
+    return glossary_dict
 
 
 if __name__ == '__main__':
