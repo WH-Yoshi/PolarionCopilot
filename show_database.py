@@ -6,7 +6,7 @@ def load_update_file():
     """
     Load the update file and return its content.
     """
-    return fh.open_pkl_file_rb(fh.get_faiss_data_path())
+    return fh.open_pkl_file_rb(fh.get_faiss_catalog_path())
 
 
 def print_formatted_info(info):
@@ -32,7 +32,7 @@ def display_file():
 
 
 def show_database():
-    if fh.get_faiss_path().exists() and any(fh.get_faiss_path().iterdir()):
+    if fh.get_faiss_db_path().exists() and any(fh.get_faiss_db_path().iterdir()):
         display_file()
     else:
         print(colored('Your database seems empty.', 'yellow'))

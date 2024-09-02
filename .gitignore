@@ -241,3 +241,4 @@ fabric.properties
 /data/
 /certifi/
 /codes/tests/
+/faiss_databases/

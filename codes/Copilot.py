@@ -21,20 +21,20 @@ load_dotenv()
 api_key = "EMPTY"
 client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
 embeddings = HuggingFaceEndpointEmbeddings(model=os.environ.get("embedding_api"))
-files = os.listdir(fh.get_faiss_path())
+files = os.listdir(fh.get_faiss_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 glossary_path = Path(__file__).parent / "public" / "glossary" / "glossary.csv"
 
 print("[CTRL] + Click on the link to open the interface in your browser.")
 
 
-def faiss_loader(db_id: str) -> FAISS:
+def faiss_db_loader(db_id: str) -> FAISS:
     """
     This function is used to load the faiss database
     :param db_id: The id of the database
     :return: The faiss database
     """
-    db_path = str(fh.get_faiss_path() / db_id)
+    db_path = str(fh.get_faiss_db_path() / db_id)
     try:
         db = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
     except Exception as e:
@@ -197,7 +197,7 @@ def predict(
     if db_id == "General":
         documents = None
     else:
-        db = faiss_loader(db_id)
+        db = faiss_db_loader(db_id)
         documents = document_search(message, db, k, score)
 
     history_openai_format = history_format(history)
@@ -263,7 +263,7 @@ choices0 = ["No use case", "Test case [generation & modification]"]
 
 # Choices over the database
 choices1 = [("No database", "General")]
-with open(fh.get_faiss_data_path(), "rb") as f:
+with open(fh.get_faiss_catalog_path(), "rb") as f:
     databases = pickle.load(f)
 for file in files:
     file = str(file)

@@ -5,8 +5,6 @@ If installation of required libraries is not already done, go in the project fol
     pip install -r requirements.txt
 """
 import pickle
-import random
-import time
 from pathlib import Path
 
 import requests.exceptions
@@ -15,7 +13,7 @@ from termcolor import colored
 import file_helper as fh
 from WorkitemSaver import WorkitemSaver
 from enhancer import Loader
-from file_helper import check_update_file, check_db_folder
+from file_helper import faiss_catalog_filled, faiss_db_filled
 
 
 def display_file(path: Path) -> None:
@@ -32,41 +30,39 @@ def display_file(path: Path) -> None:
         raise Exception(f"An error occurred while displaying the file: {e}")
 
 
-def prepare_available_choices(action_available: list) -> tuple[str, str]:
+def prepare_available_choices(available_actions: list, default_choice: str = "") -> tuple[str, str]:
     actions = ""
-    for i, string in enumerate(action_available):
+    for i, string in enumerate(available_actions):
         actions += colored(f'[{i + 1}] ', 'green') + string + "\n"
-    return "", actions
+    return default_choice, actions
 
 
 def preliminary_checks():
     print("---------Preliminary checks---------")
+    fh.delete_uncatalogued_db()
     try:
         WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
     except Exception as e:
-        print(e)
-    if not check_db_folder() and not check_update_file():
+        raise Exception(e)
+    if not faiss_db_filled() and not faiss_catalog_filled():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
-        time.sleep(random.uniform(1.5, 2.0))
         loader.stop()
         actions = ["Save"]
-    elif check_db_folder() and not check_update_file():
+    elif faiss_db_filled() and not faiss_catalog_filled():
         loader = Loader("Checking", "Some databases exist but are unusable, deleting...", "yellow", 0.05).start()
-        time.sleep(random.uniform(1.5, 2.0))
         loader.stop()
-        fh.delete_all_faiss_databases()
+        fh.delete_all_databases()
         actions = ["Save"]
     else:
         loader = Loader("Checking", "All good.", "green", 0.05).start()
-        time.sleep(1)
         loader.stop()
         actions = ["Save", "Update"]
     return actions
 
 
 if __name__ == "__main__":
-    action_available = preliminary_checks()
-    update_file_path = fh.get_faiss_data_path()
+    available_actions = preliminary_checks()
+    update_file_path = fh.get_faiss_catalog_path()
 
     print("\n|------Polarion Workitem Saver------|\n")
 
@@ -77,15 +73,15 @@ if __name__ == "__main__":
             do_save = input(" \u21AA  Invalid input. Please enter 'y' or 'n: "
                             if do_save else " \u21AA  Do you want to embed them now ? [Y]es / [N]o : ").lower()
         if do_save == "y":
-            display_file(fh.get_cache_data_path())
+            display_file(fh.get_cache_catalog_path())
             cache_choice = ""
             while cache_choice not in [str(i) for i in
-                                       range(1, len(fh.open_pkl_file_rb(fh.get_cache_data_path())) + 1)]:
+                                       range(1, len(fh.open_pkl_file_rb(fh.get_cache_catalog_path())) + 1)]:
                 cache_choice = input(
                     " \u21AA  Invalid input, retry : "
                     if cache_choice else " \u21AA  Number input : ")
 
-            dictio = fh.open_pkl_file_rb(fh.get_cache_data_path())
+            dictio = fh.open_pkl_file_rb(fh.get_cache_catalog_path())
             db_id = list(dictio.keys())[int(cache_choice) - 1]
             details = dictio[db_id]
 
@@ -100,8 +96,8 @@ if __name__ == "__main__":
             WorkitemSaver(location, db_type, workitem_type, release_input).create_vector_db(workitems)
             (fh.get_cache_path() / f"{db_id}.pkl").unlink()
 
-    action, printable_actions = prepare_available_choices(action_available)
-    while action not in [str(i) for i in range(1, len(action_available) + 1)]:
+    action, printable_actions = prepare_available_choices(available_actions)
+    while action not in [str(i) for i in range(1, len(available_actions) + 1)]:
         action = input(
             "Invalid input. Please enter the right number: "
             if action else "Choose an action:\n" + printable_actions + " \u21AA  Input : ")
@@ -159,7 +155,7 @@ if __name__ == "__main__":
         db_id = None
     elif action == "2":  # Update
         print(f"Databases you can {colored('update', 'green')}:\n")
-        display_file(fh.get_faiss_data_path())
+        display_file(fh.get_faiss_catalog_path())
 
         db_choice = ""
         while db_choice not in [str(i) for i in range(1, len(fh.open_pkl_file_rb(update_file_path)) + 1)]:

@@ -107,7 +107,7 @@ class WorkitemSaver:
     :param last_update_date: [Optional] A string representing the time of the last update
     :param db_id: [Optional] A string representing the database id
     """
-    db_folder_name = fh.get_faiss_path()
+    db_folder_name = fh.get_faiss_db_path()
 
     def __init__(
             self,
@@ -123,7 +123,7 @@ class WorkitemSaver:
         self.release = release
         self.polarion_url = os.environ.get("polarion_url")
         self.embedding_api = os.environ.get("embedding_api")
-        self.update_file_path = fh.get_faiss_data_path()
+        self.update_file_path = fh.get_faiss_catalog_path()
         self.now = datetime.now()
         self.client = self.get_polarion_instance()
         self.date = last_update_date
@@ -148,9 +148,7 @@ class WorkitemSaver:
             loader.stop(print_exit=False)
             if "Could not find a suitable TLS CA certificate bundle" in str(e):
                 raise Exception(f"Unable to get the Polarion instance. Could not find a suitable TLS CA certificate bundle.\nSolution : {colored('Please make sure that the certificates are in the certifi folder.', 'yellow')}")
-            elif "frfr" in str(e):
-                raise Exception(e)
-            raise Exception(f"Error while getting the Polarion instance.\nPossible error: {colored('Your.env file might not be created and / or filled.', 'yellow')}\nReal error: {colored(e, 'red')}\n")
+            raise Exception(f"Error while getting the Polarion instance.\nPossible error: {colored('The .env file might not be created and/or filled correctly.', 'yellow')}\nReal error: {colored(e, 'red')}\n")
         loader.stop()
         return client
 
@@ -449,7 +447,7 @@ class WorkitemSaver:
         texts = [descriptions[i:i + batch_size] for i in range(0, len(descriptions), batch_size)]
         metadatas = [metadatas[i:i + batch_size] for i in range(0, len(metadatas), batch_size)]
         if self.db_id:
-            path = str(fh.get_faiss_path() / self.db_id)
+            path = str(fh.get_faiss_db_path() / self.db_id)
             faiss = FAISS.load_local(path, embeddings, allow_dangerous_deserialization=True)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
                             timeout=0.05).start()
@@ -465,8 +463,8 @@ class WorkitemSaver:
                 faiss.add_texts(texts=text, metadatas=metadatas[i])
             loader.stop()
             self.db_id = uuid.uuid4().hex
-            faiss.save_local(str(fh.get_faiss_path() / self.db_id))
-        fh.db_to_faiss_file(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type, self.now)
+            faiss.save_local(str(fh.get_faiss_db_path() / self.db_id))
+        fh.db_to_faiss_catalog(self.db_id, self.location_id, self.release, self.location_type, self.workitem_type, self.now)
 
     def caller(self) -> None:
         workitems = []
@@ -506,7 +504,7 @@ class WorkitemSaver:
 
             uid = uuid.uuid4().hex
             try:
-                with open(fh.get_cache_data_path(), "rb") as f:
+                with open(fh.get_cache_catalog_path(), "rb") as f:
                     infos = pickle.load(f)
                 infos_to_dump = {
                     "location": self.location_id,
@@ -516,7 +514,7 @@ class WorkitemSaver:
                     "last_update": None
                 }
                 infos[uid] = infos_to_dump
-                with open(fh.get_cache_data_path(), "wb") as f:
+                with open(fh.get_cache_catalog_path(), "wb") as f:
                     pickle.dump(infos, f)
 
                 with open(fh.get_cache_path() / f"{uid}.pkl", "wb") as f:
@@ -532,7 +530,7 @@ class WorkitemSaver:
                 if "Failed to establish a new connection" and "22027" in str(e):
                     print(colored("This happens because the 22027 port is not open to communication. "
                                   "A SSH tunnel has to be opened to the distant server.\n"
-                                  "Find instructions here: https://github.com/WH-Yoshi/PolarionCopilot?tab=readme-ov-file#tensordock-virtual-machine", 'red'),
+                                  "Find instructions here: https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#tensordock-virtual-machine", 'red'),
                           colored("\nA cache file has been created, try again after enabling the SSH tunnel.", 'yellow'))
                 else:
                     raise Exception(f"Some error occurred: {e}")
