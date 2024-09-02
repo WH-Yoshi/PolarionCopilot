@@ -1,6 +1,6 @@
 @echo off
 set PORT=22027
-set SSH_COMMAND="ssh -N -f -p 41708 user@91.150.160.37 -i C:\Users\AIXYF\.ssh\id_rsa_tensordock -L 22027:localhost:8080"
+set SSH_COMMAND="ssh -N -f -p 41708 user@91.150.160.37 -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080"
 
 rem Check if PORT is open (listening or established)
 netstat -an | findstr /i ":%PORT%.*LISTENING" >nul
