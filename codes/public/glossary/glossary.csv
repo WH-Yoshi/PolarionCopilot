@@ -1,0 +1,715 @@
+﻿Activity;A
+American Association of Physicists in Medicine;AAPM
+Automatic Bolus Exchanger;ABE
+Automatic Beam Operation;ABO
+Automatic Beam Scheduler;ABS
+Automatic Beam Tuning;ABT
+Accelerator Control Unit;ACU
+Auto Correction Vector;ACV
+Analog to Digital Converter;ADC
+Architectural Design Document;ADD
+Application Entity;AE
+Agence fédérale des médicaments et des produits de santé;AFMPS
+Accessory Holder Universal Nozzle;AHUN
+AdaPT Insight;AI
+adaPTinsight Configuration Management Tool ;AICMT
+As Low As Reasonably Achievable;ALARA
+As Low As Reasonably Practicable;ALARP
+Advisory Notice;AN
+Automatic Nozzle Switching;ANS
+American National Standards Institute;ANSI
+Agence Nationale de Sécurité du médicament et des produits de santé;ANSM
+Agência Nacional De Vigilância Sanitária;ANVISA
+Asia Pacific;APAC
+Architecture;AR
+Architecture Review Board;ARB
+Abstract Syntax Notation number One;ASN.1
+Automatic Switching Rack;ASR
+Acceptance Test;AT
+Acceptance Test Protocol Tool;ATP Tool
+Beam Absence Electronic Unit;BAEU
+Band Aid Matrix;BAM
+Beam Access Point;BAP
+Beam Access Point Process;BAPP
+Building Beneficiary Occupancy Date ;BBOD
+Beam Current Control;BCC
+Beam Current Control Chain;BCC Chain
+Beam Current Check Electronic Unit;BCCEU
+Beam Current Measurement;BCM
+Beam Current Modulation;BCM
+Beam Current Monitor;BCM
+Beam Common Process;BCP
+Beam Current Regulation Electronic Unit;BCREU
+Beam Delivery Coordinator;BDC
+Burst Delivery Controller;BDC
+Beam Delivery Coordinator Unit;BDCU
+Beam Delivery System;BDS
+Beam Delivery System Control Unit;BDSCU
+Beam Delivery System Inputs and Outputs;BDSIO
+Beam's Eye View;BEV
+Bundesinstitut für Arzneimittel und Medizinprodukte;BfArM
+Beam Fluence Distribution Monitor;BFDM
+Beam Flux Monitor;BFM
+Beam Gating Electronic Unit;BGEU
+Baptist Hospital Miami;BHM
+Batch Importer;BI
+Business Intelligence Business Object;BIBO
+Beijing Institute of medical Testing;BIMT
+Beam Intensity Redundant Electronic Unit;BIREU
+Beam Intensity Regulation Electronic Unit;BIREU
+Beam Imaging System;BIS
+Beam Line Acquisition Kernel;BLAK
+Beam Line Control Unit;BLCU
+Beam Line Power Supply Control Unit;BLPSCU
+Beam Modifying Accessory Check;BMAC
+Beam Monitor Electronic Unit;BMEU
+Best Manufacturing Practices;BMP
+Beam Management System;BMS
+Building Occupancy Date;BOD
+Bill Of Material;BOM
+Bragg Peak;BP
+Bragg Peak Chamber;BPC
+Beam Profile Monitor;BPM
+Beam Profile Monitor Electronic Unit;BPMEU
+Beam Production System;BPS
+Building Readiness Date;BRD
+Beam Stop;BS
+Beam Supply System;BSS
+Back to conformity;BTC
+Beam Transport System;BTS
+Business Unit;BU
+competent authorities;CA
+Corrective Action and Preventive Action;CAPA
+Crash Button (Emergency Stop);CB
+Cone Beam Computed Tomography;CBCT
+CBCT and CNSH Control Unit;CBCTCNSHCU
+Condition Based Maintenance;CBM
+Compact Beam Production System;CBPS
+Cyclotron & Beam Transport Vault;CBTV
+Change Control Board;CCB
+Configuration Control Item;CCI
+Compensation Coil Power Supply;CCPS
+Close Circuit TeleVision;CCTV
+Counter Clock Wise;CCW
+Concept (or Preliminary) Design Review;CDR
+Central Drugs Standard Control Organization;CDSCO
+Component Engineering;CE
+Conformité Européenne;CE
+CE marking;CE
+Clinical Event Committee;CEC
+Chief Executive Officer;CEO
+Clinical Evaluation Report;CER
+Chinese FDA;CFDA
+Chief Financial Officer;CFO
+Code of Federal Regulation;CFR
+Compact Gantry Control Unit;CGCU
+Compact Gantry Treatment Room;CGTR
+Compact Gantry X-ray equipment Insertion System;CGXRIS
+Chief Innovation & Development Officer;CIDO
+Clinical Investigation Plan;CIP
+Clinical Investigation Report;CIR
+Corrective Maintenance;CM
+Capability Maturity Model Integration;CMMI
+Computerized Maintenance Management System;CMMS
+Computerized Medical System;CMS
+Compact Nozzle;CN
+Compact Nozzle Snout Holder;CNSH
+Certificate of conformity;CoC
+Chief Opetations Officer;COO
+Close Out Visit;COV
+Customer Project Coordination (department);CPC
+Centre de Protonthérapie d'Orsay;CPO
+Central Processing Unit;CPU
+Change Request;CR
+Cyclic Redundant Check;CRC
+Clinical Research Committee;CRC
+Case Report Form;CRF
+Customer Relationship Management System;CRM
+Contract Research Organization;CRO
+Capacity Requirement Planning;CRP
+Clinical study agreement;CSA
+Clinical Solution Group;CSG
+Customer service test matrix;CSTM
+Computed Tomography;CT
+Critical To Quality;CTQ
+Computerized Tomography Scanner;CT-Scanner
+Clinical Target Volume;CTV
+Control Unit;CU
+Clinical User Guide;CUG
+Clock Wise;CW
+Continuous Wave;CW
+Absorbed Dose;D
+Attenuation Equivalent;d
+Absorbed dose rate;D'
+Design/Building Team;D/BT
+Range in Patient;d90
+Data Base;DB
+Dual Beam Treatment Room;DBTR
+Dosimetry Counter Electronic Unit;DCEU
+Distal Dose Fall-off;DDF
+Detailed Design Review;DDR
+Device Centric Mode;DEVC
+Design History File;DHF
+Device History Record;DHR
+Digital Imaging COmmunication in Medicine;DICOM
+Digital Imaging Devices;DID
+Digital Imaging Positioning System;DIPS
+Design Inputs Review;DIR
+Data Management Plan;DMP
+Device Master Record;DMR
+Dedicated Nozzle;DN
+Dedicated Nozzle Accessory Drawer;DNAD
+Dedicated Nozzle Snout Holder;DNSH
+Delegation Of Authority;DOA
+Delegation of Authority Log;DOA
+Dead on Arrival;DOA
+Dead on Installation;DOI
+Design Outputs Review;DOR
+Lead Equivalent;dPb
+Dipole Power Supply;DPS
+Digital Radiograph;DR
+Digitally Reconstructed Radiograph;DRR
+Double Scattering;DS
+Data Safety Monitoring Committee;DSMB
+Design Transfer;DT
+Dose To Agreement;DTA
+Dose Volume Histogram;DVH
+Experimental Area;EA
+Ethics committee (Europe) or Institutional Review Board (US/ASIA);EC/IRB
+European Computer Manufacturers Association;ECMA
+Engineering Change Order;ECO
+Engineering Change Request;ECR
+Energy selection and Beam Transport Control Unit;ECU/BTCU
+Electrostatic Deflector;ED
+European Economic Area;EEA
+Environment, Health and Safety;EHS
+Electronic IDentifier;eID
+electronic IDentification Electronic Unit;eIDEU
+ElectroMagnetic;EM
+ElectroMagnetic Compatibility;EMC
+European Medical Device Nomenclature ;EMDN
+ElectroMagnetic Interference;EMI
+Electrometer IO Board;EMIO
+Electronic Medical Record;EMR
+EMR Centric Mode;EMRC
+EMRC Front End;EMRC_FE
+Eclipse Ocular Proton Planning;EOPP
+Essential Performances;EP
+Engineering Product Group;EPG
+Enterprise Resource Planning;ERP
+Energy Selection and Beam Transport System;ESBTS
+Environmental, Social and Governance;ESG
+Engineering Support Office;ESO
+Energy Selection System;ESS
+Electronic Unit;EU
+European Union;EU
+European Database on Medical Devices ;EUDAMED
+Executive Vice President;EVP
+Experimental Room;EXPR
+Factory Acceptance Test;FAT
+Fixed Beam Quality Assurance Room;FBQAR
+Fixed Beam Treatment Room;FBTR
+Faraday Cup;FC
+Functionally redundant verifier Control Unit;FCU
+Foods & Drugs Administration;FDA
+Feature Development Manager;FDM
+SOBP Flatness;Fdp
+Feet-First Prone;FFP
+Feet-First Supine;FFS
+Factory INcoming;FIN
+Lateral Flatness;Flp
+Failure Mode and Effect Analysis;FMEA
+Failure Mode, Effect and Criticality Analysis;FMECA
+Feature Management Plan;FMP
+Flow-down Matrix;FMX
+Fault Occurency Report;FOR
+Field Of View Control Unit;FOVCU
+Flat Panel ;FP
+Final Power Amplifier;FPA
+Field-Programmable Gate Array;FPGA
+Flat Panel Motion Electronic Unit;FPMEU
+Flat Panel Synchronization Electronic Unit;FPSEU
+Factory release note;FRN
+Fixed Reference System;FRS
+Fast Room Switching Time;FRST
+Field Replaceable Unit;FRU 
+First Scatterer;FS
+Field Safety Corrective Action;FSCA
+Field Service Engineer;FSE
+First Scatterer Electronic Unit;FSEU
+Field Safety Notice;FSN
+Fixed Small beam Treatment Room;FSTR
+Full Time Equivalent;FTE
+Factory Test Protocol report;FTPR
+First Unit Review;FUR
+Firmware;FW
+Full Width at Half Maximum;FWHM
+Gantry Correction File;GCF
+Gantry Control System;GCS
+Gantry Coordinate System;GCS 
+Global factory test matrix;GFTM
+Global Planning (department);GP
+Gantry Position Redundant System Control Unit;GPRSCU
+Graphic Processing Unit;GPU
+General Risk Analysis;GRA
+Gantry Rolling Floor;GRF
+Global site test matrix;GSTM
+Global Tests Matrix;GTM
+Gantry Treatment Room;GTR
+Gross Tumor Volume;GTV
+Graphical User Interface;GUI
+Dose equivalent;H
+Hand Pendant;H/P
+Hazard;HAZ 
+Human Computer Interface;HCI
+Hardware Design Specification;HDS
+Head-First Prone;HFP
+Head First Supine;HFS
+Head-First Supine;HFS
+Hospital Information System;HIS
+Human Machine Interface;HMI
+Human Resource;HR
+Health Science Authority;HSA
+Horizontal Table Top Coordinate System ;HTTCS
+Hampton University Proton Therapy Institute ;HUPTI
+High-voltage;HV
+Heating Ventilation Air Cooling;HVAC
+HardWare;HW
+Imaging and Interface;I&I
+Input / Output;I/O
+IBA Image-guided therapy Console;I2C
+Internet Assigned Numbers Authority;IANA  
+Investigator Brochure;IB
+Ion Beam Applications;IBA
+Interface Building Document;IBD
+Inclined Beam Line Gantry;IBLG
+Installed Base Technical Management;IBTM
+Inclined Beam Treatment Room;IBTR
+Ionization Chamber;IC
+Investigation, corrective and preventive action;ICAPA
+Interface Control Document;ICD
+Ionization Chamber Electronic Unit;ICEU
+Informed Consent Form;ICF
+IBA COMmon Platform;iComP
+International Commission on Radiation Units and measurements;ICRU
+Investigational Device Exemption;IDE
+Irradiation Data Translator;IDT
+International Electrotechnical Commission;IEC
+Imaging Equipment support System;IES
+Internet Engineering Task Force;IETF        
+Indication for use;IFU
+Insulated-gate bipolar transistor ;IGBT
+Image Guided Particle Therapy;IGPT
+Image Guided Radiation Therapy;IGRT
+Inspectie Gezondheidszorg en Jeugd;IGZ
+Integrating the Healthcare Enterprise;IHE
+Integrating the Healthcare Enterprise – Radiation Oncology;IHE-RO
+International Medical Device Regulators Forum;IMDRF
+InterMediate Power Amplifier;IMPA
+Intensity Modulated Proton Therapy;IMPT
+Intensity Modulation Radiotherapy Treatment;IMRT
+Imaging System;IMS
+Isocenter Materialization Tool;IMT
+Business Unit Industrial;INDUS
+Interface OIS;IOIS
+In process quality check;IPQC
+Installation Qualification;IQ
+In Room Computed Tomography;IRCT
+Ion Source;IS
+Ion Source Arc Power Supply;ISAPS
+Ion Source Electronic Unit;ISEU
+International Standardization Organization;ISO
+Ion Source Power Supply;ISPS
+Integration Test;IT
+International Telecommunication Union - Telecommunication Standardization Sector;ITU-T                
+Internal User Notice;IUN
+Just in time request;Just In Time
+Kerma;K
+Kerma Rate;K'
+Korean Foods & Drugs Administration (FDA);KFDA
+Korea National Cancer Center;KNCC
+Key Performance Indicator;KPI
+Keyboard Video Mouse;KVM
+Local Actor Administrator;LAA
+Local Area Network;LAN
+Light Emitting Diode;LED
+Linear energy transfer dE/dx;LET
+Light Field;LF
+Large Field Of View;LFOV
+Light Field Power Supply;LFPS
+Linear particle accelerator;LINAC
+Laser Light Field Electronic Unit;LLFEU
+Low-Level Radio-Frequency;LLRF
+Lateral Penumbra;LP
+Low Pressure Ionization Chamber;LPIC
+Laser Pair Power Supply;LPPS
+Lloyd's Register Quality Assurance;LRQA
+Limit Switch;LS
+Language Service Provider;LSP
+Laser Telemeter Electronic Unit ;LTEU
+Local User Administrator;LUA
+Look-up Table;LUT
+Attenuation Coefficient;m
+Measuring and monitoring;M&M
+Range Modulation;m90
+Marketing Authorization Holder;MAH
+Medical Accelerator Solutions;MAS
+Medical Accelerator Solutions & Technology;MAST
+Main Coil;MC
+Motion Control Access Point;MCAP
+Main Control Room;MCR
+Main Control Room Server;MCRS
+Main Control Room Workstation;MCRW
+Medical Device;MD
+Medical Device Coordination Group;MDCG
+Medical Device Directive;MDD
+Medical Device Report;MDR
+Reportable event;MDR reportable event
+Motion Enable Button;MEB
+Mobile Elevated Working Platform;MEWP
+Massachusetts General Hospital;MGH
+Ministry of Health, Labor, and Welfare;MHLW
+Medicines and Healthcare products Regulatory Agency;MHRA
+Metadoc ID;MID
+Metadoc Identifier;M-ID
+Manufacturer Incident Report;MIR
+Miscellaneous;Misc.
+Medical Imaging and Technology Alliance;MITA
+Multi-Leaf Collimator;MLC
+Multi Layer Faraday Cup;MLFC
+Multi Layer Ionization Chamber;MLIC
+Milling Machine;MM
+Milling Machine Interface;MMI
+Milling Machine System;MMS
+Milling Machine System Front End;MMS_FE
+Minutes of Meeting;MoM
+Medical Physicist;MP
+Monitoring Plan;MP
+Modular Power Supply System;MPSS
+Magnetic Resonance;MR
+Magnetic Resonance Imaging;MRI
+Material Requirement Planning;MRP
+Manufacturing and Supply Chain;MSC
+Manufacturing & Supply Chain Planning;MSCP
+Motorized Slits Electronic Unit;MSEU
+Mean Time Between Failures;MTBF
+Manufacturing Test Engineers (department);MTE
+Mean Time To Repair;MTTR
+Dose Monitor Unit;MU
+Monitor Unit;MU
+Maintenance user interface;MUI
+Not Applicable;NA
+North America;NAM
+Notified Body;NB
+nonconformity;NC
+National Competent Authorities;NCA
+Non disclosure agreement;NDA
+Nozzle Entrance Control Unit;NECU
+Net Full Time Equivalent;Net FTE
+Non Interceptive Beam Profile Monitor ;NIBPM
+New Jersey Proton Therapy Center;NJPTC
+Net promoter score;NPS
+Non patient specific accessories;NPSA
+Non-Product Software;NPSW
+Northeast Proton Therapy Center;NPTC
+Organs At Risk;OAR
+Oil Diffusion Pump;ODP
+Original Equipment Manufacturer;OEM
+Ordre de Fabrication;OF
+Object Identifier;OID   
+Oncology Information System;OIS
+Oklahoma City;OKC
+Operating Instruction;OP
+OLE for Process Control;OPC
+Operation Scenario;OPSC
+Operational qualification;OQ
+Occupational Safety and Health Administation;OSHA
+Profit & Loss;P/L
+ProteusPLUS;P+
+ProteusONE;P1
+Picture Archiving and Communication System;PACS
+Powered Air Purifying Respirator;PAPR
+Power Business Intelligence (Reporting tool);PBI - Power BI
+Pencil Beam Scanning;PBS
+Product Breakdown Structure;PBS
+Printed Circuit Board;PCB
+Part Classification Number;PCN, PCN1, PCN2, PCN3, PCN4
+Project Coordination Office;PCO
+Patient Carrying System;PCS
+Positioning Control Unit;PCU
+Protocol Deviation;PD
+Patient Data Controller;PDC
+Power Distribution Cabinet;PDC
+Personal Data Protection;PDP
+Product Engineering;PE
+Protective Earthing;PE
+Private Enterprise Number;PEN
+Positron Emission Tomography;PET
+Principal Investigator;PI
+Penning Ion Gauge;PIG
+Purchase Information Record;PIR
+Programmable Logic Controller;PLC
+PBS Layer Definition;PLD
+Product Lifecycle management;PLM
+Project Manager;PM
+Preventive Maintenance;PM
+Positioning Management System;PMS
+Purchase Order;PO
+POSitioning System;POSS
+Patient Positioning Devices;PPD's
+Personal Protective Equipment;PPE
+Patient Positioning System;PPS
+Patient Positioning System Control Unit;PPSCU
+Patient Positioning Verification System;PPVS
+Performance qualification ;PQ
+Preliminary Quality Notification Report ;PQNR
+Patient Record;PR
+Problem Report;PR
+Purchase Requisition;PR
+PLM;Product Lifecycle Management
+Program Management Office;ProMO
+Prototype;Proto, Proof of concept
+Production Readiness Review;PRR
+Proton Research Area;PRS
+Power Supply;PS
+Patient specific accessories;PSA
+Power Supply Room;PSR
+Programmable Safety System;PSS
+Power Supply Unit;PSU
+Particle Therapy;PT
+Proton Therapy;PT
+Proton therapy co-operative group;PTCOG
+Proton Therapy Equipement;PTE
+Proton Therapy Equipment Vendor;PTEV
+Proton Therapy System ;PTS
+Planning Target Volume;PTV
+Processing Unit;PU
+Patient, User, Public Impact;PUPI
+Project Web Application (MS project);PWA
+Quadrupole Magnets (Quads);Q
+Quality Assurance;QA
+Quality Assurance Control System;QACS
+Quality Assurance Product Release team;QAPRA
+Quality Control;QC
+Quench Detection System;QDS
+Quality Information Record;QIR
+quality management system;QMS
+Quality Notification;QN
+Quadrupole Power Supply;QPS
+QRS Team;QRS
+QTaste Test Case;QTC
+Research and Development;R&D, RnD
+Design and Development project milestones;R0,R1,R2
+Redundant Range Verifier Control Unit;R2VCU
+Regulatory Affairs;RA
+Research Area;RA
+Risk Analysis;RA
+Realibility, Availability, Maintainability and Safety;RAMS
+Responsible, Accountable, Supportive, Consulted, Informed;RASCI
+Relative biological effectiveness;RBE
+Redundant Beam Shut Off;RBSO
+Release Candidate;RC
+Research Coordinator;RC
+Range Compensator;RC 
+Root Cause Analysis;RCA
+Rough Cut Capacity Planning (measure);RCCP
+Redundant verifier Control Unit;RCU
+Relational Database;RDBMS 
+Requirement;REQ
+Return of Experience;REX
+Radio-Frequency;RF
+Ridge Filter;RF
+Redundant and Functional Control Unit;RFCU
+Radio Frequency Electronic Unit / Master Clocks;RFEU
+Request for Quotation;RFQ
+Residual gas analyzer;RGA
+Range Modulator;RM
+Return Material Authorization;RMA
+Range Modulator Electronic Unit;RMEU
+Regional Operations Director;ROD
+Restriction of Hazardous Substances;RoHS
+Return On Investment;ROI
+Federal Service for Surveillance in Healthcare;Roszdravnadzor
+ROTary CapacitOr;ROTCO
+Remote Procedure Call;RPC
+Remote Positioning and Delivery;RPD
+Business Unit Radio Pharma Solutions;RPS
+Requirement Review Board;RRB
+Range Shifter;RS
+Recommended Spare Parts List;RSPL
+Requirements Specification Review;RSR
+Radiation Therapy;RT 
+Radio-Therapy Ion Plan;RT Ion Plan
+Radio-Therapy Plan;RT Plan
+Real-Time Control Board;RTCB
+Risk Test Coverage Report;RTCR
+Radio-Therapy Treatment Delivery System ;RTS
+Radiation Therapy Technologist;RTT
+Range Verifier;RV
+Range Verifier Electronic Unit;RVEU
+Sales and Operations Planning;S&OP
+Superconducting Synchrocyclotron;S2C2
+Stand-Alone mode;SA
+Source to Axis Distance;SAD
+Statistical Analysis Plan;SAP
+Site Acceptance Test;SAT
+Search Button;SB
+Software Bill of Materials;SBOM
+Safety and Business Risks Levels;SBRL
+Scanning Controller;SC
+Steering Committee;SC
+Supervisory Control and Data Acquisition;SCADA
+Scanning Controller Coordinator;SCC
+Superconducting Coil;SCC
+Superconducting Coil Power Supply;SCCPS
+Software Configuration Management;SCM
+Services Classification Number ;SCN, SCN1, SCN2, SCN4
+Scope On Time (KPI);SCOT
+Service Class Provider;SCP
+Safety Control Unit;SCU
+Service Class User;SCU
+Safety Decision;SD
+Service Development Group;SDG
+Solution Document Review;SDR
+Software Design Specification;SDS
+Service Engineering;SE
+Single Field Uniform Dose;SFUD
+Sliding Gantry;SG
+Scan Generator Control Unit;SGCU
+Snout Holder;SH
+Snout Holder Electronic Unit;SHEU
+Start of Installation Activities;SIA
+Source to Image receptor Distance;SID
+Source to Isocenter Distance;SID
+Single Identification Number;SIN
+Supplier-Input-Process-Output-Customer;SIPOC
+Single Scattering;SIS
+Site Initiation Visit;SIV
+Safety Key Electronic Unit;SKEU
+Snout Lifting Device;SLD
+Site Manager;SM
+Scanning Magnets;SM 
+Subject Matter Expert;SME
+Scanning magnet electronic unit;SMEU
+Single Monitoring Interface;SMI
+Safety Management Plan;SMP
+Scanning Magnets Power Supply;SMPS
+Scanning Magnets Power Supply Electronic Unit;SMPSEU
+Scanning dedicated Nozzle;SN
+Serial Number;SN
+System Owner;SO
+Spread Out Bragg Peak;SOBP
+Source to Object Distance;SOD
+Standard Operating Hours;SOH
+Standard Operating Procedure;SOP
+Standard Operating Sheet;SOS
+Software of Unkown provenance;SOUP
+Service Pack;SP
+Single Photon Emission CT;SPECT
+Serious Public Health Threat ;SPHT
+Single Person of Contact;SPOC
+Sourcing Quality Officer;SQE
+Site Qualification Visit;SQV
+Safety Redundant Control Unit;SRCU
+Safety Redundant Control Unit located in MCR;SRCU-0
+Safety Redundant Control Unit located in TRi;SRCU-i
+System Requirements Document;SRD
+Single Registration Number;SRN
+S2C2 Realtime Sequencing Electronic Unit;SRSEU
+Second Scatterer;SS
+Solid State Amplifier;SSA
+Source to Skin Distance;SSD
+Second Scatterer Electronic Unit;SSEU
+Standard template of Acceptance Test Protocols;Standard template of ATPs
+Summary of Technical and Electronical Documents;STED
+Steering Committee;Steerco
+Site Technical Leader;STL
+Site Tests Matrix;STM
+Supplier Test Report;STR
+SoftWare;SW
+Subzone;SZ
+Radioactive Half-life;T
+To Be Defined;TBD
+Therapy Center;TC
+Technical Complexity Levels ;TCL
+Tool Center Point;TCP
+Transmission Control Protocol;TCP
+Treatment Control Room;TCR
+Technical change request;TCR
+Treatment Control Room Workstation;TCRW
+Therapy Control System;TCS
+Treatment Control Unit;TCU
+Treatment Delivery Status;TDS
+Trim/Degauss and Steering Power Supply;TDSPS
+Therapeutic Good Administration;TGA
+Training Log;TL
+Trial Master File;TMF
+Target Operating Model (Governance);TOM
+Technical Product Documentation;TPD
+Treatment Prescription Manager;TPM
+Test Protocol;TPO
+Test Protocol Report;TPR
+Treatment Planning Room;TPR
+Treatment Planning System;TPS
+Treatment Room;TR
+Test Review Board;TRB
+TReatment Control System;TRCS
+Treatment Room Monitor;TRM
+Technical Support Center;TSC
+Treatment Session Manager;TSM 
+Therapy Safety System;TSS
+Table Top Coordinate System;TTCS
+Technical Writer;TW
+Ushuaïa to Vladivostok;U2V
+Unanticipated Adverse Event ;UAE
+Universal Beam Triggering Interface;UBTI
+Use Case;UC
+Use Cases Document;UCD
+Unique Device Identifier;UDI
+Usability Engineering File;UEF
+User Interface;UI
+Underwriters Laboratories ;UL
+Universal Monitoring Interface;UMI
+Unified Modeling Language;UML
+Unified Modeling Language;UML
+Universal Nozzle;UN
+User Notice;UN
+University of Florida;UoF
+University of Pennsylvania;Upenn
+Uninterruptible Power Supply;UPS
+User Requirement Specification;URS
+Uniform Scanning;US
+Uniform Scanning Generator;USG
+Unit Testing;UT
+Universal Triggering Electronic Unit;UTEU
+Verification and Validation;V&V, VnV
+Verification by Analysis;VBA
+Variable Collimator;VC
+Variable Collimator Electronic Unit;VCEU
+Visual Display Unit;VDU
+VERSAmodule Eurocard ;VME
+Verification Matrix;VMX
+Virtual Network Computing;VNC
+Virtual Source to Axis Distance;VSAD
+Validation Test;VT
+Validation Test Case;VTC
+Work Breakdown Structure;WBS
+Water Cooling Room;WCR
+Water Equivalent Thickness;WET
+Workflow;WF
+Workflow Identifier;WFID
+Workflow Interruption;WI
+Work Instruction;WI
+Wireless Motion Enable Button;WMEB
+Wireless Motion Enable Button Control Unit;WMEBCU
+Work Order ;WO
+Westdeutsches Protonentherapiezentrum Essen;WPE
+X-Ray Control Unit;XCU
+X, Y, Z axes of the IEC61217 Fixed Reference System;Xf, Yf, Zf
+X, Y, Z axes of the IEC61217 Gantry Coordinate System;Xg, Yg, Zg
+eXtensible Markup Language;XML
+X-ray Tube Electronic Unit;XREU
+X-ray tube Power Supply;XRPS
+Yoke Lifting Control Unit;YLCU
+Yoke Temperature Electronic Unit;YTEU
+Total;714
