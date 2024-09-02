@@ -28,7 +28,7 @@ def check_packages():
 
 
 def print_instructions():
-    print("Instructions for setting up and running Polarion.py:")
+    print("Instructions:")
 
     print("\n1. Installing the necessary packages:")
     check_packages()
