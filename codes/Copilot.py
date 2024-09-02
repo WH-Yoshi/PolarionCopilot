@@ -7,15 +7,14 @@ from pathlib import Path
 from typing import List, Tuple
 
 import gradio as gr
+import openai
 from dotenv import load_dotenv
-from langchain_core.runnables.utils import Output
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
 from openai import OpenAI
 
 import file_helper as fh
-from PolarionCopilot.codes.file_helper import get_glossary
 
 load_dotenv()
 
@@ -90,7 +89,7 @@ def append_context_to_history(
     @param prebuilt_context: The information about the user
     @return: The updated history and the system prompt in a tuple
     """
-    glossary = get_glossary(str(glossary_path))
+    glossary = fh.get_glossary(str(glossary_path))
 
     if documents is not None and not isinstance(documents, list):
         raise Exception("The documents should be a list")
@@ -205,12 +204,18 @@ def predict(
     messages, system_prompt = append_context_to_history(documents, history_openai_format, message, user_summary)
 
     if message:
-        response = client.chat.completions.create(
-            model="mistralai/Mistral-7B-Instruct-v0.3",
-            messages=messages,
-            temperature=0.5,
-            stream=True,
-        )
+        try:
+            response = client.chat.completions.create(
+                model="mistralai/Mistral-7B-Instruct-v0.3",
+                messages=messages,
+                temperature=0.5,
+                stream=True,
+            )
+        except openai.AuthenticationError:
+            raise Exception("You didn't create and/or fill your .env file...")
+        except Exception as e:
+            raise Exception(e)
+
         partial_message = ""
         try:
             if documents:
