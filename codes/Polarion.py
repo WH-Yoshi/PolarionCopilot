@@ -44,7 +44,7 @@ def preliminary_checks():
     try:
         WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
     except Exception as e:
-        print(f"Error while getting the Polarion instance. Did you fill .env file ? : {e}")
+        print(e)
     if not check_db_folder() and not check_update_file():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
         time.sleep(random.uniform(1.5, 2.0))
