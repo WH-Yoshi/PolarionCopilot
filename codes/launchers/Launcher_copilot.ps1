@@ -12,6 +12,7 @@ $PORT2_STATUS = if ($PORT2_STATUS) { 0 } else { 1 }
 
 # If either port is closed, run the SSH command
 if ($PORT1_STATUS -ne 0 -or $PORT2_STATUS -ne 0) {
+    Write-Host "One or both ports are closed. Running SSH command..."
     Invoke-Expression $SSH_COMMAND
     if ($LASTEXITCODE -eq 0) {
         Write-Host "SSH command successful."

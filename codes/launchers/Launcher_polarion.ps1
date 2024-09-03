@@ -6,6 +6,7 @@ $PORT_STATUS = netstat -an | Select-String -Pattern ":$PORT.*LISTENING"
 if ($PORT_STATUS) {
     Write-Host "Port $PORT is open on localhost"
 } else {
+    Write-Host "Port $PORT is closed on localhost. Running SSH command..."
     Invoke-Expression $SSH_COMMAND
     if ($LASTEXITCODE -eq 0) {
         Write-Host "SSH command successful."

@@ -6,9 +6,10 @@ SSH_COMMAND="ssh -N -f -p 41708 user@91.150.160.37 -i ~/.ssh/id_rsa_tensordock -
 if nc -zv localhost "$PORT" 2>&1 | grep -q 'succeeded'; then
   echo "Port $PORT is open on localhost"
 else
+  echo "Port $PORT is closed on localhost. Opening SSH tunnel..."
   $SSH_COMMAND
   if [ $? -eq 0 ]; then
-    echo "SSH command successful. Leave the terminal open."
+    echo "SSH command successful."
   else
     echo "Error: SSH command failed with exit code $?."
     echo "The remote virtual machine is probably not running."
