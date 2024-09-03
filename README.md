@@ -7,14 +7,14 @@ PolarionCopilot is a combination of two main codes:
 ## Installation
 
 The installation is half-manual, half-automated.\
-The manual and the first part is the installation of the required software.\
+The manual part is the installation of the required software.\
 The automated part is the installation of each library, and specific changes done to them.
 
 ### Required installations
 #### Windows
 1. Python, any version is good: [Python for Windows](https://www.python.org/downloads/)
    - Make sure to check the box *"Add python.exe to PATH"* during the installation
-2. Git if not already installed, to clone this repository: [Git](https://git-scm.com/downloads)
+2. Git, if it isn't already installed, to clone this repository: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
 3. **[Optional]** A good terminal to have a more user-friendly experience.
    - You can use the new Windows Terminal for exemple: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
@@ -23,7 +23,7 @@ The automated part is the installation of each library, and specific changes don
    ```bash
    sudo apt-get install python3 python3-venv
    ```
-2. Git if not already installed, to clone this repository: 
+2. Git, if it isn't already installed, to clone this repository: 
    ```bash
    sudo apt-get install git
    ```
@@ -88,7 +88,7 @@ Create and fill the .env file with the following content, each value must be bet
    polarion_token=<TOKEN> # The user token to access the Polarion server
    ```
    Replace `<URL>`, `<USERNAME>`, and `<TOKEN>`(or `<PASSWORD>`) with your own values.
-   .env file contains sensitive information, make sure to not share it.
+   The '.env' file contains sensitive information, make sure to not share it.
 
 
 ### Tensordock virtual machine
