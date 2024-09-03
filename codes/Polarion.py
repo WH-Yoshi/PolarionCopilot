@@ -45,7 +45,7 @@ def preliminary_checks():
         WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
     except Exception as e:
         print(e)
-        sys.exit(1)
+        sys.exit(0)
     if not faiss_db_filled() and not faiss_catalog_filled():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
         loader.stop()
