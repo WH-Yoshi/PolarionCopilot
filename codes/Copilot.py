@@ -23,6 +23,7 @@ client = OpenAI(api_key=api_key, base_url=os.environ.get("openai_api"))
 embeddings = HuggingFaceEndpointEmbeddings(model=os.environ.get("embedding_api"))
 files = os.listdir(fh.get_faiss_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
+iba_logo = Path(__file__).parent / "public" / "images" / "iba.png"
 glossary_path = Path(__file__).parent / "public" / "glossary" / "glossary.csv"
 
 print("[CTRL] + Click on the link to open the interface in your browser.")
@@ -244,9 +245,63 @@ def update_visibility(selected_dropdown: str, gradio_value: str):
         return gr.update(visible=True), gr.update(visible=True)
 
 
-CSS = """#row1 {flex-grow: 1; align-items: unset;}
-.form {height: fit-content;}
-footer {display: none !important;}"""
+CSS = """
+    #gradio_header {
+    width: 100%;
+    display:flex;
+    height:10%;
+    align-items: center;
+    }
+    
+    #gradio_header h1 {
+    width: 100% !important;
+    padding-left: 3% !important;
+    font-size:1.2rem !important;
+    }
+    
+    #gradio_header #logo{
+    width: 3.25rem;
+    height: 3.25rem;
+    }
+    #row1 {flex-grow: 1; align-items: unset;}
+    .form {height: fit-content;}
+    footer {display: none !important;}
+    #issues {
+        height: fit-content !important;
+        overflow-y: auto !important;
+        border: 1px solid #374151 !important;
+        background-color:#1F2937 !important;
+        padding: 3% !important;
+        padding-bottom: 5% !important;
+    }
+    
+    #issues p{
+        color:#9ca3af;
+        padding-bottom: 2.5% !important;
+    }
+    #component-24{
+        background:#69BE28 !important;
+    }
+    
+    #component-24:hover{
+        background-color: #4A9C1D !important;
+    }
+    
+    #issues a{
+        font-size: 1rem;
+        padding: 2% 5%;
+        background-color: #69BE28;
+        text-decoration: none;
+        color: white;
+        border-radius:5px;
+        margin-bottom:5% !important;
+    }
+    
+    #issues a:hover{
+        cursor:pointer;
+        background-color: #4A9C1D;
+    }
+    """
 
 textbox = gr.Textbox(
     lines=2,
@@ -287,69 +342,87 @@ with gr.Blocks(
             spacing_size="sm",
             radius_size="sm",
             font=[gr.themes.GoogleFont("Montserrat", weights=(500, 700))]),
-        title="VLLM Copilot Polarion",
+        title="VLLM Polarion Copilot [BETA]",
 ) as demo:
-    with gr.Row(
-            equal_height=False,
-            elem_id="row1"
-    ):
-        selected_context = gr.Dropdown(
-            choices=choices0,
-            value="No use case",
-            multiselect=False,
-            label="Prebuilt context",
-            info="Here are some pre made contexts to help you test the chatbot.",
-            show_label=True,
-            interactive=True,
-            elem_id="dropdown_context",
-            scale=3
-        )
-        with gr.Column(scale=7):
-            with gr.Row(equal_height=True):
-                dropdown1 = gr.Dropdown(
-                    choices=choices1,
-                    value="General",
-                    multiselect=False,
-                    label="Feeding the chatbot",
-                    info="If a database is selected, similarity search will be performed into it before the response is generated.",
-                    show_label=True,
-                    interactive=True,
-                    elem_id="dropdown_release",
-                    scale=5
-                )
-                dropdown2 = gr.Dropdown(
-                    choices=choices2,
-                    value=10,
-                    multiselect=False,
-                    label="Number of workitems",
-                    info="Start with a larger value and then decrease it if the response is inconvenient.",
-                    show_label=True,
-                    interactive=True,
-                    elem_id="dropdown_k",
-                    scale=3,
-                    visible=False
-                )
-                slider = gr.Slider(
-                    minimum=0.0,
-                    maximum=1.0,
-                    step=0.02,
-                    value=0.8,
-                    label="Precision",
-                    info="Lower values increase the precision of the search by demanding a closer match.",
-                    show_label=True,
-                    interactive=True,
-                    elem_id="slider_precision",
-                    scale=3,
-                    visible=False
-                )
-            gr.ChatInterface(
-                fn=predict,
-                textbox=textbox,
-                additional_inputs=[dropdown1, dropdown2, slider, selected_context],
-                fill_height=True,
+    with gr.Column():
+        with gr.Row(equal_height=False, elem_id="row0"):
+            header = gr.HTML(
+                elem_id="gradio_header",
+                value=f"""
+                    <div id="gradio_header">
+                        <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
+                        <h1>Welcome to Polarion Copilot! [BETA]</h1>
+                        
+                    </div>
+                """
             )
+        with gr.Row(equal_height=False, elem_id="row1"):
+            with gr.Column(scale=3):
+                selected_context = gr.Dropdown(
+                    choices=choices0,
+                    value="No use case",
+                    multiselect=False,
+                    label="Prebuilt context",
+                    info="Here are some pre made contexts to help you test the chatbot.",
+                    show_label=True,
+                    interactive=True,
+                    elem_id="dropdown_context",
+                    scale=3
+                )
+                issues = gr.HTML(
+                    elem_id="issues",
+                    value="""
+                        Found a bug or an issue? Let us know!
+                        <p>Feel free to report any issue or bug you find in the chatbot.</p>
+                        <a href="https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto/-/issues">Report</a>
+                    """
+                )
+            with gr.Column(scale=8):
+                with gr.Row(equal_height=True):
+                    dropdown1 = gr.Dropdown(
+                        choices=choices1,
+                        value="General",
+                        multiselect=False,
+                        label="Feeding the chatbot",
+                        info="If a database is selected, similarity search will be performed into it before the response is generated.",
+                        show_label=True,
+                        interactive=True,
+                        elem_id="dropdown_release",
+                        scale=5
+                    )
+                    dropdown2 = gr.Dropdown(
+                        choices=choices2,
+                        value=10,
+                        multiselect=False,
+                        label="Number of workitems",
+                        info="Start with a larger value and then decrease it if the response is inconvenient.",
+                        show_label=True,
+                        interactive=True,
+                        elem_id="dropdown_k",
+                        scale=3,
+                        visible=False
+                    )
+                    slider = gr.Slider(
+                        minimum=0.0,
+                        maximum=1.0,
+                        step=0.02,
+                        value=0.8,
+                        label="Precision",
+                        info="Lower values increase the precision of the search by demanding a closer match.",
+                        show_label=True,
+                        interactive=True,
+                        elem_id="slider_precision",
+                        scale=3,
+                        visible=False
+                    )
+                gr.ChatInterface(
+                    fn=predict,
+                    textbox=textbox,
+                    additional_inputs=[dropdown1, dropdown2, slider, selected_context],
+                    fill_height=True,
+                )
 
     dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("General")], outputs=[dropdown2, slider])
 
 if __name__ == '__main__':
-    demo.launch(favicon_path=icon.__str__(), show_error=True)
+    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."])
