@@ -11,6 +11,7 @@ else
     echo "SSH command successful. Leave the terminal open."
   else
     echo "Error: SSH command failed with exit code $?."
+    echo "The remote virtual machine is probably not running."
   fi
 fi
 
