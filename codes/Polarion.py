@@ -5,6 +5,7 @@ If installation of required libraries is not already done, go in the project fol
     pip install -r requirements.txt
 """
 import pickle
+import sys
 from pathlib import Path
 
 import requests.exceptions
@@ -44,6 +45,7 @@ def preliminary_checks():
         WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
     except Exception as e:
         print(e)
+        sys.exit(1)
     if not faiss_db_filled() and not faiss_catalog_filled():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
         loader.stop()
