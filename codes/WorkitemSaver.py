@@ -148,7 +148,9 @@ class WorkitemSaver:
             loader.stop(print_exit=False)
             if "Could not find a suitable TLS CA certificate bundle" in str(e):
                 raise Exception(f"Unable to get the Polarion instance. Could not find a suitable TLS CA certificate bundle.\n{colored('Please make sure that the certificates are in the certifi folder.', 'yellow')}")
-            raise Exception(f"Error while getting the Polarion instance.\nPossible error: {colored('The .env file might not be created and/or filled correctly.', 'yellow')}\nReal error: {colored(e, 'red')}\n")
+            if "Could not log in to Polarion for user" in str(e):
+                raise Exception(f"Unable to get the Polarion instance.\nPossible error: {colored('The user credentials might be wrong', 'yellow')}\nReal error: {colored(e, 'red')}\n")
+            raise Exception(f"Unable to get the Polarion instance.\nPossible error: {colored('The .env file might not be created and/or filled correctly.', 'yellow')}\nReal error: {colored(e, 'red')}\n")
         loader.stop()
         return client
 
