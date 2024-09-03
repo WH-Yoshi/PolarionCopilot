@@ -25,9 +25,10 @@ if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
   echo "One or both ports are closed. Running SSH command in a new terminal..."
   $SSH_COMMAND
   if [ $? -eq 0 ]; then
-    echo "SSH command successful. Leave the terminal open."
+    echo "SSH command successful."
   else
     echo "Error: SSH command failed with exit code $?."
+    echo "One or both remote virtual machine are probably not running."
   fi
 fi
 
