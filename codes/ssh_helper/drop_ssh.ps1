@@ -1,37 +1,16 @@
-# Function to display active SSH connections
-function List-SshConnections
-{
-    Write-Output "Active SSH connections:"
-    netstat -anop tcp | Select-String 'ESTABLISHED.*ssh' | ForEach-Object {
-        $fields = $_ -split '\s+'
-        $index = [array]::IndexOf($fields, 'ESTABLISHED')
-        $remoteAddress = $fields[$index - 1]
-        $pid = $fields[$index + 1] -split '/' | Select-Object -First 1
-        Write-Output "$( $fields[0] ) $remoteAddress $pid"
-    }
-}
+# Define the port you want to check
+$portToCheck = 22027
 
-# Function to drop a selected SSH connection
-function Drop-SshConnection {
-    param (
-        [int]$ConnectionNumber
-    )
-    $connection = netstat -anop tcp | Select-String 'ESTABLISHED.*ssh' | Select-Object -Index ($ConnectionNumber - 1)
-    if ($connection) {
-        $fields = $connection -split '\s+'
-        $index = [array]::IndexOf($fields, 'ESTABLISHED')
-        $pid = $fields[$index + 1] -split '/' | Select-Object -First 1
-        Stop-Process -Id $pid -Force
-        Write-Output "Connection $ConnectionNumber dropped."
-    } else {
-        Write-Output "Invalid selection."
-    }
-}
+# Get all active TCP connections
+$connections = Get-NetTCPConnection -State Established
 
-# Main script
-List-SshConnections
-$selection = Read-Host "Enter the number of the connection you want to drop (or 'q' to quit)"
+# Filter for connections using the specified local port
+$portConnection = $connections | Where-Object { $_.LocalPort -eq $portToCheck }
 
-if ($selection -ne 'q') {
-    Drop-SshConnection -ConnectionNumber [int]$selection
+if ($portConnection) {
+    # If a connection is found, display details
+    Write-Host "Active connection found on local port $portToCheck"
+    $portConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, OwningProcess
+} else {
+    Write-Host "No active connection found on local port $portToCheck"
 }

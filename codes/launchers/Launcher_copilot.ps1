@@ -1,6 +1,6 @@
 $PORT1 = 22027
 $PORT2 = 22028
-$SSH_COMMAND = 'ssh -N -f -p 22002 user@idaho-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22028:localhost:8000'
+$SSH_COMMAND = 'ssh -N -f -p 22002 user@idaho-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080 -L 22028:localhost:8000'
 
 # Check if PORT1 is open (listening or established)
 $PORT1_STATUS = netstat -an | Select-String -Pattern ":$PORT1.*LISTENING"

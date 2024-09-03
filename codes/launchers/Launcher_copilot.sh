@@ -2,7 +2,7 @@
 
 PORT1=22027
 PORT2=22028
-SSH_COMMAND="ssh -N -f -p 22002 user@idaho-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L 22028:localhost:8000"
+SSH_COMMAND="ssh -N -f -p 22002 user@idaho-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L 22027:localhost:8080 -L 22028:localhost:8000"
 
 check_port() {
   local PORT=$1
