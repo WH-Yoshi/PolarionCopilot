@@ -320,7 +320,7 @@ with gr.Blocks(
                 )
                 dropdown2 = gr.Dropdown(
                     choices=choices2,
-                    value=7,
+                    value=10,
                     multiselect=False,
                     label="Number of workitems",
                     info="Start with a larger value and then decrease it if the response is inconvenient.",
@@ -334,7 +334,7 @@ with gr.Blocks(
                     minimum=0.0,
                     maximum=1.0,
                     step=0.02,
-                    value=0.66,
+                    value=0.8,
                     label="Precision",
                     info="Lower values increase the precision of the search by demanding a closer match.",
                     show_label=True,
