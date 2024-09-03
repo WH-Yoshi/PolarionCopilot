@@ -55,7 +55,6 @@ def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple
     # message = f"Instruct: {instruction}\nQuery: {message}"
     try:
         documents = db.similarity_search_with_score(query=message, k=k, score_threshold=score)
-        print("Done")
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
