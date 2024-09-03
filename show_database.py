@@ -2,9 +2,9 @@ from termcolor import colored
 from codes import file_helper as fh
 
 
-def load_update_file():
+def load_faiss_catalog_file():
     """
-    Load the update file and return its content.
+    Load the content of the faiss catalog.
     """
     return fh.open_pkl_file_rb(fh.get_faiss_catalog_path())
 
@@ -25,9 +25,9 @@ def print_formatted_info(info):
 
 def display_file():
     """
-    Display the content of the update file, which represents the last update of each active database.
+    Display the content of the faiss catalog, which contains the information about the databases.
     """
-    infos = load_update_file()
+    infos = load_faiss_catalog_file()
     print_formatted_info(infos)
 
 
@@ -35,8 +35,7 @@ def show_database():
     if fh.get_faiss_db_path().exists() and any(fh.get_faiss_db_path().iterdir()):
         display_file()
     else:
-        print(colored('Your database seems empty.', 'yellow'))
-        print(colored("You can create databases with 'py ./run_polarion.py' command.", 'yellow'))
+        print(colored("Your database seems empty.\nYou can create databases with 'py ./run_polarion.py' command.", "yellow"))
 
 
 if __name__ == "__main__":
