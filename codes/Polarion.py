@@ -10,6 +10,7 @@ from pathlib import Path
 
 import requests.exceptions
 from termcolor import colored
+from typing import Tuple
 
 import file_helper as fh
 from WorkitemSaver import WorkitemSaver
@@ -31,7 +32,7 @@ def display_file(path: Path) -> None:
         raise Exception(f"An error occurred while displaying the file: {e}")
 
 
-def prepare_available_choices(available_actions: list, default_choice: str = "") -> tuple[str, str]:
+def prepare_available_choices(available_actions: list, default_choice: str = "") -> Tuple[str, str]:
     actions = ""
     for i, string in enumerate(available_actions):
         actions += colored(f'[{i + 1}] ', 'green') + string + "\n"

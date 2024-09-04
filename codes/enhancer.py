@@ -2,15 +2,16 @@ from itertools import cycle
 from shutil import get_terminal_size
 from threading import Thread
 from time import sleep
+from typing import Optional
 
 from termcolor import colored
 
 
-def arrow(content: str, start: str | None = '', end: str | None = ''):
+def arrow(content: str, start: Optional[str] = '', end: Optional[str] = ''):
     return f"{start} \u21AA  {content}{end}"
 
 
-def printarrow(content: str, start: str | None = '', end: str | None = ''):
+def printarrow(content: str, start: Optional[str] = '', end: Optional[str] = ''):
     print(arrow(content, start, end))
 
 

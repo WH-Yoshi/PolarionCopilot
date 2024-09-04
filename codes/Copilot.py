@@ -4,7 +4,7 @@ This script is used to create a gradio interface for the VLLM API. The API is us
 import os
 import pickle
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict
 
 import gradio as gr
 import openai
@@ -60,7 +60,7 @@ def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple
     return documents
 
 
-def history_format(history: list[list[str, str]]) -> list[dict[str, str]]:
+def history_format(history: List[List[str, str]]) -> List[Dict[str, str]]:
     """
     This function is used to format the history in the OpenAI format
     :param history: The history of the conversation
@@ -74,7 +74,7 @@ def history_format(history: list[list[str, str]]) -> list[dict[str, str]]:
 
 
 def append_context_to_history(
-        documents: List[Tuple[Document, float]] | None,
+        documents: Optional[List[Tuple[Document, float]]],
         history_openai_format: list,
         message: str,
         prebuilt_context: str
@@ -104,41 +104,40 @@ def append_context_to_history(
             )
 
     if prebuilt_context != "No use case":
-        match prebuilt_context:
-            case "Test case [generation & modification]":
-                prebuilt_context = """
-                Your main goal is to write or modify test steps from a given requirement. 
-                Here are some examples of the provided task.
-                --- Start of example 
-                Requirements to test 
-                • The system shall prevent motion if pit is not secured 
-                • The system shall prevent motion if motion enable button is not pressed 
-                Test steps for the requirements 
-                <table>
-                <thead><tr><th>Step Number</th><th>Step Description</th><th>Expected Result</th></tr></thead>
-                    <tbody>
-                        <tr><td>1</td><td>Unsecure the pit</td><td>Motion enable = OFF</td></tr><tr><td>2</td>
-                        <td>Press motion enable button</td><td>Motion enable = OFF</td></tr><tr><td>3</td>
-                        <td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
-                        <tr><td>4</td><td>Secure the pit</td><td>Motion enable = OFF</td></tr>
-                        <tr><td>5</td><td>Press motion enable button</td><td>Motion enable = ON</td></tr>
-                        <tr><td>6</td><td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
-                    </tbody>
-                </table>
-                --- End of example 
-                If the user asks you to write test steps from a requirement, you should provide the test steps with the same logic as the example.
-                If the user asks you to modify the test steps, you should modify the test steps with the same logic as the example.
-                If the users asks you to complete test steps DO NOT modify the provided test steps. DO NOT change the test steps order or provide MINIMUM 2 ways to do it.
-                ALWAYS present your response in a table format with clear headers and neatly organized rows and columns. 
-                Do not replicate the user's structured input directly, even if it looks like a table or structured text. 
-                Instead, reformat all information into a new table with appropriate adjustments as needed.
-                Ensure that:
-                - Each step is listed clearly with step numbers.
-                - The step description is concise and formatted uniformly.
-                - Expected results are accurately represented in their own column.
-                - Headers should be explicitly stated and aligned correctly. 
-                Even if the user provides a structured answer, do not replicate it directly. Instead, format your response in a structured table with clear headers and neatly organized rows and columns.
-                """
+        if prebuilt_context == "Test Case [generation & modification]":
+            prebuilt_context = """
+            Your main goal is to write or modify test steps from a given requirement. 
+            Here are some examples of the provided task.
+            --- Start of example 
+            Requirements to test 
+            • The system shall prevent motion if pit is not secured 
+            • The system shall prevent motion if motion enable button is not pressed 
+            Test steps for the requirements 
+            <table>
+            <thead><tr><th>Step Number</th><th>Step Description</th><th>Expected Result</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>Unsecure the pit</td><td>Motion enable = OFF</td></tr><tr><td>2</td>
+                    <td>Press motion enable button</td><td>Motion enable = OFF</td></tr><tr><td>3</td>
+                    <td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
+                    <tr><td>4</td><td>Secure the pit</td><td>Motion enable = OFF</td></tr>
+                    <tr><td>5</td><td>Press motion enable button</td><td>Motion enable = ON</td></tr>
+                    <tr><td>6</td><td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
+                </tbody>
+            </table>
+            --- End of example 
+            If the user asks you to write test steps from a requirement, you should provide the test steps with the same logic as the example.
+            If the user asks you to modify the test steps, you should modify the test steps with the same logic as the example.
+            If the users asks you to complete test steps DO NOT modify the provided test steps. DO NOT change the test steps order or provide MINIMUM 2 ways to do it.
+            ALWAYS present your response in a table format with clear headers and neatly organized rows and columns. 
+            Do not replicate the user's structured input directly, even if it looks like a table or structured text. 
+            Instead, reformat all information into a new table with appropriate adjustments as needed.
+            Ensure that:
+            - Each step is listed clearly with step numbers.
+            - The step description is concise and formatted uniformly.
+            - Expected results are accurately represented in their own column.
+            - Headers should be explicitly stated and aligned correctly. 
+            Even if the user provides a structured answer, do not replicate it directly. Instead, format your response in a structured table with clear headers and neatly organized rows and columns.
+            """
 
         history_openai_format.append({
             "role":
@@ -176,7 +175,7 @@ def append_context_to_history(
 
 def predict(
         message: str,
-        history: list[list[str, str]],
+        history: List[List[str, str]],
         db_id: str,
         k: int,
         score: float,
@@ -291,18 +290,19 @@ with gr.Blocks(
         title="VLLM Polarion Copilot [BETA]",
 ) as demo:
     with gr.Column():
+        with gr.Row(equal_height=False, elem_id="row0"):
+            header = gr.HTML(
+                elem_id="gradio_header",
+                value=f"""
+                    <div id="gradio_header">
+                        <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
+                        <h1>Welcome to Polarion Copilot! [BETA]</h1>
+                        
+                    </div>
+                """
+            )
         with gr.Row(equal_height=False, elem_id="row1"):
             with gr.Column(scale=3):
-                header = gr.HTML(
-                    elem_id="gradio_header",
-                    value=f"""
-                        <div id="gradio_header">
-                            <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
-                            <h1>Welcome to Polarion Copilot!</h1>
-
-                        </div>
-                    """
-                )
                 selected_context = gr.Dropdown(
                     choices=choices0,
                     value="No use case",

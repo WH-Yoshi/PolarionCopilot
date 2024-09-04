@@ -6,6 +6,7 @@ import pandas as pd
 from pprint import pprint
 
 from termcolor import colored
+from typing import List, Union
 
 current_path = Path(__file__)
 
@@ -118,7 +119,7 @@ def faiss_catalog_filled():
         raise Exception(f"Error while checking update file: {e}")
 
 
-def db_to_faiss_catalog(db_id: str, pr_name: str, release: str, pr_type: str, wi_type: list[str], update_date: datetime):
+def db_to_faiss_catalog(db_id: str, pr_name: str, release: str, pr_type: str, wi_type: List[str], update_date: datetime):
     """
     Add a database to the faiss catalog.
 
@@ -222,7 +223,7 @@ def path_to_certs() -> Path:
         raise Exception(f"Error : {e}")
 
 
-def get_glossary(path: str | Path) -> dict:
+def get_glossary(path: Union[str, Path]) -> dict:
     """
     Read the glossary file and return it as a dictionary
     """
@@ -234,7 +235,7 @@ def get_glossary(path: str | Path) -> dict:
         raise Exception(f"Error while reading glossary file: {e}")
 
 
-def get_css(path: str | Path) -> str:
+def get_css(path: Union[str, Path]) -> str:
     """
     Read the css file and return the content as a string
     """

@@ -8,7 +8,7 @@ import re
 import sys
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, List, Optional, Union, Tuple
 
 from dotenv import load_dotenv
 from langchain_community.vectorstores.faiss import FAISS
@@ -113,10 +113,10 @@ class WorkitemSaver:
             self,
             location: str,
             location_type: str,
-            workitem_type: list[str],
-            release: str | None = "",
-            last_update_date: datetime | None = None,
-            db_id: str | None = None
+            workitem_type: List[str],
+            release: Optional[str] = "",
+            last_update_date: Optional[datetime] = None,
+            db_id: Optional[str] = None
     ):
         self.location_id = location
         self.location_type = location_type
@@ -178,7 +178,7 @@ class WorkitemSaver:
         except Exception as e:
             raise Exception(f"Error while searching for the release: {e}")
 
-    def define_query(self, additional_query: str | None = "") -> str:
+    def define_query(self, additional_query: Optional[str] = "") -> str:
         """
         Define the query to get workitems from a project or a project group
         :param additional_query: [Optional] A string representing an additional query
@@ -198,8 +198,8 @@ class WorkitemSaver:
     def get_workitems_from_group(
             self,
             project_group_id: str,
-            additional_query: str | None = ""
-    ) -> list[Workitem]:
+            additional_query: Optional[str] = ""
+    ) -> List[Workitem]:
         """
         Get a list of workitems (requirement and safety decisions) from the given Group
         :param additional_query: [Optional] A string representing an additional query
@@ -225,8 +225,8 @@ class WorkitemSaver:
     def get_workitems_from_project(
             self,
             project_id: str,
-            additional_query: str | None = ""
-    ) -> list[Workitem]:
+            additional_query: Optional[str] = ""
+    ) -> List[Workitem]:
         """
         Get workitems with a query from a project
         :param additional_query: [Optional] A string representing an additional query
@@ -254,8 +254,8 @@ class WorkitemSaver:
 
     def merge_workitem_children_descriptions(
             self,
-            full_workitems_list: list[Workitem],
-    ) -> list[Workitem]:
+            full_workitems_list: List[Workitem],
+    ) -> List[Workitem]:
         """
         Get the children of a workitem and merge their description with the parent workitem
         :param full_workitems_list: A list of workitems
@@ -370,8 +370,8 @@ class WorkitemSaver:
 
     def format_workitem(
             self,
-            merged_workitems: list[Workitem]
-    ) -> list[tuple[str, tuple[Any, str | Any]]]:
+            merged_workitems: List[Workitem]
+    ) -> List[Tuple[str, Tuple[Any, Union[str, Any]]]]:
         workitems_to_embed = []
         for workitem in merged_workitems:
             if workitem.type['id'] in ["safetydecision", "requirement"]:
@@ -422,7 +422,7 @@ class WorkitemSaver:
                     raise Exception(f"An error occurred while processing workitem {workitem.id}: {e}")
         return workitems_to_embed
 
-    def create_vector_db(self, data: list[tuple[Any, tuple[Any, str | Any]]]):
+    def create_vector_db(self, data: List[Tuple[Any, Tuple[Any, Union[str, Any]]]]):
         """
         Create a vector database from a list of workitems
         :param data: A list of tuples containing the workitem description and the workitem references
