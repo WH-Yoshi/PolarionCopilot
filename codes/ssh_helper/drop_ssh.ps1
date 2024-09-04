@@ -1,17 +1,23 @@
-# Define the port you want to check
-$portToCheck = 41708
-$addressToCheck = "91.150.160.37"
+# Demander à l'utilisateur de saisir le port et l'adresse
+$portToCheck = Read-Host "Remote Port: "
+$addressToCheck = Read-Host "Remote IPv4 Address or Domain: "
 
-# Get all active TCP connections
+# Obtenir toutes les connexions TCP actives
 $connections = Get-NetTCPConnection -State Established
 
-# Filter for connections using the specified local port
-$portConnection = $connections | Where-Object { $_.RemotePort -eq $portToCheck } | Where-Object { $_.RemoteAddress -eq $addressToCheck }
+# Filtrer les connexions utilisant le port et l'adresse spécifiés
+$portConnection = $connections | Where-Object {
+    $_.RemotePort -eq $portToCheck -and
+    ($_.RemoteAddress -eq $addressToCheck -or $_.RemoteAddress -eq (Resolve-DnsName -Name $addressToCheck).IPAddress)
+}
 
 if ($portConnection) {
-    # If a connection is found, display details
-    Write-Host "Active connection found"
+    # Si une connexion est trouvée, afficher les détails
+    Write-Host "Active connection found."
     $portConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, OwningProcess
+    Write-Host "Deleting connection..."
+    # Supprimer la connexion
+    $portConnection | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
 } else {
-    Write-Host "No active connection found"
+    Write-Host "No active connection found."
 }

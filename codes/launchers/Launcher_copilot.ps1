@@ -1,26 +1,55 @@
-$PORT1 = 22027
-$PORT2 = 22028
-$SSH_COMMAND = 'ssh -N -f -p 22002 user@idaho-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080 -L 22028:localhost:8000'
+$embedding_port = 22027
+$mistral_port = 22028
 
-# Check if PORT1 is open (listening or established)
-$PORT1_STATUS = netstat -an | Select-String -Pattern ":$PORT1.*LISTENING"
-$PORT1_STATUS = if ($PORT1_STATUS) { 0 } else { 1 }
+$embedding_remote_port = "47939"
+$mistral_remote_port = "22002"
 
-# Check if PORT2 is open (listening or established)
-$PORT2_STATUS = netstat -an | Select-String -Pattern ":$PORT2.*LISTENING"
-$PORT2_STATUS = if ($PORT2_STATUS) { 0 } else { 1 }
+$ssh_embedding = "ssh -N -f -p $embedding_remote_port user@213.180.0.77 -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080"
+$ssh_mistral = "ssh -N -f -p $mistral_remote_port user@idaho-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22028:localhost:8000"
 
-# If either port is closed, run the SSH command
-if ($PORT1_STATUS -ne 0 -or $PORT2_STATUS -ne 0) {
-    Write-Host "One or both ports are closed. Running SSH command..."
-    Invoke-Expression $SSH_COMMAND
+function exec_ssh($SSH_COMMAND) {
+    Start-Process -FilePath "powershell" -ArgumentList "-Command", $SSH_COMMAND -NoNewWindow
+}
+
+# Check if embedding port is open (listening or established)
+$embedding_STATUS = netstat -an | Select-String -Pattern ":$embedding_port.*LISTENING"
+$embedding_STATUS = if ($embedding_STATUS) { 0 } else { 1 }
+
+# Check if mistral port is open (listening or established)
+$mistral_STATUS = netstat -an | Select-String -Pattern ":$mistral_port.*LISTENING"
+$mistral_STATUS = if ($mistral_STATUS) { 0 } else { 1 }
+
+if ($embedding_STATUS -eq 0) {
+    Write-Host "Port 22027 is open on localhost. [Embedding]"
+}
+if ($mistral_STATUS -eq 0) {
+    Write-Host "Port 22028 is open on localhost. [Mistral]"
+}
+
+# If embedding port is closed, run the SSH command for embedding port
+if ($embedding_STATUS -ne 0) {
+    Write-Host "Port $embedding_port is closed. Running SSH command..."
+    exec_ssh $ssh_embedding
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "SSH command successful."
+        Write-Host "SSH command for port $embedding_port successful.`n"
     } else {
-        Write-Host "Error: SSH command failed with exit code $LASTEXITCODE."
-        Write-Host "One or both remote virtual machine are probably not running."
+        Write-Host "Error: SSH command for port $embedding_port failed with exit code $LASTEXITCODE."
+        Write-Host "The remote virtual machine for port $embedding_port is probably not running."
     }
 }
+
+# If mistral port is closed, run the SSH command for mistral port
+if ($mistral_STATUS -ne 0) {
+    Write-Host "Port $mistral_port is closed. Running SSH command..."
+    exec_ssh $ssh_mistral
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "SSH command for port $mistral_port successful."
+    } else {
+        Write-Host "Error: SSH command for port $mistral_port failed with exit code $LASTEXITCODE."
+        Write-Host "The remote virtual machine for port $mistral_port is probably not running."
+    }
+}
+Write-Host "`n"
 
 python .\codes\before_code.py
 python .\codes\Copilot.py
