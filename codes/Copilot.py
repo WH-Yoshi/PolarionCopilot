@@ -13,7 +13,6 @@ from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
 from openai import OpenAI
-
 import file_helper as fh
 
 load_dotenv()
@@ -245,63 +244,7 @@ def update_visibility(selected_dropdown: str, gradio_value: str):
         return gr.update(visible=True), gr.update(visible=True)
 
 
-CSS = """
-    #gradio_header {
-    width: 100%;
-    display:flex;
-    height:10%;
-    align-items: center;
-    }
-    
-    #gradio_header h1 {
-    width: 100% !important;
-    padding-left: 3% !important;
-    font-size:1.2rem !important;
-    }
-    
-    #gradio_header #logo{
-    width: 3.25rem;
-    height: 3.25rem;
-    }
-    #row1 {flex-grow: 1; align-items: unset;}
-    .form {height: fit-content;}
-    footer {display: none !important;}
-    #issues {
-        height: fit-content !important;
-        overflow-y: auto !important;
-        border: 1px solid #374151 !important;
-        background-color:#1F2937 !important;
-        padding: 3% !important;
-        padding-bottom: 5% !important;
-    }
-    
-    #issues p{
-        color:#9ca3af;
-        padding-bottom: 2.5% !important;
-    }
-    #component-24{
-        background:#69BE28 !important;
-    }
-    
-    #component-24:hover{
-        background-color: #4A9C1D !important;
-    }
-    
-    #issues a{
-        font-size: 1rem;
-        padding: 2% 5%;
-        background-color: #69BE28;
-        text-decoration: none;
-        color: white;
-        border-radius:5px;
-        margin-bottom:5% !important;
-    }
-    
-    #issues a:hover{
-        cursor:pointer;
-        background-color: #4A9C1D;
-    }
-    """
+CSS = fh.get_css(Path(__file__).parent / "public" / "styles" / "gradio.css")
 
 textbox = gr.Textbox(
     lines=2,
@@ -311,9 +254,12 @@ textbox = gr.Textbox(
     label="Message",
 )
 
-# AVE Start
+submit_btn = gr.Button(
+    elem_id="submit",
+    value="Send",
+)
+
 choices0 = ["No use case", "Test case [generation & modification]"]
-# AVE End
 
 # Choices over the database
 choices1 = [("No database", "General")]
@@ -369,8 +315,16 @@ with gr.Blocks(
                     elem_id="dropdown_context",
                     scale=3
                 )
+                documentation = gr.HTML(
+                    elem_id="left_container",
+                    value="""
+                        Copilot user documentation.
+                        <p>Feel free to download the user documentation.</p>
+                        <a href="https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto/-/raw/move-to-server/Doc-PolarionCopilot.pdf?ref_type=heads&inline=false">User Documentation</a>
+                    """
+                )
                 issues = gr.HTML(
-                    elem_id="issues",
+                    elem_id="left_container",
                     value="""
                         Found a bug or an issue? Let us know!
                         <p>Feel free to report any issue or bug you find in the chatbot.</p>
@@ -420,6 +374,7 @@ with gr.Blocks(
                     textbox=textbox,
                     additional_inputs=[dropdown1, dropdown2, slider, selected_context],
                     fill_height=True,
+                    submit_btn=submit_btn
                 )
 
     dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("General")], outputs=[dropdown2, slider])

@@ -222,10 +222,28 @@ def path_to_certs() -> Path:
         raise Exception(f"Error : {e}")
 
 
-def get_glossary(path: str):
-    df = pd.read_csv(path, on_bad_lines='skip', header=None, delimiter=';')
-    glossary_dict = dict(zip(df[0], df[1]))
-    return glossary_dict
+def get_glossary(path: str | Path) -> dict:
+    """
+    Read the glossary file and return it as a dictionary
+    """
+    try:
+        df = pd.read_csv(path, on_bad_lines='skip', header=None, delimiter=';')
+        glossary_dict = dict(zip(df[0], df[1]))
+        return glossary_dict
+    except Exception as e:
+        raise Exception(f"Error while reading glossary file: {e}")
+
+
+def get_css(path: str | Path) -> str:
+    """
+    Read the css file and return the content as a string
+    """
+    try:
+        with open(path, 'r') as css_file:
+            css_content = css_file.read()
+        return css_content
+    except Exception as e:
+        raise Exception(f"Error while reading css file: {e}")
 
 
 if __name__ == '__main__':
