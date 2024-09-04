@@ -1,12 +1,12 @@
 #gradio_header {
     width: 100%;
+    min-height: 11vh;
     display:flex;
-    height:10%;
     align-items: center;
     }
 
     #gradio_header h1 {
-    width: 100% !important;
+    width: 150% !important;
     padding-left: 3% !important;
     font-size:1.2rem !important;
     }
@@ -18,6 +18,7 @@
     #row1 {flex-grow: 1; align-items: unset;}
     .form {height: fit-content;}
     footer {display: none !important;}
+
     #left_container {
         height: fit-content !important;
         overflow-y: auto !important;
@@ -53,3 +54,27 @@
         cursor:pointer;
         background-color: #4A9C1D;
     }
+
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+#gradio_header {
+    width: 100%;
+    display:flex;
+    height: 15vh;
+    align-items: center;
+    }
+
+    #gradio_header h1 {
+    width: 150% !important;
+    font-size:1rem !important;
+    }
+
+    #gradio_header #logo{
+    width: 3rem;
+    height: 3rem;
+    }
+
+    #left_container a{
+        font-size: 0.9rem;
+    }
+}

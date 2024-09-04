@@ -105,7 +105,7 @@ def append_context_to_history(
 
     if prebuilt_context != "No use case":
         match prebuilt_context:
-            case "Test Case [generation & modification]":
+            case "Test case [generation & modification]":
                 prebuilt_context = """
                 Your main goal is to write or modify test steps from a given requirement. 
                 Here are some examples of the provided task.
@@ -291,19 +291,18 @@ with gr.Blocks(
         title="VLLM Polarion Copilot [BETA]",
 ) as demo:
     with gr.Column():
-        with gr.Row(equal_height=False, elem_id="row0"):
-            header = gr.HTML(
-                elem_id="gradio_header",
-                value=f"""
-                    <div id="gradio_header">
-                        <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
-                        <h1>Welcome to Polarion Copilot! [BETA]</h1>
-                        
-                    </div>
-                """
-            )
         with gr.Row(equal_height=False, elem_id="row1"):
             with gr.Column(scale=3):
+                header = gr.HTML(
+                    elem_id="gradio_header",
+                    value=f"""
+                        <div id="gradio_header">
+                            <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
+                            <h1>Welcome to Polarion Copilot!</h1>
+
+                        </div>
+                    """
+                )
                 selected_context = gr.Dropdown(
                     choices=choices0,
                     value="No use case",
