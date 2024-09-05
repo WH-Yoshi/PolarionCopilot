@@ -104,8 +104,8 @@ def append_context_to_history(
                 f" - {doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
             )
 
-    if prebuilt_context != "No use case":
-        if prebuilt_context == "Test Case [generation & modification]":
+    if prebuilt_context != "no_use_case":
+        if prebuilt_context == "test_case":
             prebuilt_context = """
             Your main goal is to write or modify test steps from a given requirement. 
             Here are some examples of the provided task.
@@ -259,7 +259,7 @@ submit_btn = gr.Button(
     value="Send",
 )
 
-choices0 = ["No use case", "Test case [generation & modification]"]
+choices0 = [("no_use_case","No use case"), ("test_case","Test case [generation & modification]")]
 
 # Choices over the database
 choices1 = [("No database", "General")]
@@ -298,7 +298,6 @@ with gr.Blocks(
                     <div id="gradio_header">
                         <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
                         <h1>Welcome to Polarion Copilot! [BETA]</h1>
-                        
                     </div>
                 """
             )
