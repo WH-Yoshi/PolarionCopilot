@@ -1,8 +1,6 @@
 import os
-import random
 import shutil
 import site
-import time
 from pathlib import Path
 
 import polarion
@@ -21,7 +19,6 @@ def check_packages():
         if "site-packages" in str(path):
             for file in os.listdir(site_package_path / "polarion"):
                 shutil.copy(site_package_path / "polarion" / file, path / "polarion" / file)
-    time.sleep(random.uniform(0.5, 1.0))
     loader.stop()
     return
 

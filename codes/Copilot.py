@@ -380,4 +380,4 @@ with gr.Blocks(
     dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("General")], outputs=[dropdown2, slider])
 
 if __name__ == '__main__':
-    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."])
+    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."], server_port=20000)

@@ -32,9 +32,9 @@ def display_file(path: Path) -> None:
         raise Exception(f"An error occurred while displaying the file: {e}")
 
 
-def prepare_available_choices(available_actions: list, default_choice: str = "") -> Tuple[str, str]:
+def prepare_available_choices(actions_list: list, default_choice: str = "") -> Tuple[str, str]:
     actions = ""
-    for i, string in enumerate(available_actions):
+    for i, string in enumerate(actions_list):
         actions += colored(f'[{i + 1}] ', 'green') + string + "\n"
     return default_choice, actions
 

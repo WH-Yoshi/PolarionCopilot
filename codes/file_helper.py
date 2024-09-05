@@ -2,11 +2,10 @@ import os
 import pickle
 from datetime import datetime
 from pathlib import Path
-import pandas as pd
-from pprint import pprint
-
-from termcolor import colored
 from typing import List, Union
+
+import pandas as pd
+from termcolor import colored
 
 current_path = Path(__file__)
 

@@ -5,7 +5,9 @@ gradio
 openai
 termcolor
 langchain
+langchain-core
 langchain-community
 langchain-huggingface
 huggingface-hub
 faiss-cpu
+pandas
