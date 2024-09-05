@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PORT=22027
-SSH_COMMAND="ssh -N -f -p 22016 user@91.150.160.37 -i ~/.ssh/id_rsa_tensordock -L 22027:localhost:8080"
+SSH_COMMAND="ssh -N -f -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L 22027:localhost:8080"
 
 if nc -zv localhost "$PORT" 2>&1 | grep -q 'succeeded'; then
   echo "Port $PORT is open on localhost"
