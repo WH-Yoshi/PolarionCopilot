@@ -93,72 +93,69 @@ def append_context_to_history(
 
     if documents is not None and not isinstance(documents, list):
         raise Exception("The documents should be a list")
-    system_prompt = ""
+    reference_prompt = ""
     if documents:
         for doc in documents:
             doc_content = doc[0].page_content
             doc_reference = doc[0].metadata["ibafullpuid"]
             doc_url = doc[0].metadata["url"]
 
-            system_prompt += (
+            reference_prompt += (
                 f" - {doc_content} {doc_reference} -- <b><a href='{doc_url}'>LINK</a></b>\n"
             )
-
-    if prebuilt_context != "no_use_case":
-        if prebuilt_context == "test_case":
-            prebuilt_context = """
-            Your main goal is to write or modify test steps from a given requirement. 
-            Here are some examples of the provided task.
-            --- Start of example 
-            Requirements to test 
-            • The system shall prevent motion if pit is not secured 
-            • The system shall prevent motion if motion enable button is not pressed 
-            Test steps for the requirements 
-            <table>
-            <thead><tr><th>Step Number</th><th>Step Description</th><th>Expected Result</th></tr></thead>
-                <tbody>
-                    <tr><td>1</td><td>Unsecure the pit</td><td>Motion enable = OFF</td></tr><tr><td>2</td>
-                    <td>Press motion enable button</td><td>Motion enable = OFF</td></tr><tr><td>3</td>
-                    <td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
-                    <tr><td>4</td><td>Secure the pit</td><td>Motion enable = OFF</td></tr>
-                    <tr><td>5</td><td>Press motion enable button</td><td>Motion enable = ON</td></tr>
-                    <tr><td>6</td><td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
-                </tbody>
-            </table>
-            --- End of example 
-            If the user asks you to write test steps from a requirement, you should provide the test steps with the same logic as the example.
-            If the user asks you to modify the test steps, you should modify the test steps with the same logic as the example.
-            If the users asks you to complete test steps DO NOT modify the provided test steps. DO NOT change the test steps order or provide MINIMUM 2 ways to do it.
-            ALWAYS present your response in a table format with clear headers and neatly organized rows and columns. 
-            Do not replicate the user's structured input directly, even if it looks like a table or structured text. 
-            Instead, reformat all information into a new table with appropriate adjustments as needed.
-            Ensure that:
-            - Each step is listed clearly with step numbers.
-            - The step description is concise and formatted uniformly.
-            - Expected results are accurately represented in their own column.
-            - Headers should be explicitly stated and aligned correctly. 
-            Even if the user provides a structured answer, do not replicate it directly. Instead, format your response in a structured table with clear headers and neatly organized rows and columns.
-            """
 
         history_openai_format.append({
             "role":
                 "user",
             "content":
-                "You are a helpful assistant. The following CONTEXT might be useful for the question."
-                "Consider it as knowledge and not provided information, use it to answer the question."
-                "DO NOT display the links of the CONTEXT."
+                "You are a helpful assistant. The following CONTEXT might be useful for the question. "
+                "Consider it as knowledge and not provided information, use it to answer the question. "
+                "DO NOT display the links of the CONTEXT. "
                 "Only if the CONTEXT has nothing to do with the QUESTION or is EMPTY, provide the "
-                "answer to the question without using the CONTEXT."
+                "answer to the question without using the CONTEXT. "
                 f"ABBREVIATION: {glossary}"
-                "Your might get a specific context, I want you to use it to adapt to the user."
-                "### Specific context :"
-                f"{prebuilt_context}"
+                "Your might get a specific context, I want you to use it to adapt to the user. "
                 "### Context :"
-                f"{system_prompt}"
+                f"{reference_prompt} "
                 "### Question :"
                 f"{message}"
         })
     else:
+        if prebuilt_context != "no_use_case":
+            if prebuilt_context == "test_case":
+                prebuilt_context = """
+                Your main goal is to write or modify test steps from a given requirement. 
+                Here are some examples of the provided task.
+                --- Start of example 
+                Requirements to test 
+                • The system shall prevent motion if pit is not secured 
+                • The system shall prevent motion if motion enable button is not pressed 
+                Test steps for the requirements 
+                <table>
+                <thead><tr><th>Step Number</th><th>Step Description</th><th>Expected Result</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Unsecure the pit</td><td>Motion enable = OFF</td></tr><tr><td>2</td>
+                        <td>Press motion enable button</td><td>Motion enable = OFF</td></tr><tr><td>3</td>
+                        <td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
+                        <tr><td>4</td><td>Secure the pit</td><td>Motion enable = OFF</td></tr>
+                        <tr><td>5</td><td>Press motion enable button</td><td>Motion enable = ON</td></tr>
+                        <tr><td>6</td><td>Stop pressing motion enable button</td><td>Motion enable = OFF</td></tr>
+                    </tbody>
+                </table>
+                --- End of example 
+                If the user asks you to write test steps from a requirement, you should provide the test steps with the same logic as the example.
+                If the user asks you to modify the test steps, you should modify the test steps with the same logic as the example.
+                If the users asks you to complete test steps DO NOT modify the provided test steps. DO NOT change the test steps order or provide MINIMUM 2 ways to do it.
+                ALWAYS present your response in a table format with clear headers and neatly organized rows and columns. 
+                Do not replicate the user's structured input directly, even if it looks like a table or structured text. 
+                Instead, reformat all information into a new table with appropriate adjustments as needed.
+                Ensure that:
+                - Each step is listed clearly with step numbers.
+                - The step description is concise and formatted uniformly.
+                - Expected results are accurately represented in their own column.
+                - Headers should be explicitly stated and aligned correctly. 
+                Even if the user provides a structured answer, do not replicate it directly. Instead, format your response in a structured table with clear headers and neatly organized rows and columns.
+                """
         history_openai_format.append({
             "role":
                 "user",
@@ -168,10 +165,12 @@ def append_context_to_history(
                 "If a question is ambiguous, ask clarifying questions to better understand the user's needs."
                 "*DO NOT make up information*; if you don't know the answer, it's okay to say so in a polite way."
                 "When applicable, provide **examples** or **references** to support your answer."
+                "### Specific context :"
+                f"{prebuilt_context}"
                 "### Question : "
                 f"{message}"
         })
-    return history_openai_format, system_prompt
+    return history_openai_format, reference_prompt
 
 
 def predict(
@@ -200,7 +199,7 @@ def predict(
         documents = document_search(message, db, k, score)
 
     history_openai_format = history_format(history)
-    messages, system_prompt = append_context_to_history(documents, history_openai_format, message, user_summary)
+    messages, references = append_context_to_history(documents, history_openai_format, message, user_summary)
 
     if message:
         try:
@@ -221,7 +220,8 @@ def predict(
                 for chunk in response:
                     if chunk.choices[0].delta.content is not None:
                         partial_message = partial_message + chunk.choices[0].delta.content
-                yield partial_message + "\n\n<i><b>References:</b></i>\n" + system_prompt
+                        yield partial_message
+                yield partial_message + "\n\n<i><b>References:</b></i>\n" + references
             else:
                 for chunk in response:
                     if chunk.choices[0].delta.content is not None:
@@ -298,6 +298,7 @@ with gr.Blocks(
                     <div id="gradio_header">
                         <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
                         <h1>Welcome to Polarion Copilot! [BETA]</h1>
+                        
                     </div>
                 """
             )
