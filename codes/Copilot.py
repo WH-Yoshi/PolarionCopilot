@@ -221,7 +221,8 @@ def predict(
                 for chunk in response:
                     if chunk.choices[0].delta.content is not None:
                         partial_message = partial_message + chunk.choices[0].delta.content
-                yield partial_message + "\n\n<i><b>References:</b></i>\n" + system_prompt
+                        yield partial_message
+                        return "\n\n<i><b>References:</b></i>\n" + system_prompt
             else:
                 for chunk in response:
                     if chunk.choices[0].delta.content is not None:
