@@ -121,8 +121,8 @@ def append_context_to_history(
                 f"{message}"
         })
     else:
-        if prebuilt_context != "No use case":
-            if prebuilt_context == "Test Case [generation & modification]":
+        if prebuilt_context != "no_use_case":
+            if prebuilt_context == "test_case":
                 prebuilt_context = """
                 Your main goal is to write or modify test steps from a given requirement. 
                 Here are some examples of the provided task.
@@ -259,7 +259,7 @@ submit_btn = gr.Button(
     value="Send",
 )
 
-choices0 = ["No use case", "Test case [generation & modification]"]
+use_case_choices = [("No use case","no_use_case"), ("Test case [generation & modification]","test_case")]
 
 # Choices over the database
 choices1 = [("No database", "General")]
@@ -291,21 +291,20 @@ with gr.Blocks(
         title="VLLM Polarion Copilot [BETA]",
 ) as demo:
     with gr.Column():
-        with gr.Row(equal_height=False, elem_id="row0"):
-            header = gr.HTML(
-                elem_id="gradio_header",
-                value=f"""
-                    <div id="gradio_header">
-                        <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
-                        <h1>Welcome to Polarion Copilot! [BETA]</h1>
-                        
-                    </div>
-                """
-            )
         with gr.Row(equal_height=False, elem_id="row1"):
             with gr.Column(scale=3):
+                header = gr.HTML(
+                    elem_id="gradio_header",
+                    value=f"""
+                        <div id="gradio_header">
+                            <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
+                            <h1>Welcome to Polarion Copilot! [BETA]</h1>
+
+                        </div>
+                    """
+                )
                 selected_context = gr.Dropdown(
-                    choices=choices0,
+                    choices=use_case_choices,
                     value="No use case",
                     multiselect=False,
                     label="Prebuilt context",
@@ -313,7 +312,8 @@ with gr.Blocks(
                     show_label=True,
                     interactive=True,
                     elem_id="dropdown_context",
-                    scale=3
+                    scale=3,
+                    allow_custom_value=True
                 )
                 documentation = gr.HTML(
                     elem_id="left_container",
