@@ -4,15 +4,16 @@ This script is used to create a gradio interface for the VLLM API. The API is us
 import os
 import pickle
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional
 
 import gradio as gr
 import openai
 from dotenv import load_dotenv
-from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
+from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from openai import OpenAI
+
 import file_helper as fh
 
 load_dotenv()
@@ -60,7 +61,7 @@ def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple
     return documents
 
 
-def history_format(history: List[List[str, str]]) -> List[Dict[str, str]]:
+def history_format(history):
     """
     This function is used to format the history in the OpenAI format
     :param history: The history of the conversation
@@ -175,7 +176,7 @@ def append_context_to_history(
 
 def predict(
         message: str,
-        history: List[List[str, str]],
+        history,
         db_id: str,
         k: int,
         score: float,
