@@ -31,7 +31,7 @@ if ($embedding_STATUS -ne 0) {
     Write-Host "Port $embedding_port is closed. Running SSH command..."
     exec_ssh $ssh_embedding
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "SSH command for port $embedding_port applied..`n"
+        Write-Host "SSH command for port $embedding_port applied.`n"
     } else {
         Write-Host "Error: SSH command for port $embedding_port failed with exit code $LASTEXITCODE."
         Write-Host "The remote virtual machine for port $embedding_port is probably not running."
@@ -43,7 +43,7 @@ if ($mistral_STATUS -ne 0) {
     Write-Host "Port $mistral_port is closed. Running SSH command..."
     exec_ssh $ssh_mistral
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "SSH command for port $mistral_port successful."
+        Write-Host "SSH command for port $mistral_port applied."
     } else {
         Write-Host "Error: SSH command for port $mistral_port failed with exit code $LASTEXITCODE."
         Write-Host "The remote virtual machine for port $mistral_port is probably not running."

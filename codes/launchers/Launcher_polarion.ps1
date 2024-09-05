@@ -1,5 +1,5 @@
 $PORT = 22027
-$REMOTE_PORT = 47939
+$REMOTE_PORT = 22016
 
 $SSH_COMMAND = "ssh -N -f -p $REMOTE_PORT user@213.180.0.77 -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080"
 
