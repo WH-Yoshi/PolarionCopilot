@@ -190,20 +190,17 @@ def predict(
     @param user_summary: The information about the user
     @return: The response of the VLLM model
     """
-    if db_id == "no_database":
-        documents = None
-    else:
-        if message:
+    if message:
+        if db_id == "no_database":
+            documents = None
+        else:
             db = faiss_db_loader(db_id)
             documents = document_search(message, db, k, score)
-        else:
-            gr.Warning("Please enter a message.")
-            return "Oops! I'd love to help, but I need a bit more information to assist you better."
 
-    history_openai_format = history_format(history)
-    messages, references = append_context_to_history(documents, history_openai_format, message, user_summary)
 
-    if message:
+        history_openai_format = history_format(history)
+        messages, references = append_context_to_history(documents, history_openai_format, message, user_summary)
+
         try:
             response = client.chat.completions.create(
                 model="mistralai/Mistral-7B-Instruct-v0.3",
