@@ -113,6 +113,34 @@ Create and fill the .env file with the following content, each value must be bet
    ```
 When the two images are booted up, you can proceed.
 
+### Setup a Linux daemon for automatic containers start. 
+Warning: You must have created the container by pulling the images on point 9.
+When the two images are booted up, you can proceed.
+
+1. Create a new file in /etc/systemd/system/ :
+   ```bash
+   sudo nano /etc/systemd/system/containers.service
+   ```
+2. Fill the file with the following content :
+   ```bash
+   [Unit]
+   Description=Starts all containers service
+   After=network.target
+   Requires=docker.service
+   
+   [Service]
+   Type=oneshot
+   ExecStart=/bin/sh -c '/usr/bin/docker start $(/usr/bin/docker ps -aq)'
+   ExecStop=/bin/sh -c '/usr/bin/docker stop $(/usr/bin/docker ps -aq)'
+   RemainAfterExit=true
+   
+3. Reload the daemon and start the service :
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl start containers
+   
+4. Now you can restart the virtual machine without having to restart the containers manually.
+
 ### Use the Code
 1. Run the desired script in the main directory:
    #### Windows
