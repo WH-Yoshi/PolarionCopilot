@@ -13,7 +13,7 @@ are_packages_installed() {
 
 install_packages() {
     file_path="./requirements.txt"
-    while read -r line
+    while read line
     do
       package_list+=$line
     done < "$file_path"
