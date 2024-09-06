@@ -54,8 +54,8 @@ If ($MyInvocation.InvocationName -ne ".")
     }
 
     # Verify remote connections
-    $embedding_STATUS = Get-NetTCPConnection -State Established -RemotePort $embed_remote_port 2> `$null
-    $mistral_STATUS = Get-NetTCPConnection -State Established -RemotePort $mistral_remote_port 2> `$null
+    $embedding_STATUS = Get-NetTCPConnection -State Established -RemotePort $embed_remote_port 2> $null
+    $mistral_STATUS = Get-NetTCPConnection -State Established -RemotePort $mistral_remote_port 2> $null
 
     if ($embedding_STATUS -and $mistral_STATUS)
     {

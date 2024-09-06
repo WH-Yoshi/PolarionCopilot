@@ -24,7 +24,7 @@ def check_packages():
 
 
 def print_instructions():
-    print("Instructions:")
+    print("\n", colored("Instructions:", "light_blue"))
 
     print("\n1. Installing the necessary packages:")
     check_packages()

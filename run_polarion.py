@@ -3,9 +3,12 @@ import platform
 import subprocess
 from pathlib import Path
 
+from termcolor import colored
+
 
 def run_copilot():
     if platform.system() == 'Windows':
+        print(colored("Checking SSH connection...", "light_blue"))
         script_path = str(Path(r'.\codes\launchers\Launcher_polarion.ps1').absolute())
         os.system(f'powershell -NoProfile -ExecutionPolicy Bypass -Command '
                   f'"Start-Process -Wait powershell -ArgumentList '
