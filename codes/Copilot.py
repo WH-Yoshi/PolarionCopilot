@@ -52,8 +52,6 @@ def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple
     :param score: The score threshold
     :return: The documents found in the database
     """
-    # instruction = "Given a user input, return the most similar documents from the database."
-    # message = f"Instruct: {instruction}\nQuery: {message}"
     try:
         documents = db.similarity_search_with_score(query=message, k=k, score_threshold=score)
     except Exception as e:
@@ -192,11 +190,15 @@ def predict(
     @param user_summary: The information about the user
     @return: The response of the VLLM model
     """
-    if db_id == "General":
+    if db_id == "no_database":
         documents = None
     else:
-        db = faiss_db_loader(db_id)
-        documents = document_search(message, db, k, score)
+        if message:
+            db = faiss_db_loader(db_id)
+            documents = document_search(message, db, k, score)
+        else:
+            gr.Warning("Please enter a message.")
+            return "Oops! I'd love to help, but I need a bit more information to assist you better."
 
     history_openai_format = history_format(history)
     messages, references = append_context_to_history(documents, history_openai_format, message, user_summary)
@@ -262,7 +264,7 @@ submit_btn = gr.Button(
 use_case_choices = [("No use case","no_use_case"), ("Test case [generation & modification]","test_case")]
 
 # Choices over the database
-choices1 = [("No database", "General")]
+choices1 = [("No database", "no_database")]
 with open(fh.get_faiss_catalog_path(), "rb") as f:
     databases = pickle.load(f)
 for file in files:
@@ -335,7 +337,7 @@ with gr.Blocks(
                 with gr.Row(equal_height=True):
                     dropdown1 = gr.Dropdown(
                         choices=choices1,
-                        value="General",
+                        value="no_database",
                         multiselect=False,
                         label="Feeding the chatbot",
                         info="If a database is selected, similarity search will be performed into it before the response is generated.",
@@ -377,7 +379,7 @@ with gr.Blocks(
                     submit_btn=submit_btn
                 )
 
-    dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("General")], outputs=[dropdown2, slider])
+    dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("no_database")], outputs=[dropdown2, slider])
 
 if __name__ == '__main__':
     demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."], server_port=20000)
