@@ -13,6 +13,7 @@ from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.documents import Document
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 from openai import OpenAI
+from termcolor import colored
 
 import file_helper as fh
 
@@ -25,7 +26,7 @@ files = os.listdir(fh.get_faiss_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 iba_logo = Path(__file__).parent / "public" / "images" / "iba.png"
 glossary_path = Path(__file__).parent / "public" / "glossary" / "glossary.csv"
-
+print(colored("Copilot".center(36, "="), "light_cyan"))
 print("[CTRL] + Click on the link to open the interface in your browser.")
 
 
