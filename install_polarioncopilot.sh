@@ -1,7 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname "${0}")/.." || exit 1
-source codes/helpers.sh
+cd "$(dirname "${0}")" || exit 1
 
 function program_required() {
   if [ ! -x "$(command -v ${1})" ]; then

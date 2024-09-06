@@ -1,7 +1,7 @@
 $PORT = 22027
 $REMOTE_PORT = 22016
 
-$SSH_COMMAND = "ssh -N -f -p $REMOTE_PORT user@213.180.0.77 -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080 2>`$null"
+$SSH_COMMAND = "ssh -N -f -p $REMOTE_PORT user@northcarolina-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080 2>`$null"
 
 function exec_ssh($SSH_COMMAND) {
     Start-Process -FilePath "powershell" -ArgumentList "-Command", $SSH_COMMAND -NoNewWindow
