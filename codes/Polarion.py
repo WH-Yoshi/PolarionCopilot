@@ -68,6 +68,7 @@ def preliminary_checks():
 if __name__ == "__main__":
     available_actions = preliminary_checks()
     update_file_path = fh.get_faiss_catalog_path()
+    print()
 
     if fh.get_cache_path().exists() and any(fh.get_cache_path().iterdir()):
         print("Cache files found, it contains workitems that need to be embedded.")
