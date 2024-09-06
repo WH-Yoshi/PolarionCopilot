@@ -298,7 +298,6 @@ with gr.Blocks(
                         <div id="gradio_header">
                             <img id="logo" src="file/{iba_logo}" alt="IBA Logo">
                             <h1>Welcome to Polarion Copilot! [BETA]</h1>
-
                         </div>
                     """
                 )
