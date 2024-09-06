@@ -1,34 +1,24 @@
 #!/bin/bash
 
-# Check and install Polarion Copilot packages
-are_packages_installed() {
-    file_path="./requirements.txt"
-    while read -r line
-    do
-      package_list+=$line
-    done < "$file_path"
-    echo "$package_list"
-    return 0
-}
-
-install_packages() {
-    file_path="./requirements.txt"
-    while read line
-    do
-      package_list+=$line
-    done < "$file_path"
-    echo "$package_list"
-    return 0
-}
-
-# Check if the required packages are installed
-if are_packages_installed; then
-    echo "All required packages are installed"
-else
-    echo "Installing required packages"
-    if install_packages; then
-        echo "Packages installed successfully"
-    else
-        echo "Failed to install packages"
-    fi
+# Check if pip is installed
+if ! command -v pip &> /dev/null; then
+    echo "pip is not installed. Please install it first."
+    exit 1
 fi
+
+# Function to install missing packages
+install_missing_packages() {
+    requirements=$(cat requirements.txt)
+    installed_packages=$(pip list | grep -v '^#')  # Exclude comments
+    missing_packages=$(echo "$installed_packages" | grep -v -F "$requirements")
+
+    if [[ -n "$missing_packages" ]]; then
+        echo "Some required packages are missing. Installing..."
+        pip install -r requirements.txt
+    else
+        echo "All required packages are installed."
+    fi
+}
+
+# Call the function
+install_missing_packages
