@@ -40,7 +40,9 @@ def prepare_available_choices(actions_list: list, default_choice: str = "") -> T
 
 
 def preliminary_checks():
-    print("---------Preliminary checks---------")
+    print(colored("Polarion Workitem Saver".center(36, "="), "light_cyan"))
+
+    print("Checking the environment...")
     fh.delete_uncatalogued_db()
     try:
         WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
@@ -66,8 +68,6 @@ def preliminary_checks():
 if __name__ == "__main__":
     available_actions = preliminary_checks()
     update_file_path = fh.get_faiss_catalog_path()
-
-    print("\n|------Polarion Workitem Saver------|\n")
 
     if fh.get_cache_path().exists() and any(fh.get_cache_path().iterdir()):
         print("Cache files found, it contains workitems that need to be embedded.")
