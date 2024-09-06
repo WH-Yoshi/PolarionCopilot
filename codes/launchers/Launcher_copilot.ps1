@@ -11,45 +11,37 @@ function exec_ssh($SSH_COMMAND) {
     Start-Process -FilePath "powershell" -ArgumentList "-Command", $SSH_COMMAND -NoNewWindow
 }
 
-# Check if embedding port is open (listening or established)
-$embedding_STATUS = netstat -an | Select-String -Pattern ":$embedding_port.*LISTENING"
-$embedding_STATUS = if ($embedding_STATUS) { 0 } else { 1 }
-
-# Check if mistral port is open (listening or established)
-$mistral_STATUS = netstat -an | Select-String -Pattern ":$mistral_port.*LISTENING"
-$mistral_STATUS = if ($mistral_STATUS) { 0 } else { 1 }
-
-if ($embedding_STATUS -eq 0) {
-    Write-Host "Port 22027 is open on localhost. [Embedding]"
-}
-if ($mistral_STATUS -eq 0) {
-    Write-Host "Port 22028 is open on localhost. [Mistral]"
+function message($port){
+    Write-Host "[SSH TUNNEL] " -ForegroundColor Green -NoNewline
+    Write-Host "Port $port is open on localhost"
 }
 
-# If embedding port is closed, run the SSH command for embedding port
-if ($embedding_STATUS -ne 0) {
-    Write-Host "Port $embedding_port is closed. Running SSH command..."
+# Check if local embedding port is open (listening)
+$embedding_PORT_STATUS = netstat -an | Select-String -Pattern ":$embedding_port.*LISTENING"
+if (-not $embedding_PORT_STATUS) {
+    Write-Host "Port $embedding_port is closed on localhost. Running SSH command..."
     exec_ssh $ssh_embedding
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "SSH command for port $embedding_port applied.`n"
-    } else {
-        Write-Host "Error: SSH command for port $embedding_port failed with exit code $LASTEXITCODE."
-        Write-Host "The remote virtual machine for port $embedding_port is probably not running."
-    }
 }
 
-# If mistral port is closed, run the SSH command for mistral port
-if ($mistral_STATUS -ne 0) {
-    Write-Host "Port $mistral_port is closed. Running SSH command..."
+# Check if local mistral port is open (listening)
+$mistral_PORT_STATUS = netstat -an | Select-String -Pattern ":$mistral_port.*LISTENING"
+if (-not $mistral_PORT_STATUS) {
+    Write-Host "Port $mistral_port is closed on localhost. Running SSH command..."
     exec_ssh $ssh_mistral
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "SSH command for port $mistral_port applied."
-    } else {
-        Write-Host "Error: SSH command for port $mistral_port failed with exit code $LASTEXITCODE."
-        Write-Host "The remote virtual machine for port $mistral_port is probably not running."
-    }
 }
-Write-Host "`n"
 
-python .\codes\before_code.py
-python .\codes\Copilot.py
+# Verify remote connections
+$embedding_STATUS = Get-NetTCPConnection -State Established -RemotePort $embedding_remote_port
+$mistral_STATUS = Get-NetTCPConnection -State Established -RemotePort $mistral_remote_port
+
+if ($embedding_STATUS -and $mistral_STATUS) {
+    message($embedding_port)
+    message($mistral_port)
+    Write-Host "`n"
+    python .\codes\before_code.py
+    python .\codes\Polarion.py
+} else {
+    Write-Host "Please check the Remote Virtual Machine. They must be running to use the APP!" -ForegroundColor Red
+    Write-Host "Follow these instruction for the deployment of the cloud GPU via TensorDock." -ForegroundColor Yellow
+    Write-Host "https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#polarioncopilot`n" -ForegroundColor Yellow
+}
