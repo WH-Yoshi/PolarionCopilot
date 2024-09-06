@@ -7,30 +7,37 @@ SSH_COMMAND_MI="ssh -N -f -p 22002 user@idaho-b.tensordockmarketplace.com -i ~/.
 
 check_port() {
   local PORT=$1
+  local DEST=$2
   if nc -zv localhost "$PORT" 2>&1 | grep -q 'succeeded'; then
-    echo "Port $PORT is open on localhost"
+    echo "Port to $DEST: $PORT is open on localhost"
     return 0
   else
-    echo "Port $PORT is closed on localhost"
+    echo "Port to $DEST: $PORT is closed on localhost"
     return 1
   fi
 }
 
-check_port $PORT1
+check_port $PORT1 "Embedding Machine"
 PORT1_STATUS=$?
 
-check_port $PORT2
+check_port $PORT2 "Mistral Inference"
 PORT2_STATUS=$?
 
 if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
   echo "One or both ports are closed. Running SSH command..."
   $SSH_COMMAND_EM
   $SSH_COMMAND_MI
-  if [ $? -eq 0 ]; then
-    echo "SSH command successful."
+  if [ "$SSH_COMMAND_EM" -eq 0 ]; then
+    echo "SSH to Embedding Machine established."
   else
     echo "Error: SSH command failed with exit code $?."
-    echo "One or both remote virtual machine are probably not running."
+    echo "Run that machine to establish the connection."
+  fi
+  if [ "$SSH_COMMAND_MI" -eq 0 ]; then
+    echo "SSH to Mistral Inference established."
+  else
+    echo "Error: SSH command failed with exit code $?."
+    echo "Run that machine to establish the connection."
   fi
 fi
 
