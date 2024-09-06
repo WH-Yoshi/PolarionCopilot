@@ -1,10 +1,11 @@
 import os
 import shutil
 import site
-import subprocess
+import sys
 from pathlib import Path
 
 import polarion
+import subprocess
 from termcolor import colored
 
 from enhancer import Loader, arrow
@@ -15,7 +16,7 @@ polarion_location = Path(polarion.__file__)
 
 def check_packages():
     loader = Loader("Checking packages... ", colored("Packages up to date.", "green"), timeout=0.05).start()
-    subprocess.run(["pip", "install", "-r", "requirements.txt"], check=True, stdout=subprocess.PIPE)
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.DEVNULL)
     for path in site.getsitepackages():
         path = Path(site.__file__).parent / "site-packages" / path
         if "site-packages" in str(path):
@@ -31,10 +32,4 @@ def print_instructions():
     print("1. Installing the necessary packages:")
     check_packages()
 
-    print("\n2. Run the Embedding Machine if it does not already:")
-    print("   Follow these instruction for the deployment of the cloud GPU via TensorDock.")
-    print(arrow("https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#polarioncopilot", start="  "))
-
-
 print_instructions()
-input("\nPress Enter to run the script.")

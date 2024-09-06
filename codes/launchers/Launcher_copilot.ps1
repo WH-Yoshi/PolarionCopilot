@@ -1,8 +1,8 @@
 $embed_port = 22027
 $mistral_port = 22028
 
-$embed_remote_port = "22016"
-$mistral_remote_port = "22002"
+$embed_remote_port = 22016
+$mistral_remote_port = 22002
 
 $address_embed = "northcarolina-b.tensordockmarketplace.com"
 $address_mistral = "idaho-b.tensordockmarketplace.com"
@@ -15,7 +15,6 @@ function exec_ssh($SSH_COMMAND) {
 }
 
 function message($port){
-    Write-Host "[SSH TUNNEL] " -ForegroundColor Green -NoNewline
     Write-Host "Port $port is open on localhost"
 }
 
@@ -38,19 +37,27 @@ function return_address2(){
 If ($MyInvocation.InvocationName -ne ".")
 {
     # Check if local embedding port is open (listening)
-    $embedding_PORT_STATUS = netstat -an | Select-String -Pattern ":$embed_port.*LISTENING"
+    $embedding_PORT_STATUS = netstat -an | Select-String ":$embed_remote_port" | Select-String "ESTABLISHED"
     if (-not $embedding_PORT_STATUS)
     {
         Write-Host "Port $embed_port is closed on localhost. Running SSH command..."
         exec_ssh $ssh_embedding
     }
+    else
+    {
+        Write-Host "Port $embed_port is open on localhost"
+    }
 
     # Check if local mistral port is open (listening)
-    $mistral_PORT_STATUS = netstat -an | Select-String -Pattern ":$mistral_port.*LISTENING"
+    $mistral_PORT_STATUS = netstat -an | Select-String ":$mistral_remote_port" | Select-String "ESTABLISHED"
     if (-not $mistral_PORT_STATUS)
     {
         Write-Host "Port $mistral_port is closed on localhost. Running SSH command..."
         exec_ssh $ssh_mistral
+    }
+    else
+    {
+        Write-Host "Port $mistral_port is open on localhost"
     }
 
     # Verify remote connections
@@ -59,16 +66,15 @@ If ($MyInvocation.InvocationName -ne ".")
 
     if ($embedding_STATUS -and $mistral_STATUS)
     {
-        message($embed_port)
-        message($mistral_port)
+        Write-Host "[SSH TUNNEL OK]" -ForegroundColor Green
         python .\codes\before_code.py
-        python .\codes\Polarion.py
+        python .\codes\Copilot.py
     }
     else
     {
         Write-Host "Execution of one or both SSH tunnel was unsuccessful." -ForegroundColor Red
-        Write-Host "`nPlease check the Remote Virtual Machine. They must be running to use the APP!" -ForegroundColor Yellow
+        Write-Host "`nPlease check the Remote Virtual Machines. They must be running to use the APP! " -ForegroundColor Yellow
         Write-Host "Follow these instruction for the deployment of the cloud GPU via TensorDock." -ForegroundColor Yellow
-        Write-Host "https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#polarioncopilot`n" -ForegroundColor Blue
+        Write-Host "https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#polarioncopilot`n" -ForegroundColor Cyan
     }
 }
