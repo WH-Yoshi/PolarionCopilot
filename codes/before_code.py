@@ -1,6 +1,7 @@
 import os
 import shutil
 import site
+import subprocess
 from pathlib import Path
 
 import polarion
@@ -14,6 +15,7 @@ polarion_location = Path(polarion.__file__)
 
 def check_packages():
     loader = Loader("Checking packages... ", colored("Packages up to date.", "green")).start()
+    subprocess.run(["pip", "install", "-r", "requirements.txt"], check=True, stdout=subprocess.PIPE)
     for path in site.getsitepackages():
         path = Path(site.__file__).parent / "site-packages" / path
         if "site-packages" in str(path):
