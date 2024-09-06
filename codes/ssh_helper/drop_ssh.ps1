@@ -1,23 +1,24 @@
-# Demander à l'utilisateur de saisir le port et l'adresse
-$portToCheck = Read-Host "Remote Port: "
-$addressToCheck = Read-Host "Remote IPv4 Address or Domain: "
+. ../launchers/Launcher_copilot.ps1
 
-# Obtenir toutes les connexions TCP actives
+$port_embed = return_port1
+$port_mistral = return_port2
+$address_embed = return_address1
+$address_mistral = return_address2
+
 $connections = Get-NetTCPConnection -State Established
 
-# Filtrer les connexions utilisant le port et l'adresse spécifiés
 $portConnection = $connections | Where-Object {
-    $_.RemotePort -eq $portToCheck -and
-    ($_.RemoteAddress -eq $addressToCheck -or $_.RemoteAddress -eq (Resolve-DnsName -Name $addressToCheck).IPAddress)
+    ($_.RemotePort -eq $port_embed -or $_.RemotePort -eq $port_mistral) -and
+    (($_.RemoteAddress -eq $address_embed -or $_.RemoteAddress -eq (Resolve-DnsName -Name $address_embed).IPAddress) -or
+    ($_.RemoteAddress -eq $address_mistral -or $_.RemoteAddress -eq (Resolve-DnsName -Name $address_mistral).IPAddress))
 }
 
 if ($portConnection) {
-    # Si une connexion est trouvée, afficher les détails
     Write-Host "Active connection found."
     $portConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, OwningProcess
-    Write-Host "Deleting connection..."
-    # Supprimer la connexion
+    Read-Host "Do you want to delete the connection? (Enter or Ctrl+C)"
     $portConnection | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+    Write-Host "Connection deleted."
 } else {
     Write-Host "No active connection found."
 }
