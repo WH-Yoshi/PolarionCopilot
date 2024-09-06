@@ -40,8 +40,7 @@ def prepare_available_choices(actions_list: list, default_choice: str = "") -> T
 
 
 def preliminary_checks():
-    print(colored("Polarion Workitem Saver".center(36, "="), "light_cyan"))
-
+    print(colored("Polarion Workitem Saver", "light_cyan"))
     print("Checking the environment...")
     fh.delete_uncatalogued_db()
     try:
@@ -66,6 +65,7 @@ def preliminary_checks():
 
 
 if __name__ == "__main__":
+    print()
     available_actions = preliminary_checks()
     update_file_path = fh.get_faiss_catalog_path()
     print()
