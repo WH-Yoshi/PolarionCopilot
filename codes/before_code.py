@@ -24,12 +24,12 @@ def check_packages():
 
 
 def print_instructions():
-    print("\n", colored("Instructions:", "light_blue"))
+    print(colored("\nInstructions:", "light_blue"))
 
-    print("\n1. Installing the necessary packages:")
+    print("1. Installing the necessary packages:")
     check_packages()
 
-    print("\n2. Run the Cloud GPU:")
+    print("\n2. Run the Embedding Machine if it does not already:")
     print("   Follow these instruction for the deployment of the cloud GPU via TensorDock.")
     print(arrow("https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#polarioncopilot", start="  "))
 
