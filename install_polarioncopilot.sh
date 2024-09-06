@@ -1,21 +1,23 @@
 #!/bin/bash
 
-# Check if the requirements.txt file exists
-if [ ! -f requirements.txt ]; then
-    echo "requirements.txt not found!"
-    exit 1
-fi
+cd "$(dirname "${0}")/.." || exit 1
+source codes/helpers.sh
 
-# Check if each package from the requirements.txt is installed
-while IFS= read -r package; do
-    # Strip version constraints if present
-    pkg_name=$(echo "$package" | cut -d '=' -f 1)
-
-    # Check if the package is installed
-    pip show "$pkg_name" > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "$pkg_name is not installed."
+function program_required() {
+  if [ ! -x "$(command -v ${1})" ]; then
+    echo "${1} is not installed on the computer..."
+    if [ "${2}" ]; then
+      echo "Check out this link: ${2}"
     fi
-done < requirements.txt
+    exit 1
+  fi
+}
 
-echo "Check complete."
+function pip_required() {
+  program_required "pip" "https://pip.pypa.io/en/stable/installation/"
+}
+
+pip_required
+
+echo "Installing Polarion Copilot..."
+pip install -r requirements.txt
