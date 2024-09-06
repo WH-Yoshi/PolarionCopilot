@@ -1,34 +1,23 @@
 #!/bin/bash
 
-# Check and install Polarion Copilot packages
-are_packages_installed() {
-    file_path="./requirements.txt"
-    while read -r line
-    do
-      package_list+=$line
-    done < "$file_path"
-    echo "$package_list"
-    return 0
-}
+cd "$(dirname "${0}")/.." || exit 1
+source codes/helpers.sh
 
-install_packages() {
-    file_path="./requirements.txt"
-    while read line
-    do
-      package_list+=$line
-    done < "$file_path"
-    echo "$package_list"
-    return 0
-}
-
-# Check if the required packages are installed
-if are_packages_installed; then
-    echo "All required packages are installed"
-else
-    echo "Installing required packages"
-    if install_packages; then
-        echo "Packages installed successfully"
-    else
-        echo "Failed to install packages"
+function program_required() {
+  if [ ! -x "$(command -v ${1})" ]; then
+    echo "${1} is not installed on the computer..."
+    if [ "${2}" ]; then
+      echo "Check out this link: ${2}"
     fi
-fi
+    exit 1
+  fi
+}
+
+function pip_required() {
+  program_required "pip" "https://pip.pypa.io/en/stable/installation/"
+}
+
+pip_required
+
+echo "Installing Polarion Copilot..."
+pip install -r requirements.txt
