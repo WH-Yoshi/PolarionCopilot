@@ -23,16 +23,20 @@ PORT1_STATUS=$?
 check_port $PORT2 "Mistral Inference"
 PORT2_STATUS=$?
 
-if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
+if [ $PORT1_STATUS -ne 0 ]; then
   echo "One or both ports are closed. Running SSH command..."
   $SSH_COMMAND_EM
-  $SSH_COMMAND_MI
   if [ "$SSH_COMMAND_EM" -eq 0 ]; then
     echo "SSH to Embedding Machine established."
   else
     echo "Error: SSH command failed with exit code $?."
     echo "Run that machine to establish the connection."
   fi
+fi
+
+if [ $PORT2_STATUS -ne 0 ]; then
+  echo "One or both ports are closed. Running SSH command..."
+  $SSH_COMMAND_MI
   if [ "$SSH_COMMAND_MI" -eq 0 ]; then
     echo "SSH to Mistral Inference established."
   else
