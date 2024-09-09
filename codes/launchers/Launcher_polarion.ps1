@@ -16,17 +16,15 @@ if (-not $PORT_STATUS) {
 else
 {
     Write-Host "Port $PORT is open on localhost"
+    Write-Host "[SSH TUNNEL OK]" -ForegroundColor Green
 }
 
 # Verify remote connection
 $REMOTE_STATUS = Get-NetTCPConnection -State Established -RemotePort $REMOTE_PORT 2> $null
 
-if ($REMOTE_STATUS) {
-    Write-Host "[SSH TUNNEL OK]" -ForegroundColor Green
-    python .\codes\before_code.py
-    python .\codes\Polarion.py
-} else {
-    Write-Host "Please check the Embedding Virtual Machine. It must be running to use the APP!" -ForegroundColor Red
-    Write-Host "Follow these instructions for the deployment of the cloud GPU via TensorDock." -ForegroundColor Yellow
-    Write-Host "https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto#polarioncopilot`n" -ForegroundColor Cyan
+if (-not $REMOTE_STATUS) {
+    Write-Host "Remote machine is down, workitems will be saved locally for later."
 }
+
+python .\codes\before_code.py
+python .\codes\Polarion.py

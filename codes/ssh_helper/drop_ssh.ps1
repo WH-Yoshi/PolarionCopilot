@@ -1,4 +1,6 @@
-. ../launchers/Launcher_copilot.ps1
+$scriptDir = $PSScriptRoot
+
+. $scriptDir/../launchers/Launcher_copilot.ps1
 
 $port_embed = return_port1
 $port_mistral = return_port2

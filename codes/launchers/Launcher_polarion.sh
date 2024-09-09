@@ -12,7 +12,7 @@ else
     echo "SSH command successful."
   else
     echo "Error: SSH command failed with exit code $?."
-    echo "The Embedding machine is probably not running."
+    echo "Remote machine is down, workitems will be saved locally for later."
   fi
 fi
 
