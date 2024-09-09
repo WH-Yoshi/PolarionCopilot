@@ -12,14 +12,14 @@ The automated part is the installation of each library, and specific changes don
 
 ### Required installations
 #### Windows
-1. Python, any version is good: [Python for Windows](https://www.python.org/downloads/)
+1. Python (3.8+): [Python for Windows](https://www.python.org/downloads/)
    - Make sure to check the box *"Add python.exe to PATH"* during the installation
 2. Git, if it isn't already installed, to clone this repository: [Git](https://git-scm.com/downloads)
    - You can click *Next* for each step.
 3. **[Optional]** A good terminal to have a more user-friendly experience.
    - You can use the new Windows Terminal for exemple: [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701)
 #### Linux
-1. Python, any version is good: 
+1. Python (3.8+):
    ```bash
    sudo apt-get install python3 python3-venv
    ```
@@ -37,7 +37,7 @@ Also to keep your main Python installation clean.
    ```
 2. Create and activate the virtual environment
    ```batsh
-   py -m venv .venv
+   python -m venv .venv
    .\.venv\Scripts\activate
    ```
    If you run into an error with execution policy, check your own execution policy with:
@@ -74,10 +74,10 @@ Also to keep your main Python installation clean.
    ```
 4. Install the required libraries
    ```bash
-   pip install -r requirements.txt
+   sh install_polarioncopilot.sh
    ```
 
-#### Before any further steps, you need to fill the environment variables in the .env file.
+#### Before any further steps, you need to fill the environment variables in a .env file.
 Create and fill the .env file with the following content, each value must be between quotes "":
    ```
    base_url=<URL> # The URL of your Polarion server (e.g. https://polarion.example.com/polarion)
@@ -94,28 +94,28 @@ Create and fill the .env file with the following content, each value must be bet
 ### Tensordock virtual machine
 
 1. Open [TensorDock](https://dashboard.tensordock.com/deploy)
-2. Get two GPU with at least 48Gb of VRAM
-3. 2GPUs, 8Gb of RAM, 2CPU and 80Gb SSD
-4. Select one of the available locations
-5. Choose Ubuntu 22.04 as an operating system
-6. Put a secure password and a machine name
-7. Deploy
-8. SSH into the machine :
+2. Get two VM with one GPU each
+   1. 48GB VRAM, 8GB or RAM, 2CPUs and 50GB SSD
+   2. 16GB VRAM, 8GB or RAM, 2CPUs and 30GB SSD
+3. Select one of the available locations
+4. Choose Ubuntu 22.04 as an operating system
+5. Deploy
+6. SSH into the machine :
    ```bash
-   ssh -p xxxxx user@host -L 22027:localhost:8080 -L 22028:localhost:8000
+   ssh -p xxxxx user@host -i ~/.ssh/id_rsa_tensordock
    ```
-9. Run the two docker images :
+7. Run the two docker images :
    ```bash
-   docker run -d --gpus '"device=0"' -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=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" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.3
+   docker run -d --gpus all -v ~/.cache/huggingface:/root/.cache/huggingface --env "HUGGING_FACE_HUB_TOKEN=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" -p 8000:8000 --ipc=host vllm/vllm-openai:latest --model mistralai/Mistral-7B-Instruct-v0.3
    ```
    ```bash
-   docker run -d --gpus '"device=1"' -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:86-1.5 --model-id dunzhang/stella_en_1.5B_v5 
+   docker run -d --gpus all -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:86-1.5 --model-id dunzhang/stella_en_1.5B_v5 
    ```
-When the two images are booted up, you can proceed.
 
-### Setup a Linux daemon for automatic containers start. 
-Warning: You must have created the container by pulling the images on point 9.
-When the two images are booted up, you can proceed.
+### [Optional] Setup a Linux daemon for automatic containers start. 
+**Warning:** You must have created the container by pulling the images on point 7.\
+This step is optional but recommended to avoid having to restart the containers manually after a reboot.\
+It will start all the containers that are stopped.
 
 1. Create a new file in /etc/systemd/system/ :
    ```bash
@@ -134,12 +134,13 @@ When the two images are booted up, you can proceed.
    ExecStop=/bin/sh -c '/usr/bin/docker stop $(/usr/bin/docker ps -aq)'
    RemainAfterExit=true
    
-3. Reload the daemon and start the service :
+3. Reload the daemon and enable the service to start at boot :
    ```bash
    sudo systemctl daemon-reload
-   sudo systemctl start containers
+   sudo systemctl enable containers
+   ```
    
-4. Now you can restart the virtual machine without having to restart the containers manually.
+Now you can restart the virtual machine without having to restart the containers manually.
 
 ### Use the Code
 1. Run the desired script in the main directory:
@@ -154,3 +155,6 @@ When the two images are booted up, you can proceed.
       python3 run_copilot.py
       ```
 2. Enjoy the ride!
+
+
+###### Luca A. | 2024, Arnaud V. | 2024
