@@ -236,7 +236,7 @@ def predict(
             yield f"Sorry, an unexpected error occurred: {str(e)}"
     else:
         gr.Warning("Please enter a message.")
-        yield "Oops! I'd love to help, but I need a bit more information to assist you better."
+        yield "Oops! I'd love to help, but I need information to assist you better."
 
 def update_visibility(selected_dropdown: str, gradio_value: str):
     if selected_dropdown == gradio_value:
