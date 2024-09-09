@@ -11,7 +11,7 @@ $ssh_embedding = "ssh -N -f -p $embed_remote_port user@$address_embed -i ~\.ssh\
 $ssh_mistral = "ssh -N -f -p $mistral_remote_port user@$address_mistral -i ~\.ssh\id_rsa_tensordock -L 22028:localhost:8000 2>`$null"
 
 function exec_ssh($SSH_COMMAND) {
-    Start-Process -FilePath "powershell" -ArgumentList "-Command", $SSH_COMMAND -NoNewWindow -Wait
+    Start-Process -FilePath "powershell" -ArgumentList "-Command", $SSH_COMMAND -NoNewWindow
 }
 
 function message($port){
