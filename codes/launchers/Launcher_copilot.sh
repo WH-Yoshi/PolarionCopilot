@@ -45,5 +45,4 @@ if [ $PORT2_STATUS -ne 0 ]; then
   fi
 fi
 
-python3 ./codes/before_code.py
-python3 ./codes/Copilot.py
+screen -S polarion bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'

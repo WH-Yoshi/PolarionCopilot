@@ -16,5 +16,4 @@ else
   fi
 fi
 
-python3 ./codes/before_code.py
-python3 ./codes/Polarion.py
+screen -S copilot bash -c 'python3 ./codes/before_code.py; python3 ./codes/Polarion.py; exec bash'
