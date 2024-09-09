@@ -18,5 +18,8 @@ function pip_required() {
 
 pip_required
 
-echo "Installing Polarion Copilot..."
+echo "Checking venv..."
+python3 -m venv .venv
+source .venv/bin/activate
+echo "Installing requirements..."
 pip install -r requirements.txt
