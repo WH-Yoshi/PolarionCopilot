@@ -253,6 +253,7 @@ textbox = gr.Textbox(
     placeholder="Enter your message here...",
     scale=7,
     label="Message",
+    max_length=2000,
 )
 
 submit_btn = gr.Button(
