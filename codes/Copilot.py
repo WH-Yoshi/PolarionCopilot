@@ -45,17 +45,16 @@ def faiss_db_loader(db_id: str) -> FAISS:
     return db
 
 
-def document_search(message: str, db: FAISS, k: int, score: float) -> List[Tuple[Document, float]]:
+def document_search(message: str, db: FAISS, k: int) -> List[Tuple[Document, float]]:
     """
     This function is used to search for documents in the database
     :param message: the user input
     :param db: The faiss database
     :param k: The number of documents to return
-    :param score: The score threshold
     :return: The documents found in the database
     """
     try:
-        documents = db.similarity_search_with_score(query=message, k=k, score_threshold=score)
+        documents = db.similarity_search_with_score(query=message, k=k)
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
@@ -178,7 +177,6 @@ def predict(
         history,
         db_id: str,
         k: int,
-        score: float,
         user_summary: str
 ) -> str:
     """
@@ -188,7 +186,6 @@ def predict(
     @param history: The history of the conversation
     @param db_id: The chosen database
     @param k: The number of documents to retrieve
-    @param score: The score threshold
     @param user_summary: The information about the user
     @return: The response of the VLLM model
     """
@@ -197,7 +194,7 @@ def predict(
             documents = None
         else:
             db = faiss_db_loader(db_id)
-            documents = document_search(message, db, k, score)
+            documents = document_search(message, db, k)
 
 
         history_openai_format = history_format(history)
@@ -240,9 +237,9 @@ def predict(
 
 def update_visibility(selected_dropdown: str, gradio_value: str):
     if selected_dropdown == gradio_value:
-        return gr.update(visible=False), gr.update(visible=False)
+        return gr.update(visible=False)
     else:
-        return gr.update(visible=True), gr.update(visible=True)
+        return gr.update(visible=True)
 
 
 CSS = fh.get_css(Path(__file__).parent / "public" / "styles" / "gradio.css")
@@ -357,28 +354,15 @@ with gr.Blocks(
                         scale=3,
                         visible=False
                     )
-                    slider = gr.Slider(
-                        minimum=0.0,
-                        maximum=1.0,
-                        step=0.02,
-                        value=0.8,
-                        label="Precision",
-                        info="Lower values increase the precision of the search by demanding a closer match.",
-                        show_label=True,
-                        interactive=True,
-                        elem_id="slider_precision",
-                        scale=3,
-                        visible=False
-                    )
                 gr.ChatInterface(
                     fn=predict,
                     textbox=textbox,
-                    additional_inputs=[dropdown1, dropdown2, slider, selected_context],
+                    additional_inputs=[dropdown1, dropdown2, selected_context],
                     fill_height=True,
                     submit_btn=submit_btn
                 )
 
-    dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("no_database")], outputs=[dropdown2, slider])
+    dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("no_database")], outputs=dropdown2)
 
 if __name__ == '__main__':
     demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."])
