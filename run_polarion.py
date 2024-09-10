@@ -5,7 +5,7 @@ from pathlib import Path
 from termcolor import colored
 
 
-def run_copilot():
+def run_polarion():
     if platform.system() == 'Windows':
         script_path = str(Path(r'.\codes\launchers\Launcher_polarion.ps1').absolute())
         os.system(f'powershell -NoProfile -ExecutionPolicy Bypass -Command '
@@ -19,4 +19,4 @@ def run_copilot():
 
 
 if __name__ == '__main__':
-    run_copilot()
+    run_polarion()

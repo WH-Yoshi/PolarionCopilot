@@ -67,10 +67,14 @@ def preliminary_checks():
 if __name__ == "__main__":
     print()
     available_actions = preliminary_checks()
-    update_file_path = fh.get_faiss_catalog_path()
+    catalog_faiss_path = fh.get_faiss_catalog_path()
     print()
 
     if fh.get_cache_path().exists() and any(fh.get_cache_path().iterdir()):
+        """
+        If cache files are found, it means that the user has saved workitems in the cache but has not embedded them
+        in the database. The user will be asked if he wants to embed them now.
+        """
         print("Cache files found, it contains workitems that need to be embedded.")
         do_save = ""
         while do_save not in ["y", "n"]:
@@ -162,12 +166,12 @@ if __name__ == "__main__":
         display_file(fh.get_faiss_catalog_path())
 
         db_choice = ""
-        while db_choice not in [str(i) for i in range(1, len(fh.open_pkl_file_rb(update_file_path)) + 1)]:
+        while db_choice not in [str(i) for i in range(1, len(fh.open_pkl_file_rb(catalog_faiss_path)) + 1)]:
             db_choice = input(
                 " \u21AA  Invalid input, retry : "
                 if db_choice else " \u21AA  Number input : ")
 
-        dictio = fh.open_pkl_file_rb(update_file_path)
+        dictio = fh.open_pkl_file_rb(catalog_faiss_path)
         db_id = list(dictio.keys())[int(db_choice) - 1]
         details = dictio[db_id]
         location = details["location"]

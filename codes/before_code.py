@@ -1,3 +1,6 @@
+"""
+Checking if modified libraries are installed in the site-packages directory
+"""
 import os
 import shutil
 import site

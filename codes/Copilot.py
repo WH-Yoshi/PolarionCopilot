@@ -54,7 +54,7 @@ def document_search(message: str, db: FAISS, k: int) -> List[Tuple[Document, flo
     :return: The documents found in the database
     """
     try:
-        documents = db.similarity_search_with_score(query=message, k=k)
+        documents = db.similarity_search_with_score(query=message, k=k, score_threshold=1)
     except Exception as e:
         raise Exception(f"Error while searching for documents: {e}")
     return documents
@@ -85,7 +85,7 @@ def append_context_to_history(
     @param documents: The documents found in the database
     @param history_openai_format: The history in the OpenAI format
     @param message: The user input
-    @param prebuilt_context: The information about the user
+    @param prebuilt_context: The use case
     @return: The updated history and the system prompt in a tuple
     """
     glossary = fh.get_glossary(str(glossary_path))
@@ -355,8 +355,8 @@ with gr.Blocks(
                         visible=False
                     )
                 gr.ChatInterface(
-                    fn=predict,
-                    textbox=textbox,
+                    fn=predict,  # Function to call when the user sends a message (Submit)
+                    textbox=textbox,  # Where the user input is
                     additional_inputs=[dropdown1, dropdown2, selected_context],
                     fill_height=True,
                     submit_btn=submit_btn

@@ -38,6 +38,7 @@ def modify_value_in_list_of_dicts(list_of_dicts, value_to_find, new_value):
 def str_cleaner(text: str) -> str:
     """
     Clean a string from HTML tags and other characters
+
     :param text: The string to clean
     :type text: str
     :return: The cleaned string
@@ -174,13 +175,14 @@ class WorkitemSaver:
                 raise ValueError(f"Release '{release}' has a None value.")
             else:
                 print(f'Found release "{colored(release, "green")}" with id: {match[0].id}.')
-                return match[0]
+                return match[0].id
         except Exception as e:
             raise Exception(f"Error while searching for the release: {e}")
 
     def define_query(self, additional_query: Optional[str] = "") -> str:
         """
         Define the query to get workitems from a project or a project group
+
         :param additional_query: [Optional] A string representing an additional query
         :return: A string representing the query
         """
@@ -189,7 +191,7 @@ class WorkitemSaver:
 
         if self.release and self.release != "None":
             release_id = self.check_release(self.release)
-            query = f"""type:({' '.join(self.workitem_type)}) AND NOT ibaFullPuid:("(cont'd)") AND ibaApplicableConfiguration.KEY:("{release_id.id}") AND status:approved"""
+            query = f"""type:({' '.join(self.workitem_type)}) AND NOT ibaFullPuid:("(cont'd)") AND ibaApplicableConfiguration.KEY:("{release_id}") AND status:approved"""
         else:
             query = f"""type:({' '.join(self.workitem_type)}) AND NOT ibaFullPuid:("(cont'd)") AND status:approved"""
         query += f" AND {additional_query}" if additional_query else ""
@@ -202,6 +204,7 @@ class WorkitemSaver:
     ) -> List[Workitem]:
         """
         Get a list of workitems (requirement and safety decisions) from the given Group
+
         :param additional_query: [Optional] A string representing an additional query
         :param project_group_id: A string representing the project group id
         :return: A list of workitem objects
@@ -229,6 +232,7 @@ class WorkitemSaver:
     ) -> List[Workitem]:
         """
         Get workitems with a query from a project
+
         :param additional_query: [Optional] A string representing an additional query
         :param project_id: A string representing the project id
         :return: A list of workitems
@@ -258,6 +262,7 @@ class WorkitemSaver:
     ) -> List[Workitem]:
         """
         Get the children of a workitem and merge their description with the parent workitem
+
         :param full_workitems_list: A list of workitems
         :return: A list of parent workitems with the children's description merged
         """
@@ -422,13 +427,14 @@ class WorkitemSaver:
                     raise Exception(f"An error occurred while processing workitem {workitem.id}: {e}")
         return workitems_to_embed
 
-    def create_vector_db(self, data: List[Tuple[Any, Tuple[Any, Union[str, Any]]]]):
+    def create_vector_db(self, preprocessed_workitems: List[Tuple[Any, Tuple[Any, Union[str, Any]]]]):
         """
         Create a vector database from a list of workitems
-        :param data: A list of tuples containing the workitem description and the workitem references
+
+        :param preprocessed_workitems: A list of tuples containing the workitem description and the workitem references
         """
 
-        if not data:
+        if not preprocessed_workitems:
             raise Exception("This error comes because the function received a empty list. This means that there are no "
                             "workitems with the IBAApplicabilityConfiguration field set to the release you provided in "
                             "that particular project or project group.")
@@ -437,18 +443,15 @@ class WorkitemSaver:
 
         descriptions = []
         metadatas = []
-        for description, reference in data:
-            if description != "":
-                chunks = [description[i:i + 1000] for i in range(0, len(description), 1000)]
-                descriptions.extend(chunks)
-                metadatas.extend([{"ibafullpuid": reference[0], "url": reference[1]}] * len(chunks))
-            else:
-                print('it does happen')
+        for description, reference in preprocessed_workitems:
+            chunks = [description[i:i + 1000] for i in range(0, len(description), 1000)]
+            descriptions.extend(chunks)
+            metadatas.extend([{"ibafullpuid": reference[0], "url": reference[1]}] * len(chunks))
 
         batch_size = 32
         texts = [descriptions[i:i + batch_size] for i in range(0, len(descriptions), batch_size)]
         metadatas = [metadatas[i:i + batch_size] for i in range(0, len(metadatas), batch_size)]
-        if self.db_id:
+        if self.db_id:  # updating a database  --> to check
             path = str(fh.get_faiss_db_path() / self.db_id)
             faiss = FAISS.load_local(path, embeddings, allow_dangerous_deserialization=True)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
@@ -457,7 +460,7 @@ class WorkitemSaver:
                 faiss.add_texts(text, metadatas[i])
             loader.stop()
             faiss.save_local(path)
-        else:
+        else:  # saving a new database
             faiss = FAISS.from_texts(texts=texts[0], metadatas=metadatas[0], embedding=embeddings)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
                             timeout=0.05).start()
