@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../../install_polarioncopilot.sh
+source ./install_polarioncopilot.sh
 
 PORT=22027
 SSH_COMMAND="ssh -N -f -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L $PORT:localhost:8080"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../../install_polarioncopilot.sh
+source ./install_polarioncopilot.sh
 
 PORT1=22027
 PORT2=22028
