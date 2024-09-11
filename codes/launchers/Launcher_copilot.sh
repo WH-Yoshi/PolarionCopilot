@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd "$(dirname "${0}")/../../.." || exit 1
+pwd
 source ./install_polarioncopilot.sh
 
 PORT1=22027
