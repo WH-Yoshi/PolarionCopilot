@@ -130,6 +130,7 @@ class WorkitemSaver:
         self.date = last_update_date
         self.workitem_type = workitem_type
         self.db_id = db_id
+        self.embeddings = HuggingFaceEndpointEmbeddings(model=self.embedding_api, model_kwargs={"truncate": True})
 
     def get_polarion_instance(self) -> Polarion:
         """
@@ -439,8 +440,6 @@ class WorkitemSaver:
                             "workitems with the IBAApplicabilityConfiguration field set to the release you provided in "
                             "that particular project or project group.")
 
-        embeddings = HuggingFaceEndpointEmbeddings(model=self.embedding_api, model_kwargs={"truncate": True})
-
         descriptions = []
         metadatas = []
         for description, reference in preprocessed_workitems:
@@ -453,7 +452,7 @@ class WorkitemSaver:
         metadatas = [metadatas[i:i + batch_size] for i in range(0, len(metadatas), batch_size)]
         if self.db_id:  # updating a database  --> to check
             path = str(fh.get_faiss_db_path() / self.db_id)
-            faiss = FAISS.load_local(path, embeddings, allow_dangerous_deserialization=True)
+            faiss = FAISS.load_local(path, self.embeddings, allow_dangerous_deserialization=True)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
                             timeout=0.05).start()
             for i, text in enumerate(texts):
@@ -461,7 +460,7 @@ class WorkitemSaver:
             loader.stop()
             faiss.save_local(path)
         else:  # saving a new database
-            faiss = FAISS.from_texts(texts=texts[0], metadatas=metadatas[0], embedding=embeddings)
+            faiss = FAISS.from_texts(texts=texts[0], metadatas=metadatas[0], embedding=self.embeddings)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
                             timeout=0.05).start()
             for i, text in enumerate(texts[1:], start=1):
@@ -490,6 +489,8 @@ class WorkitemSaver:
                 workitems = self.get_workitems_from_project(self.location_id, add_query)
             if not workitems:
                 printarrow(colored("The database is already up to date!", 'green'))
+                path = str(fh.get_faiss_db_path() / self.db_id)
+                faiss = FAISS.load_local(path, self.embeddings, allow_dangerous_deserialization=True)
                 sys.exit(0)
             merged_workitems = self.merge_workitem_children_descriptions(workitems)
             formatted_list_workitems = self.format_workitem(merged_workitems)

@@ -1,30 +1,38 @@
 $PORT = 22027
 $REMOTE_PORT = 22016
 
-$SSH_COMMAND = "ssh -N -f -p $REMOTE_PORT user@northcarolina-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080 2>`$null"
-
-function exec_ssh($SSH_COMMAND) {
-    Start-Process -FilePath "powershell" -ArgumentList "-Command", $SSH_COMMAND -NoNewWindow
-}
-
 # Check if local port is open (listening)
-$PORT_STATUS = netstat -an | Select-String ":$PORT" | Select-String "ESTABLISHED"
+$PORT_STATUS = netstat -an | Select-String ":$PORT" | Select-String "LISTEN"
 if (-not $PORT_STATUS) {
     Write-Host "Port $PORT is closed on localhost. Running SSH command..."
-    exec_ssh $SSH_COMMAND
+    Start-Process ssh -ArgumentList "-N -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~\.ssh\id_rsa_tensordock -L 22027:localhost:8080" -NoNewWindow
 }
-else
-{
+else {
     Write-Host "Port $PORT is open on localhost"
     Write-Host "[SSH TUNNEL OK]" -ForegroundColor Green
+    exit
 }
 
+# Initialize remote status variable
+$REMOTE_STATUS = $null
+
 # Verify remote connection
-$REMOTE_STATUS = Get-NetTCPConnection -State Established -RemotePort $REMOTE_PORT 2> $null
+for ($i = 0; $i -lt 3; $i++) {
+    $REMOTE_STATUS = Get-NetTCPConnection -State Established -RemotePort $REMOTE_PORT -ErrorAction SilentlyContinue
+    if ($REMOTE_STATUS) {
+        Write-Host "Remote machine is up and running."
+        break
+    }
+    else {
+        Write-Host "Remote machine is down, retrying in 2 seconds..."
+        Start-Sleep -Seconds 2
+    }
+}
 
 if (-not $REMOTE_STATUS) {
     Write-Host "Remote machine is down, workitems will be saved locally for later."
 }
 
+# Run Python scripts
 python .\codes\before_code.py
 python .\codes\Polarion.py

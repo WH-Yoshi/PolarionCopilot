@@ -365,4 +365,4 @@ with gr.Blocks(
     dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("no_database")], outputs=dropdown2)
 
 if __name__ == '__main__':
-    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."])
+    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."], server_name="0.0.0.0", server_port=7860)
