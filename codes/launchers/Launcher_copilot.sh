@@ -19,7 +19,7 @@ check_port() {
   fi
 }
 
-echo -e "\e[36mChecking SSH connections...\e[0m"
+echo -e "\e[96mChecking SSH connections...\e[0m"
 
 check_port $PORT1 "Embedding Machine"
 PORT1_STATUS=$?
