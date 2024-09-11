@@ -62,5 +62,5 @@ echo -e "\e[96mInstalling the requirements...\e[0m"
 pip install -r ./requirements.txt -q
 echo ""
 echo -e "\e[92mUse the command 'screen -r Copilot' to attach to the app.\e[0m"
-echo -e "\e[96mTo detach use Ctrl + A > D \e[0m"
+echo -e "\e[92mTo detach use Ctrl + A > D \e[0m"
 screen -dmS Copilot bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'
