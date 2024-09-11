@@ -50,13 +50,14 @@ if [ $PORT2_STATUS -ne 0 ]; then
 fi
 
 if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
-  echo -e "\e[31mPlease run this script again after running the machines and establishing the connections.\e[0m"
-  exit 0
+  echo -e "\e[31mPlease run this script again after running the machines.\e[0m"
 else
   echo -e "\e[32mAll SSH connections are established.\e[0m"
 fi
 
+echo -e "\e[96mChecking the environment\e[0m"
 python3 -m venv .venv
 source .venv/bin/activate
+echo -e "\e[96mInstalling the requirements\e[0m"
 pip install -r ./requirements.txt -q
 screen -dmS Copilot bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'
