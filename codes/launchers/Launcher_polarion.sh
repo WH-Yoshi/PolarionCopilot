@@ -1,6 +1,6 @@
 #!/bin/bash
-# This script check if localhost port 22027 is connected to the ssh tunnel to the embedding machine.
-# Opens it if it's not the case.
+
+source ../../install_polarioncopilot.sh
 
 PORT=22027
 SSH_COMMAND="ssh -N -f -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L $PORT:localhost:8080"
@@ -18,4 +18,5 @@ else
   fi
 fi
 
-screen -S copilot bash -c 'python3 ./codes/before_code.py; python3 ./codes/Polarion.py; exec bash'
+python3 ./codes/before_code.py
+python3 ./codes/Polarion.py

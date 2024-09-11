@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ../../install_polarioncopilot.sh
+
 PORT1=22027
 PORT2=22028
 SSH_COMMAND_EM="ssh -N -f -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L 22027:localhost:8080"
@@ -45,4 +47,4 @@ if [ $PORT2_STATUS -ne 0 ]; then
   fi
 fi
 
-screen -S polarion bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'
+screen -dmS polarion bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'
