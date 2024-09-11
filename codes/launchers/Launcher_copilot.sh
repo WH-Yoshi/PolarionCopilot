@@ -55,9 +55,10 @@ else
   echo -e "\e[32mAll SSH connections are established.\e[0m"
 fi
 
-echo -e "\e[96mChecking the environment\e[0m"
+echo -e "\e[96mChecking the environment...\e[0m"
 python3 -m venv .venv
 source .venv/bin/activate
-echo -e "\e[96mInstalling the requirements\e[0m"
+echo -e "\e[96mInstalling the requirements...\e[0m"
 pip install -r ./requirements.txt -q
+echo -e "\e[92mUse the command 'screen -r Copilot' to attach to the app.\e[0m"
 screen -dmS Copilot bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'
