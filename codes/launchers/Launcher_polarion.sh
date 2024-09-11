@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cd "$(dirname "${0}")/../.." || exit 1
-source ./install_polarioncopilot.sh
 
 PORT=22027
 SSH_COMMAND="ssh -N -f -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L $PORT:localhost:8080"
@@ -19,5 +18,8 @@ else
   fi
 fi
 
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r ./requirements.txt -q
 python3 ./codes/before_code.py
 python3 ./codes/Polarion.py

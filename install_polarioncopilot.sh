@@ -1,8 +1,5 @@
 #!/bin/bash
 
-pwd
-cd "$(dirname "${0}")" || exit 1
-
 function program_required() {
   if [ ! -x "$(command -v ${1})" ]; then
     echo "${1} is not installed on the computer..."
@@ -23,5 +20,4 @@ echo "Checking venv..."
 python3 -m venv .venv
 source .venv/bin/activate
 echo "Installing requirements..."
-pwd
 pip install -r ./requirements.txt -q

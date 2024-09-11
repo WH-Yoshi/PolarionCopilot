@@ -2,7 +2,6 @@ import os
 import platform
 import subprocess
 from pathlib import Path
-from termcolor import colored
 
 
 def run_copilot():
@@ -12,7 +11,6 @@ def run_copilot():
                   f'"Start-Process -Wait powershell -ArgumentList '
                   f'\'-NoProfile -NoExit -ExecutionPolicy Bypass -File {script_path}\'"')
     elif platform.system() == 'Linux':
-        print(colored('Checking SSH connection...', 'light_cyan'))
         subprocess.run(['bash', str(Path(r'./codes/launchers/Launcher_copilot.sh').absolute())], check=True)
     else:
         raise OSError('Unsupported OS yet')

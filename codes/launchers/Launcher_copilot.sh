@@ -1,8 +1,6 @@
 #!/bin/bash
 
 cd "$(dirname "${0}")/../.." || exit 1
-pwd
-source ./install_polarioncopilot.sh
 
 PORT1=22027
 PORT2=22028
@@ -49,4 +47,7 @@ if [ $PORT2_STATUS -ne 0 ]; then
   fi
 fi
 
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r ./requirements.txt -q
 screen -dmS Copilot bash -c 'python3 ./codes/before_code.py; python3 ./codes/Copilot.py; exec bash'
