@@ -11,10 +11,10 @@ check_port() {
   local PORT=$1
   local DEST=$2
   if nc -zv localhost "$PORT" 2>&1 | grep -q 'succeeded'; then
-    echo "\e[32mPort to $DEST: $PORT is open on localhost\e[0m"
+    echo -e "\e[32mPort to $DEST: $PORT is open on localhost\e[0m"
     return 0
   else
-    echo "\e[33mPort to $DEST: $PORT is closed on localhost\e[0m"
+    echo -e "\e[33mPort to $DEST: $PORT is closed on localhost\e[0m"
     return 1
   fi
 }
@@ -50,7 +50,7 @@ if [ $PORT2_STATUS -ne 0 ]; then
 fi
 
 if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
-  echo "\e[31mPlease run this script again after running the machines and establishing the connections.\e[0m"
+  echo -e "\e[31mPlease run this script again after running the machines and establishing the connections.\e[0m"
   exit 0
 else
   echo -e "\e[32mAll SSH connections are established.\e[0m"
