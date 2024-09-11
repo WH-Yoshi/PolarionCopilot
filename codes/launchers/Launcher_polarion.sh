@@ -6,15 +6,15 @@ PORT=22027
 SSH_COMMAND="ssh -N -f -p 22016 user@northcarolina-b.tensordockmarketplace.com -i ~/.ssh/id_rsa_tensordock -L $PORT:localhost:8080"
 
 if nc -zv localhost "$PORT" 2>&1 | grep -q 'succeeded'; then
-  echo "Port to Embedding machine: $PORT is open on localhost"
+  echo "\e[32Port to Embedding machine: $PORT is open on localhost\e[0m"
 else
-  echo "Port to Embedding machine: $PORT is closed on localhost. Opening SSH tunnel..."
+  echo "\e[33Port to Embedding machine: $PORT is closed on localhost. Opening SSH tunnel...\e[0m"
   $SSH_COMMAND
   if [ $? -eq 0 ]; then
-    echo "SSH command successful."
+    echo "\e[32SSH command successful.\e[0m"
   else
     echo "Error: SSH command failed with exit code $?."
-    echo "Remote machine is down, workitems will be saved locally for later."
+    echo "\e[33Remote machine is down, workitems will be saved locally for later.\e[0m"
   fi
 fi
 
