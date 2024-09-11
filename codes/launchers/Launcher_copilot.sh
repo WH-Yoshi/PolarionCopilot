@@ -47,6 +47,11 @@ if [ $PORT2_STATUS -ne 0 ]; then
   fi
 fi
 
+if [ $PORT1_STATUS -ne 0 ] || [ $PORT2_STATUS -ne 0 ]; then
+  echo "Please run this script again after running the machines and establishing the connections."
+  exit 1
+fi
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r ./requirements.txt -q
