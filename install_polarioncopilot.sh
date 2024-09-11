@@ -22,4 +22,5 @@ echo "Checking venv..."
 python3 -m venv .venv
 source .venv/bin/activate
 echo "Installing requirements..."
-pip install -r requirements.txt -q
+pwd
+pip install -r ./requirements.txt -q
