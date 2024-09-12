@@ -320,7 +320,7 @@ with gr.Blocks(
                     value="""
                         Copilot user documentation.
                         <p>Feel free to download the user documentation.</p>
-                        <a href="https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto/-/raw/move-to-server/Doc-PolarionCopilot.pdf?ref_type=heads&inline=false">User Documentation</a>
+                        <a href="https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto/-/raw/main/Doc-PolarionCopilot.pdf?ref_type=heads&inline=false">User Documentation</a>
                     """
                 )
                 issues = gr.HTML(
