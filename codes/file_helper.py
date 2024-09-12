@@ -184,7 +184,7 @@ def open_pkl_file_rb(path: Path):
 
 def delete_uncatalogued_db():
     """
-    Delete all the databases that aren't followed by the catalog
+    Delete all the databases that aren't followed by the catalog and delete the dbs in the catalog that don't exist
     """
     try:
         dbs = os.listdir(get_faiss_db_path())
@@ -193,7 +193,9 @@ def delete_uncatalogued_db():
             if db not in catalog.keys():
                 db_path = get_faiss_db_path() / db
                 os.remove(db_path)
-                print(f"Uncatalogued database {colored(db, 'red')} deleted.")
+        for db in catalog.keys():
+            if db not in dbs:
+                del catalog[db]
     except Exception as e:
         raise Exception(f"Error while deleting databases: {e}")
 
