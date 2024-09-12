@@ -208,9 +208,11 @@ def predict(
                 stream=True,
             )
         except openai.AuthenticationError:
+            gr.Warning("The chatbot is currently unavailable. Please try again later.", duration=10)
             raise Exception("You didn't create and/or fill your .env file...")
         except Exception as e:
-            raise Exception(e)
+            gr.Warning("The chatbot is currently unavailable. Please try again later.", duration=10)
+            raise Exception(e, "The remote server is probably down...")
 
         partial_message = ""
         try:
@@ -365,4 +367,4 @@ with gr.Blocks(
     dropdown1.change(fn=update_visibility, inputs=[dropdown1, gr.State("no_database")], outputs=dropdown2)
 
 if __name__ == '__main__':
-    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."], server_name="0.0.0.0", server_port=7860)
+    demo.launch(favicon_path=icon.__str__(), show_error=True, allowed_paths=["."], server_name="127.0.0.1", server_port=7860, root_path="/copilot")

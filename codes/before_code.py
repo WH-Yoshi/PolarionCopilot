@@ -10,8 +10,7 @@ from pathlib import Path
 import polarion
 import subprocess
 from termcolor import colored
-
-from enhancer import Loader, arrow
+from enhancer import Loader
 
 site_package_path = Path(__file__).parent / "site-packages-changes"
 polarion_location = Path(polarion.__file__)
@@ -31,8 +30,9 @@ def check_packages():
 
 def print_instructions():
     print(colored("\nInstructions:", "light_cyan"))
-
     print("1. Installing the necessary packages:")
     check_packages()
 
-print_instructions()
+
+if __name__ == '__main__':
+    print_instructions()
