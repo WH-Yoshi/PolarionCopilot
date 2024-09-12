@@ -112,6 +112,19 @@ Create and fill the .env file with the following content, each value must be bet
    docker run -d --gpus all -p 8080:80 -v $PWD/data:/data --pull always ghcr.io/huggingface/text-embeddings-inference:86-1.5 --model-id dunzhang/stella_en_1.5B_v5 
    ```
 
+8. Create a ssh key (without password)
+   ```bash
+   ssh-keygen -t rsa -b 4096
+   ```
+
+9. Copy/Paste the pub key in [TensorDock SSH](https://dashboard.tensordock.com/api#:~:text=Create%20Authorization-,SSH%20Public%20Keys,-New)
+
+10. Add the private key to your ssh agent
+   ```bash
+   ssh-add ~/.ssh/id_rsa_tensordock
+   ```
+We use an SSH key to automatically establish an SSH tunnel to the remote server without needing to enter a password.
+
 ### [Optional] Setup a Linux daemon for automatic containers start. 
 **Warning:** You must have created the container by pulling the images on point 7.\
 This step is optional but recommended to avoid having to restart the containers manually after a reboot.\
