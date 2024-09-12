@@ -193,7 +193,7 @@ def delete_uncatalogued_db():
             if db not in catalog.keys():
                 db_path = get_faiss_db_path() / db
                 os.remove(db_path)
-        catalog_copy = catalog
+        catalog_copy = catalog.copy()
         for db in catalog_copy.keys():
             if db not in dbs:
                 del catalog[db]
