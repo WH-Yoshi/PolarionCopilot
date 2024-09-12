@@ -329,7 +329,7 @@ with gr.Blocks(
                     value="""
                         Found a bug or an issue? Let us know!
                         <p>Feel free to report any issue or bug you find in the chatbot.</p>
-                        <a href="https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto/-/issues">Report</a>
+                        <a href="https://jira.goiba.net/projects/POLA/issues/POLA-402?filter=allopenissues">Report</a>
                     """
                 )
             with gr.Column(scale=8):
