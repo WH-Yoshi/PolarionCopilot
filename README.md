@@ -62,17 +62,12 @@ Also to keep your main Python installation clean.
    ```bash
    cd /your/directory/
    ```
-2. Create and activate the virtual environment
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-3. Clone the repository
+2. Clone the repository
    ```bash
    git clone https://github.com/WH-Yoshi/PolarionCopilot.git
    cd PolarionCopilot
    ```
-4. Install the required libraries
+3. Install the required libraries
    ```bash
    sh install_polarioncopilot.sh
    ```
@@ -91,7 +86,7 @@ Create and fill the .env file with the following content, each value must be bet
    The '.env' file contains sensitive information, make sure to not share it.
 
 
-### Tensordock virtual machine
+### Tensordock virtual machine initialization
 
 1. Open [TensorDock](https://dashboard.tensordock.com/deploy)
 2. Get two VM with one GPU each

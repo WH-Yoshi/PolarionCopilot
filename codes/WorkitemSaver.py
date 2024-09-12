@@ -262,7 +262,10 @@ class WorkitemSaver:
             full_workitems_list: List[Workitem],
     ) -> List[Workitem]:
         """
-        Get the children of a workitem and merge their description with the parent workitem
+        For requirements and safety decisions:
+        Get the children of a workitem and merge their description with the parent workitem for the requirements and safety decisions
+        For Risk Analysis:
+        Get the children of a workitem and separate the parent and children workitems
 
         :param full_workitems_list: A list of workitems
         :return: A list of parent workitems with the children's description merged
@@ -378,6 +381,10 @@ class WorkitemSaver:
             self,
             merged_workitems: List[Workitem]
     ) -> List[Tuple[str, Tuple[Any, Union[str, Any]]]]:
+        """
+        Format the workitems to embed them in the database
+        structure : list(tuple(description, metadata(puid, url)), tuple(description, metadata(puid, url)), ...)
+        """
         workitems_to_embed = []
         for workitem in merged_workitems:
             if workitem.type['id'] in ["safetydecision", "requirement"]:
@@ -430,7 +437,7 @@ class WorkitemSaver:
 
     def create_vector_db(self, preprocessed_workitems: List[Tuple[Any, Tuple[Any, Union[str, Any]]]]):
         """
-        Create a vector database from a list of workitems
+        Create a vector database from a processed list of workitems
 
         :param preprocessed_workitems: A list of tuples containing the workitem description and the workitem references
         """
@@ -442,12 +449,12 @@ class WorkitemSaver:
 
         descriptions = []
         metadatas = []
-        for description, reference in preprocessed_workitems:
-            chunks = [description[i:i + 1000] for i in range(0, len(description), 1000)]
+        for description, reference in preprocessed_workitems:  # Splitting the descriptions into chunks of 1500 characters
+            chunks = [description[i:i + 1500] for i in range(0, len(description), 1500)]
             descriptions.extend(chunks)
             metadatas.extend([{"ibafullpuid": reference[0], "url": reference[1]}] * len(chunks))
 
-        batch_size = 32
+        batch_size = 32  # Creating a batch of 32 descriptions for efficient processing
         texts = [descriptions[i:i + batch_size] for i in range(0, len(descriptions), batch_size)]
         metadatas = [metadatas[i:i + batch_size] for i in range(0, len(metadatas), batch_size)]
         if self.db_id:  # updating a database  --> to check
@@ -489,8 +496,6 @@ class WorkitemSaver:
                 workitems = self.get_workitems_from_project(self.location_id, add_query)
             if not workitems:
                 printarrow(colored("The database is already up to date!", 'green'))
-                path = str(fh.get_faiss_db_path() / self.db_id)
-                faiss = FAISS.load_local(path, self.embeddings, allow_dangerous_deserialization=True)
                 sys.exit(0)
             merged_workitems = self.merge_workitem_children_descriptions(workitems)
             formatted_list_workitems = self.format_workitem(merged_workitems)

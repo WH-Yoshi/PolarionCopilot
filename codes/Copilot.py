@@ -321,7 +321,7 @@ with gr.Blocks(
                     value="""
                         Copilot user documentation.
                         <p>Feel free to download the user documentation.</p>
-                        <a href="https://gitlab.sw.goiba.net/req-test-tools/polarion-copilot/copilot-proto/-/raw/main/Doc-PolarionCopilot.pdf?ref_type=heads&inline=false">User Documentation</a>
+                        <a href="https://iba2016.sharepoint.com/sites/PolarionKeyUsers/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FPolarionKeyUsers%2FShared%20Documents%2FGeneral%2FPolarionCopilot%5FUserGuide%2Epdf&parent=%2Fsites%2FPolarionKeyUsers%2FShared%20Documents%2FGeneral">User Documentation</a>
                     """
                 )
                 issues = gr.HTML(

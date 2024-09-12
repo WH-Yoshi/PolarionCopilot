@@ -20,11 +20,11 @@ from file_helper import faiss_catalog_filled, faiss_db_filled
 
 def display_file(path: Path) -> None:
     """
-    Display the content of the faiss file
+    Display the content of the faiss catalog file
     """
-    update_dict = fh.open_pkl_file_rb(path)
+    faiss_catalog = fh.open_pkl_file_rb(path)
     try:
-        for i, (_, value) in enumerate(update_dict.items()):
+        for i, (_, value) in enumerate(faiss_catalog.items()):
             print(f"{colored(f'[{i + 1}]', 'green')} Database : {value['location']} "
                   f"({value['release'] if value['release'] is not None else 'All release'}) "
                   f"filled with {', '.join(value['workitem_type'])}")
@@ -40,11 +40,14 @@ def prepare_available_choices(actions_list: list, default_choice: str = "") -> T
 
 
 def preliminary_checks():
+    """
+    Preliminary checks to ensure that the connection to the Polarion is possible.
+    """
     print(colored("Polarion Workitem Saver", "light_cyan"))
     print("Checking the environment...")
     fh.delete_uncatalogued_db()
     try:
-        WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled
+        WorkitemSaver("env", "env", ["env"])  # Just to check if the .env file is filled up
     except Exception as e:
         print(e)
         sys.exit(0)
@@ -52,15 +55,12 @@ def preliminary_checks():
         loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
         loader.stop()
         actions = ["Save"]
-    elif faiss_db_filled() and not faiss_catalog_filled():
-        loader = Loader("Checking", "Some databases exist but are unusable, deleting...", "yellow", 0.05).start()
-        loader.stop()
-        fh.delete_all_databases()
-        actions = ["Save"]
-    else:
+    elif faiss_db_filled() and faiss_catalog_filled():
         loader = Loader("Checking", "All good.", "green", 0.05).start()
         loader.stop()
         actions = ["Save", "Update"]
+    else:
+        raise ValueError("An error occurred while checking the environment.\nPlease report this issue.")
     return actions
 
 
@@ -71,10 +71,9 @@ if __name__ == "__main__":
     print()
 
     if fh.get_cache_path().exists() and any(fh.get_cache_path().iterdir()):
-        """
-        If cache files are found, it means that the user has saved workitems in the cache but has not embedded them
-        in the database. The user will be asked if he wants to embed them now.
-        """
+        # If cache files are found,
+        # it means that the user has saved workitems in the cache but has not embedded them in the database.
+        # The user will be asked if he wants to embed them now.
         print("Cache files found, it contains workitems that need to be embedded.")
         do_save = ""
         while do_save not in ["y", "n"]:
