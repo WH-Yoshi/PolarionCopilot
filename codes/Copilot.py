@@ -26,6 +26,7 @@ files = os.listdir(fh.get_faiss_db_path())
 icon = Path(__file__).parent / "public" / "images" / "favicon.ico"
 iba_logo = Path(__file__).parent / "public" / "images" / "iba.png"
 glossary_path = Path(__file__).parent / "public" / "glossary" / "glossary.csv"
+fh.delete_uncatalogued_db()
 print()
 print(colored("Copilot", "light_cyan"))
 print("[CTRL] + Click on the link to open the interface in your browser.")
