@@ -35,6 +35,19 @@ def modify_value_in_list_of_dicts(list_of_dicts, value_to_find, new_value):
                 list_of_dicts.append(new_dict)
 
 
+def get_id_from_ibafpuid(faiss_db: FAISS, ibafpuid: str) -> str:
+    """
+    Return the id of a docstore from the ibafullpuid
+    """
+    docstore = getattr(faiss_db, "docstore")
+    index_to_docstore = getattr(faiss_db, "index_to_docstore_id")
+    for v in index_to_docstore.values():
+        vector = docstore.search(v)
+        if vector.metadata["ibafullpuid"] == ibafpuid:
+            return v
+    return ""
+
+
 def str_cleaner(text: str) -> str:
     """
     Clean a string from HTML tags and other characters
@@ -457,12 +470,18 @@ class WorkitemSaver:
         batch_size = 32  # Creating a batch of 32 descriptions for efficient processing
         texts = [descriptions[i:i + batch_size] for i in range(0, len(descriptions), batch_size)]
         metadatas = [metadatas[i:i + batch_size] for i in range(0, len(metadatas), batch_size)]
+        print(metadatas[1])
         if self.db_id:  # updating a database  --> to check
             path = str(fh.get_faiss_db_path() / self.db_id)
             faiss = FAISS.load_local(path, self.embeddings, allow_dangerous_deserialization=True)
             loader = Loader("Precessing embeddings...", "That should be it! Try those with the Copilot",
                             timeout=0.05).start()
             for i, text in enumerate(texts):
+                for metadata in metadatas[i]:
+                    fullpuid = metadata["ibafullpuid"]
+                    id_index = get_id_from_ibafpuid(faiss, fullpuid)
+                    if id_index:
+                        faiss.delete([id_index])
                 faiss.add_texts(text, metadatas[i])
             loader.stop()
             faiss.save_local(path)
