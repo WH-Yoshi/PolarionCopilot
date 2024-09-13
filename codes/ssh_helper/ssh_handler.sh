@@ -25,12 +25,12 @@ check_ssh() {
     echo ""
     echo "Verifying SSH on $address:$remote_port..."
 
-    if pgrep -f "$ssh_command" > /dev/null; then
+    if netstat -tnpa | grep 'ESTABLISHED.*ssh' | grep "$remote_port" > /dev/null 2>&1; then
         echo -e "\e[32m   ↳ SSH tunnel up on $address localport : $local_port.\e[0m"
     else
         if nc -z -w 3 "$address" "$remote_port"; then
             echo "↳ SSH Tunnel is available on $address. Opening SSH Tunnel..."
-            nohup $ssh_command &>/dev/null &
+            nohup "$ssh_command" &>/dev/null &
             echo -e "\e[32m   ↳ SSH tunnel up on $address localport : $local_port.\e[0m"
         else
             echo -e "\e[31m Tensordock VM : [$address] is probably down\e[0m"
