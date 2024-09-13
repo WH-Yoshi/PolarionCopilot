@@ -17,7 +17,7 @@ polarion_location = Path(polarion.__file__)
 
 
 def check_packages():
-    loader = Loader("Checking packages... ", colored("Packages up to date.", "green"), timeout=0.05).start()
+    loader = Loader("Checking modified packages...", colored("Packages up to date.", "green"), timeout=0.05).start()
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.DEVNULL)
     for path in site.getsitepackages():
         path = Path(site.__file__).parent / "site-packages" / path
@@ -28,11 +28,6 @@ def check_packages():
     return
 
 
-def print_instructions():
-    print(colored("\nInstructions:", "light_cyan"))
-    print("1. Installing the necessary packages:")
-    check_packages()
-
-
 if __name__ == '__main__':
-    print_instructions()
+    print(colored("\nPrerequisites:", "light_cyan"))
+    check_packages()

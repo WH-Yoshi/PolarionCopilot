@@ -197,6 +197,8 @@ def delete_uncatalogued_db():
         for db in catalog_copy.keys():
             if db not in dbs:
                 del catalog[db]
+        with open(get_faiss_catalog_path(), 'wb') as f:
+            pickle.dump(catalog, f)
     except Exception as e:
         raise Exception(f"Error while deleting databases: {e}")
 

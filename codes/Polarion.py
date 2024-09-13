@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import requests.exceptions
+from click import clear
 from termcolor import colored
 from typing import Tuple
 
@@ -16,6 +17,20 @@ import file_helper as fh
 from WorkitemSaver import WorkitemSaver
 from enhancer import Loader
 from file_helper import faiss_catalog_filled, faiss_db_filled
+
+
+def database_check() -> list:
+    if not faiss_db_filled() and not faiss_catalog_filled():
+        loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
+        loader.stop()
+        actions = ["Save"]
+    elif faiss_db_filled() and faiss_catalog_filled():
+        loader = Loader("Checking", "All good.", "green", 0.05).start()
+        loader.stop()
+        actions = ["Save", "Update"]
+    else:
+        raise ValueError("An error occurred while checking the environment.\nPlease report this issue.")
+    return actions
 
 
 def display_file(path: Path) -> None:
@@ -51,139 +66,136 @@ def preliminary_checks():
     except Exception as e:
         print(e)
         sys.exit(0)
-    if not faiss_db_filled() and not faiss_catalog_filled():
-        loader = Loader("Checking", "Database is empty, you can start saving some projects.", "green", 0.05).start()
-        loader.stop()
-        actions = ["Save"]
-    elif faiss_db_filled() and faiss_catalog_filled():
-        loader = Loader("Checking", "All good.", "green", 0.05).start()
-        loader.stop()
-        actions = ["Save", "Update"]
-    else:
-        raise ValueError("An error occurred while checking the environment.\nPlease report this issue.")
-    return actions
 
 
 if __name__ == "__main__":
-    print()
-    available_actions = preliminary_checks()
-    catalog_faiss_path = fh.get_faiss_catalog_path()
-    print()
+    while True:
+        print()
+        preliminary_checks()
+        catalog_faiss_path = fh.get_faiss_catalog_path()
+        print()
 
-    if fh.get_cache_path().exists() and any(fh.get_cache_path().iterdir()):
-        # If cache files are found,
-        # it means that the user has saved workitems in the cache but has not embedded them in the database.
-        # The user will be asked if he wants to embed them now.
-        print("Cache files found, it contains workitems that need to be embedded.")
-        do_save = ""
-        while do_save not in ["y", "n"]:
-            do_save = input(" \u21AA  Invalid input. Please enter 'y' or 'n: "
-                            if do_save else " \u21AA  Do you want to embed them now ? [Y]es / [N]o : ").lower()
-        if do_save == "y":
-            display_file(fh.get_cache_catalog_path())
-            cache_choice = ""
-            while cache_choice not in [str(i) for i in
-                                       range(1, len(fh.open_pkl_file_rb(fh.get_cache_catalog_path())) + 1)]:
-                cache_choice = input(
+        if fh.get_cache_path().exists() and any(fh.get_cache_path().iterdir()):
+            # If cache files are found,
+            # it means that the user has saved workitems in the cache but has not embedded them in the database.
+            # The user will be asked if he wants to embed them now.
+            print("Cache files found, it contains workitems that need to be embedded.")
+            do_save = ""
+            while do_save not in ["y", "n"]:
+                do_save = input(" \u21AA  Invalid input. Please enter 'y' or 'n: "
+                                if do_save else " \u21AA  Do you want to embed them now ? [Y]es / [N]o : ").lower()
+            if do_save == "y":
+                display_file(fh.get_cache_catalog_path())
+                cache_choice = ""
+                while cache_choice not in [str(i) for i in
+                                           range(1, len(fh.open_pkl_file_rb(fh.get_cache_catalog_path())) + 1)]:
+                    cache_choice = input(
+                        " \u21AA  Invalid input, retry : "
+                        if cache_choice else " \u21AA  Number input : ")
+
+                dictio = fh.open_pkl_file_rb(fh.get_cache_catalog_path())
+                db_id = list(dictio.keys())[int(cache_choice) - 1]
+                details = dictio[db_id]
+
+                location = details["location"]
+                db_type = details["type"]
+                workitem_type = details["workitem_type"]
+                release_input = details["release"] if details["release"] is not None else ""
+
+                with open(fh.get_cache_path() / f"{db_id}.pkl", "rb") as f:
+                    workitems = pickle.load(f)
+
+                WorkitemSaver(location, db_type, workitem_type, release_input).create_vector_db(workitems)
+                (fh.get_cache_path() / f"{db_id}.pkl").unlink()
+
+        available_actions = database_check()
+        action, printable_actions = prepare_available_choices(available_actions)
+        while action not in [str(i) for i in range(1, len(available_actions) + 1)]:
+            action = input(
+                "Invalid input. Please enter the right number: "
+                if action else "Choose an action:\n" + printable_actions + " \u21AA  Input : ")
+
+        clear()
+        if action == "1":  # Save
+            locations_available = ["Group", "Project"]
+            choice, printable_locations = prepare_available_choices(locations_available)
+            while choice not in [str(i) for i in range(1, len(locations_available) + 1)]:
+                choice = input(
+                    "Invalid input : "
+                    if choice else f"    {colored('Save', 'green')} from:\n"
+                                   + printable_locations + " \u21AA  Input : ")
+            db_type = locations_available[int(choice) - 1].lower()
+            print()
+            if db_type == "group":
+                location = ""
+                while not location.strip():
+                    location = input(f" \u21AA  Type the {colored('group', 'green')} ID "
+                                     f"(e.g. Therapy_Center_Spec, L2_System_Spec, ...): ")
+            elif db_type == "project":
+                location = ""
+                while not location.strip():
+                    location = input(f" \u21AA  Type the {colored('project', 'green')} ID "
+                                     f"(e.g. PT_L2_TSS_Subsystem, PT_L1_PTS_Subsystem, ...): ")
+            else:
+                raise ValueError(f"Invalid input. {choice}")
+
+            release_input = input(
+                f" \u21AA  Type the IBA {colored('release', 'green')} ID "
+                f"(e.g. AI-V2.4.0.0, P235-R12.4.0, ...) or [ENTER] for ALL : ") or None
+            if release_input:
+                release_input = release_input.strip()
+
+            print()
+            print(f"Choose one or multiple from the following workitem objects: ")
+            print(f"{colored('[1]', 'green')} Requirements")
+            print(f"{colored('[2]', 'green')} Safety decisions")
+            print(f"{colored('[3]', 'green')} Risk analysis (Hazard and Failure mode)")
+            type_list = ["requirement", "safetydecision", "hazard failuremode"]
+
+            while True:
+                workitem_type = input(
+                    " \u21AA  Type the number(s) of the workitem object(s) you want to save (example for req and sd: '1, 2'): ")
+                workitem_type = workitem_type.split(",")
+                try:
+                    workitem_type = [int(i) for i in workitem_type]
+                    workitem_type = [type_list[i - 1] for i in workitem_type if i in range(1, 4)]
+                    if not workitem_type:
+                        raise ValueError
+                    break
+                except ValueError:
+                    print("Invalid input. Please enter at least one of the numbers 1, 2, 3")
+            time = None
+            db_id = None
+        elif action == "2":  # Update
+            print(f"Databases you can {colored('update', 'green')}:\n")
+            display_file(fh.get_faiss_catalog_path())
+
+            db_choice = ""
+            while db_choice not in [str(i) for i in range(1, len(fh.open_pkl_file_rb(catalog_faiss_path)) + 1)]:
+                db_choice = input(
                     " \u21AA  Invalid input, retry : "
-                    if cache_choice else " \u21AA  Number input : ")
+                    if db_choice else " \u21AA  Number input : ")
 
-            dictio = fh.open_pkl_file_rb(fh.get_cache_catalog_path())
-            db_id = list(dictio.keys())[int(cache_choice) - 1]
+            dictio = fh.open_pkl_file_rb(catalog_faiss_path)
+            db_id = list(dictio.keys())[int(db_choice) - 1]
             details = dictio[db_id]
-
             location = details["location"]
             db_type = details["type"]
             workitem_type = details["workitem_type"]
-            release_input = details["release"] if details["release"] is not None else ""
-
-            with open(fh.get_cache_path() / f"{db_id}.pkl", "rb") as f:
-                workitems = pickle.load(f)
-
-            WorkitemSaver(location, db_type, workitem_type, release_input).create_vector_db(workitems)
-            (fh.get_cache_path() / f"{db_id}.pkl").unlink()
-
-    action, printable_actions = prepare_available_choices(available_actions)
-    while action not in [str(i) for i in range(1, len(available_actions) + 1)]:
-        action = input(
-            "Invalid input. Please enter the right number: "
-            if action else "Choose an action:\n" + printable_actions + " \u21AA  Input : ")
-
-    print()
-    if action == "1":  # Save
-        locations_available = ["Group", "Project"]
-        choice, printable_locations = prepare_available_choices(locations_available)
-        while choice not in [str(i) for i in range(1, len(locations_available) + 1)]:
-            choice = input(
-                "Invalid input : "
-                if choice else f"    {colored('Save', 'green')} from:\n"
-                               + printable_locations + " \u21AA  Input : ")
-        db_type = locations_available[int(choice) - 1].lower()
-        print()
-        if db_type == "group":
-            location = ""
-            while not location.strip():
-                location = input(f" \u21AA  Type the {colored('group', 'green')} ID "
-                                 f"(e.g. Therapy_Center_Spec, L2_System_Spec, ...): ")
-        elif db_type == "project":
-            location = ""
-            while not location.strip():
-                location = input(f" \u21AA  Type the {colored('project', 'green')} ID "
-                                 f"(e.g. PT_L2_TSS_Subsystem, PT_L1_PTS_Subsystem, ...): ")
+            release_input = details["release"]
+            time = details["last_update"]
         else:
-            raise ValueError(f"Invalid input. {choice}")
+            raise ValueError("Invalid input.")
 
-        release_input = input(
-            f" \u21AA  Type the IBA {colored('release', 'green')} ID "
-            f"(e.g. AI-V2.4.0.0, P235-R12.4.0, ...) or [ENTER] for ALL : ") or None
-        if release_input:
-            release_input = release_input.strip()
-
-        print()
-        print(f"Choose one or multiple from the following workitem objects: ")
-        print(f"{colored('[1]', 'green')} Requirements")
-        print(f"{colored('[2]', 'green')} Safety decisions")
-        print(f"{colored('[3]', 'green')} Risk analysis (Hazard and Failure mode)")
-        type_list = ["requirement", "safetydecision", "hazard failuremode"]
-
-        while True:
-            workitem_type = input(
-                " \u21AA  Type the number(s) of the workitem object(s) you want to save (example for req and sd: '1, 2'): ")
-            workitem_type = workitem_type.split(",")
-            try:
-                workitem_type = [int(i) for i in workitem_type]
-                workitem_type = [type_list[i - 1] for i in workitem_type if i in range(1, 4)]
-                if not workitem_type:
-                    raise ValueError
+        ws = WorkitemSaver(location, db_type, workitem_type, release_input, time, db_id)
+        try:
+            ws.caller()
+            print("Do you want to continue ? [Y]es / [N]o")
+            continue_choice = ""
+            while continue_choice not in ["y", "n"]:
+                continue_choice = input(" \u21AA  Invalid input. Please enter 'y' or 'n: " if continue_choice else " \u21AA  Input: ").lower()
+            if continue_choice == "n":
                 break
-            except ValueError:
-                print("Invalid input. Please enter at least one of the numbers 1, 2, 3")
-        time = None
-        db_id = None
-    elif action == "2":  # Update
-        print(f"Databases you can {colored('update', 'green')}:\n")
-        display_file(fh.get_faiss_catalog_path())
-
-        db_choice = ""
-        while db_choice not in [str(i) for i in range(1, len(fh.open_pkl_file_rb(catalog_faiss_path)) + 1)]:
-            db_choice = input(
-                " \u21AA  Invalid input, retry : "
-                if db_choice else " \u21AA  Number input : ")
-
-        dictio = fh.open_pkl_file_rb(catalog_faiss_path)
-        db_id = list(dictio.keys())[int(db_choice) - 1]
-        details = dictio[db_id]
-        location = details["location"]
-        db_type = details["type"]
-        workitem_type = details["workitem_type"]
-        release_input = details["release"]
-        time = details["last_update"]
-    else:
-        raise ValueError("Invalid input.")
-
-    ws = WorkitemSaver(location, db_type, workitem_type, release_input, time, db_id)
-    try:
-        ws.caller()
-    except requests.exceptions.ConnectionError:
-        raise requests.exceptions.ConnectionError(
-            "Connection error. Please check your ssh connection. Port 22027 and 22028 must be assigned")
+        except requests.exceptions.ConnectionError:
+            raise requests.exceptions.ConnectionError(
+                "Connection error. Please check your ssh connection. Port 22027 and 22028 must be assigned")

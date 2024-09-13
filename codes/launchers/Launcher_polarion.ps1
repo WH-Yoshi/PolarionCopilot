@@ -10,11 +10,7 @@ if (-not $PORT_STATUS) {
 else {
     Write-Host "Port $PORT is open on localhost"
     Write-Host "[SSH TUNNEL OK]" -ForegroundColor Green
-    exit
 }
-
-# Initialize remote status variable
-$REMOTE_STATUS = $null
 
 # Verify remote connection
 for ($i = 0; $i -lt 3; $i++) {
