@@ -150,6 +150,17 @@ It will start all the containers that are stopped.
    
 Now you can restart the virtual machine without having to restart the containers manually.
 
+### SSH Handler
+To manage the creation of SSH tunnels whenever the remote server is powered on, we have developed a script that checks if it's possible to establish SSH tunnels for both the Embedding and Mistral machines. This script is designed to run in a Linux screen.
+   1. Script location
+   ```bash
+  ./PolarionCopilot/codes/ssh_helper/ssh_handler.sh
+   ```
+   2. Run the linux screen.
+   ```bash
+   screen -S ssh_handler -d -m /bin/bash /path/to/ssh_handler.sh
+   ```
+
 ### Use the Code
 1. Run the desired script in the main directory:
    #### Windows
