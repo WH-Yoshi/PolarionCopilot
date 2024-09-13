@@ -39,4 +39,5 @@ def show_database():
 
 
 if __name__ == "__main__":
+    fh.delete_uncatalogued_db()
     show_database()
