@@ -36,6 +36,7 @@ function message($port){
 If ($MyInvocation.InvocationName -ne ".")
 {
     # Check if local embedding port is open (listening)
+    # Start SSH tunnel if not
     $embedding_PORT_STATUS = netstat -an | Select-String ":$embed_remote_port" | Select-String "LISTEN"
     if (-not $embedding_PORT_STATUS)
     {
@@ -48,6 +49,7 @@ If ($MyInvocation.InvocationName -ne ".")
     }
 
     # Check if local mistral port is open (listening)
+    # Start SSH tunnel if not
     $mistral_PORT_STATUS = netstat -an | Select-String ":$mistral_remote_port" | Select-String "LISTEN"
     if (-not $mistral_PORT_STATUS) {
         Write-Host "Port $mistral_port is closed on localhost. Running SSH command..."
@@ -57,6 +59,7 @@ If ($MyInvocation.InvocationName -ne ".")
         message($mistral_port)
     }
 
+    # Check if remote ports are open
     for ($i = 0; $i -lt 3; $i++) {
         $embedding_STATUS = Get-NetTCPConnection -State Established -RemotePort $embed_remote_port -ErrorAction SilentlyContinue
         $mistral_STATUS = Get-NetTCPConnection -State Established -RemotePort $mistral_remote_port -ErrorAction SilentlyContinue
@@ -77,5 +80,5 @@ If ($MyInvocation.InvocationName -ne ".")
 
     # Run Python scripts
     python .\codes\before_code.py
-    python .\codes\CoPilot.py
+    python .\codes\Copilot.py
 }
